@@ -1,6 +1,7 @@
 <xml xmlns:o="urn:schemas-microsoft-com:office:office">
  <o:MainFile HRef="../common_questions.html"/>
  <o:File HRef="themedata.thmx"/>
+ <o:File HRef="colorschememapping.xml"/>
  <o:File HRef="image001.png"/>
  <o:File HRef="image002.png"/>
  <o:File HRef="image003.png"/>
@@ -25,19 +26,5 @@
  <o:File HRef="image022.png"/>
  <o:File HRef="image023.png"/>
  <o:File HRef="image024.png"/>
- <o:File HRef="image025.png"/>
- <o:File HRef="image026.png"/>
- <o:File HRef="image027.png"/>
- <o:File HRef="image028.png"/>
- <o:File HRef="image029.png"/>
- <o:File HRef="image030.png"/>
- <o:File HRef="image031.png"/>
- <o:File HRef="image032.png"/>
- <o:File HRef="image033.png"/>
- <o:File HRef="image034.png"/>
- <o:File HRef="image035.png"/>
- <o:File HRef="image036.png"/>
- <o:File HRef="image037.png"/>
- <o:File HRef="image038.png"/>
  <o:File HRef="filelist.xml"/>
 </xml>
