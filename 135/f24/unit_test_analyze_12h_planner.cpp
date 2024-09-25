@@ -24,7 +24,6 @@
 //     g++ analyze_12h_planner.cpp
 //   choose main function of analyze_12h_planner.cpp
 
-//https://stackoverflow.com/questions/17868302/is-it-possible-to-run-tests-on-a-cpp-file-which-already-has-a-main-function
 #ifdef UNIT_TEST
 int main(int argc, char** argv) {
     if (argc < 2) {
