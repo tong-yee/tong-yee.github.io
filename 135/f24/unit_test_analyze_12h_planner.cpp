@@ -7,20 +7,21 @@
 //https://stackoverflow.com/questions/29734231/how-to-conditional-compile-main-in-c
 //1. We have two files, analyze_12h_planner.cpp and unit_test_analyze_12h_planner.cpp.
 //2. File analyze_12h_planner.cpp reads a csv file and prints the tasks by priority.
-//3. Both files have main functions.
-//4. Enclose the main function of unit_test_analyze_12h_planner.cpp with #ifdef UNIT_TEST and #endif
+//3. File unit_test_analyze_12h_planner.cpp unit tests functions
+//   other than main function defined in analyze_12h_planner.cpp.
+//4. Both files have main functions.
+//5. Enclose the main function of unit_test_analyze_12h_planner.cpp with #ifdef UNIT_TEST and #endif
 //#ifdef UNIT_TEST
 //int main(int argc, char** argv) {
 //...
 //}
 //#endif
-//5. Enclose the main function of analyze_12h_planner.cpp with #ifnedef UNIT_TEST and #endif
-//which unit tests functions //defined in analyze_12h_planner.cpp,
-//6. When running the code, option -DUNIT_TEST means to define UNIT_TEST
+//6. Enclose the main function of analyze_12h_planner.cpp with #ifnedef UNIT_TEST and #endif
+//7. When running the code, option -DUNIT_TEST means to define UNIT_TEST
 //       g++ -DUNIT_TEST unit_test_analyze_12h_planner.cpp
 //   choose main function of unit_test_analyze_12h_planner.cpp 
 //
-//7. When compiling and linking without -D option, 
+//8. When compiling and linking without -D option, 
 //     g++ analyze_12h_planner.cpp
 //   choose main function of analyze_12h_planner.cpp
 
