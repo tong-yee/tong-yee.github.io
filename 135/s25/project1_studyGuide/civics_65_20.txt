@@ -1,0 +1,88 @@
+source: https://www.uscis.gov/sites/default/files/document/questions-and-answers/100q.pdf
+rev 1/19
+Civics Questions for the 65/20 Exemption
+
+The Immigration and Nationality Act provides for special consideration of the civics test for applicants who, at the time of filing their Form N-400, Application for Naturalization, are over 65 years old and have been a permanent resident for at least 20 years. These applicants qualify to take the civics test in the language of their choice. They are also given special consideration as they are only required to study 20 of the 100 civics test questions for the naturalization test.
+
+
+question: What is one right or freedom from the First Amendment?
+answer: speech
+type: Principles of American Democracy
+
+question: What is the economic system in the United States?
+answer: capitalist economy
+type: Principles of American Democracy
+
+question: Name one branch or part of the government.
+answer: Congress
+type: System of Government
+
+question: What are the two parts of the U.S. Congress?
+answer: the Senate and House (of Representatives)
+type: System of Government
+
+question: Who is one of your state's U.S. Senators now?
+answer: Chuck Shumer
+type: System of Government
+
+question: In what month do we vote for President?
+answer: November
+type: System of Government
+
+question: What is the name of the President of the United States now?
+answer: Donald Trump
+type: System of Government
+
+question: What is the capital of your state?
+answer: Albany
+type: System of Government
+
+question: What are the two major political parties in the United States?
+answer: Democratic and Republican
+type: System of Government
+
+question: What is one responsibility that is only for United States citizens?
+answer: serve on a jury
+type: Rights and Responsibilities
+
+question: How old do citizens have to be to vote for President?
+answer: eighteen (18) and older
+type: Rights and Responsibilities
+
+question: When is the last day you can send in federal income tax forms?
+answer: April 15
+type: Rights and Responsibilities
+
+question: Who was the first	President?
+answer: (George) Washington
+type: Colonial Period and Independence
+
+
+question: What was one important thing that Abraham Lincoln did?
+answer: freed the slaves (Emancipation Proclamation)
+type: 1800s
+
+question: Name one war fought by the United States in the 1900s.
+answer: World War II
+type: Recent American History and Other Important Historical Information
+
+question: What did Martin Luther King, Jr. do?
+answer: fought for civil rights
+type: Recent American History and Other Important Historical Information
+
+question: What is the capital of the United States?
+answer: Washington, D.C.
+type: Geography
+
+question: Where is the Statue of Liberty?
+answer: New York (Harbor)
+type: Geography
+
+question: Why does the flag	have 50	stars?
+answer: because there are 50 states
+type: Symbols
+
+question: When do we celebrate Independence Day?
+answer: July 4
+type: Holidays
+ 
