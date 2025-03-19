@@ -1,0 +1,147 @@
+//questions on 135 midterm f24, v1
+
+question: Given char arr[] = {'A', 'B', 'C'}, what is arr[1]?
+answer: 'B'
+explanation: arr[1] is the second element of array arr, which is 'B' in this example.
+version: f24 v1
+label: 1.1
+type: array
+
+question: Declare function increase, given an integer array arr with size many elements, increase each element of the array by 1. Return type is void. Define the function header (no implementation is needed).
+answer: void increase(int arr[], int size);
+explanation: (1) the first parameter is int arr[], the name of array arr, which also implies the address of the first element of array.
+(2) the second parameter represents the number of elements of the array.
+version: f24 v1
+label: 1.2
+type: function; array
+
+
+question: Assume that n is properly declared and initialized. Write a statement to declare lastDigit as an integer and initialize it to be the least significant digit of integer n. Suppose n is 123, after the statement, lastDigit is 3.
+answer: int lastDigit = n % 10;
+explanation: (1) operator % is called remainder or modular operator.
+(2) For example, 12 % 10 means the remainder when dividing 12 pens among 10 students, each student gets 1 pen, and there are 2 pens left.
+(3) In general, n % 10 returns the last digit, or the rightmost digit (least significant digit), of n.
+(4) int lastDigit = n % 10; is a statement to declare lastDigit as an int and initialize it by the last digit of n.
+version: f24 v1
+label: 1.3
+type: arithmetic; modular; remainder 
+
+
+question: What is the output?
+
+string tens_name(int n);
+
+int main() {
+    cout << tens_name(82) << endl;
+    return 0;
+}
+
+string tens_name(int n) {
+    if (n < 20 || n > 99) 
+       return "";
+
+    string names[] = {"", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"};
+
+    return names[n / 10];
+}
+answer: eighty
+explanation: (1) When calling tens_name(82), n in tens_name is initialized to be 82.
+(2) Since 82 is not less than 20 or 82 is not larger than 99, no return "";
+(3) 82 / 10 is integer division. It is like to divide 82 pens among 10 students, each student get 8 pens. So 82 / 10 returns 8.
+(4) names[n / 10] is names[82 / 10], which is names[8].
+
+index    0  1      2       3        4       5        6       7      8 
+ 
+element +--+--+--------+--------+-------+-------+-------+---------+--------+...
+        |""|""|"twenty"|"thirty"|"forty"|"fifty"|"sixty"|"seventy"|"eighty"|...
+        +--+--+--------+--------+-------+-------+-------+---------+--------+...
+
+(5) The return of tens_name(82) is "eighty".
+(6) In main function, print tens_name(82), so the print out is "eighty" (without quotes).
+version: f24 v1
+label: 1.4
+type: integer division; array
+
+
+question: Given string greeting = "How are you?"; What is the value for greeting.substr(4, 5)?
+answer: "are y"
+explanation: (1) greeting.substr(4, 5) extracts a substring from greeting from its index 4 and span 5 characters.
+(2) The character indexed at 4 in string greeting with value "How are you?" is the fifth character, which is letter 'a'.
+(3) Starting from letter 'a', take a total of 5 letters. And we get "are y".
+version: f24 v1
+label: 1.5
+type: string; substring 
+
+
+question: What is the value of 2 - 3 / 2?
+answer: 1
+explanation: (1) operator / has higher precedence than operator -.
+(2) 3 / 2 is integer division, which returns 1. It can be interpreted as 3 pens divided by 2 persons, each person gets one (1) pen.
+(3) 2 - 3 / 2 is the same as 2 - 1, which is 1.
+version: f24 v1
+label: 1.6
+type: arithmetic; integer division
+
+question: The area of a trapezoid with bases a, b, and height h is (a+b)/2 h. Assume that a, b, h are properly declared as double types and initialized, write a statement to declare area and save the value of the area.
+answer: double area = 1 / 2.0 * (a+b) * h;
+explanation: (1) Cannot use 1 / 2. * (a + b) * h; which is not a statement. 
+(2) Cannot use double area = 1 / 2 * (a + b) * h; since 1 / 2 returns 0.
+(3) 1 / 2.0 returns 0.5.
+version: f24 v1
+label: 1.7
+type: arithmetic; integer division
+
+question: What is the output of the following code?
+
+#include <iostream>
+using namespace std;
+
+int main() { 
+    int count = 0; 
+    for (int i = 9; i >= 2; i -= 3) 
+        count++; 
+
+    cout << count << endl; 
+
+    return 0;
+}
+
+answer: 3
+explanation: Variable i starts from 9 and counts starts from 0.
++-----+----------+------------+--------+
+|  i  | i >= 2 ? | count++;   | i -= 3 |
++-----+----------+------------+--------+
+|  9  | yes      | count is 1 | i is 6 |
++-----+----------+------------+--------+
+|  6  | yes      | count is 2 | i is 3 |
++-----+----------+------------+--------+
+|  3  | yes      | count is 3 | i is 0 |
++-----+----------+------------+--------+
+|  0  | no       |
++-----+----------+
+
+After the loop, print the value of count, which is 3.
+version: f24 v1
+label: 1.8
+type: repetition
+
+question: Write a statement to call foo function on integer variables a and b, both are properly declared and initialized.
+void foo(int& a, int& b);
+answer: foo(a, b);
+explanation: (1) int& means to pass by reference, it is like the original copy of int. So the first paramerer is a.
+(2) Similarly, the second parameter is b. Do not forget to add ; after calling the function.
+(3) Return type of foo(a, b) is void. There is no need to use a variable to hold the return of foo function.
+version: f24 v1
+label: 1.9
+type: function
+
+question: Write a condition in C++ to represent that an integer variable n is in the range of [60,80], where both ends are included, that is, 60 <= n <= 80 in mathematic representation. 
+answer: (n >= 60 && n <= 80)
+explanation: (1) && means and. That is, n >= 60 and n <= 80.
+(2) Condition in C++ needs to be enclosed in a pair of parentheses.
+(3) Warning: cannot write (n >= 60 && n <= 80) as (60 <= n <= 80). Otherwise, suppose n is 90, then 60 <= n returns true, which is 1.
+(4) Also, 1 <= 80 returns true. However, 90 is not in [60,80].
+version: f24 v1
+label: 1.10
+type: condition
+

@@ -1,0 +1,110 @@
+//s24 midterm v1
+question: Given string arr[] = {"Hello", "Hi", "Hey"}, what is arr[2]?
+answer: "Hey"
+version: s24 v1
+label: 1.1
+type: array
+
+
+question: Declare function remove, for an given array arr of integers, an integer called size, which represents the number of elements in the array, and an integer called target, search whether target is in the array or not, if yes, then remove the target from the array, and the size is reduced by 1, otherwise, do nothing and no change to the original size. Return type is void.
+answer: void remove(int arr[], int& size, int target);
+version: s24 v1
+label: 1.2
+type: function; array; pass by reference
+
+question: Write a statement to generate a random int in [-2, 3]. No need to include libraries.
+answer: rand() % 6 - 2
+version: s24 v1
+label: 1.3
+type: random
+
+
+question: Given string greeting = "Wonderful"; What is the value for greeting.substr(4, 2)?
+answer: "er"
+version: s24 v1
+label: 1.4
+type: string; substring
+
+question: What is the value of 1 / 3 * 2?
+answer: 0
+version: s24 v1
+label: 1.5
+type: arithmetic; integer division
+
+question: Suppose n is 2341, what the value of foo(n)?
+
+int foo(int n) {
+    int result = 0;
+    do { 
+       result += n % 10;
+       n /= 10;
+     } while (n != 0);
+     return result;
+}
+answer: 10
+version: s24 v1
+label: 1.6
+type: arithmetic; integer division; remainder
+
+
+question: Given two double variables a and b, find out the return of a^b. Hint: use pow function, see cheat sheet paper.
+answer: pow(a, b);
+version: s24 v1
+label: 1.7
+type: arithmetic 
+
+question: What is the output of the following code?
+
+#include <iostream>
+using namespace std;
+
+
+int main() {
+    int count = 0;
+    for (int i =-6; i < 2; i += 3)
+        count++;
+
+    cout << count << endl;
+
+    return 0;
+}
+answer: 3
+version: s24 v1
+label: 1.8
+type: repetition 
+
+
+question: What is the output for the following code?
+
+#include <iostream>
+using namespace std;
+
+void foo(int& a, int b);
+
+int main() {
+    int i = 1;
+    int j = 3;
+    foo(i, j);
+    cout << "i = " << i 
+         << ", j = " << j << endl;
+
+    return 0;
+}
+
+void foo(int& a, int b) {
+    a++;
+    b--;
+}
+
+answer: i = 2, j = 3
+version: s24 v1
+label: 1.9
+type: function; pass by value; pass by reference
+
+
+question: Write a condition to represent that char variable ch is none of the following: 'a', 'b', or 'c'.
+answer: (ch != 'a' && ch != 'b' && ch != 'c')
+explanation: another solution is (! (ch == 'a' || ch == 'b' || ch == 'c'))
+version: s24 v1
+label: 1.10
+type: condition
