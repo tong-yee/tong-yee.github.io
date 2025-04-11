@@ -8,17 +8,55 @@
 //2. File checkAnswer_focus_errors.cpp is the source code of our project. 
 //3. unit_test_focus_errors.cpp is to test functions defined in checkAnswer_focus_errors.cpp.
 //4. Both files have main functions. However, each C++ project can have only one main function.
-//5. To run the main function in unit_test_focus_errors.cpp, change the name of function main of checkAnswer_function_rand.cpp to be main2 or add #ifndef UNIT_TEST and #endif around this main function.
-//6. g++ -std=c++20 -DUNIT_TEST unit_test_focus_errors.cpp -o test
-//7. If there is no error in unit_test_focus_errors`.cpp, a runnable file called test is generated, run the following commands with return key to test each function.
+//5. Enclose main function in checkAnswer_focus_errors.cpp by #ifndef UNIT_TEST and #endif. Just the main function, not the whole program. That is,
+//IN checkAnswer_focus_errors.cpp,
+//#ifndef UNIT_TEST
+//int main() {
+//   ... //codes in main function
+//}
+//#endif
 
-//./test d
+//6. Enclose main function in unit_test_focus_errors.cpp by #ifdef UNIT_TEST and #endif. Just the main function, not the whole program. That is,
+//In unit_test_focus_errors.cpp,
+//
+//#ifdef UNIT_TEST
+//int main(int argc, char** argv) {
+//   ...
+//}
+//#endif
+
+//Then when UNIT_TEST is defined, the above main function is called.
+//When running
+//g++ -std=c++20 -DUNIT_TEST unit_test_focus_errors.cpp -o test
+//Option -DUNIT_TEST defines UNIT_TEST.
+
+//7. If there is no error in unit_test_focus_errors.cpp and checkAnswer_focus_errors.cpp (see comments).
+
+//comments: unit_test_focus_errors.cpp has a line 
+//#include "checkAnswer_focus_errors.cpp"
+
+//When unit_test_focus_errors.cpp is called, so is checkAnswer_focus_errors.cpp.
+//Similarly, when checkAnswer_focus_errors.cpp is changed,
+//Need to run the following command again.
+//g++ -std=c++20 -DUNIT_TEST unit_test_focus_errors.cpp -o test
+
+//If the above command runs file, a runnable file called test is generated, run the following commands with return key to test each function.
+
+//./test d 
+
+//The above command tests related_type function in checkAnswer_focus_errors.cpp
+
 //./test e
 
-//8. Change main2 function in checkAnswer_function_rand.cpp back to main.
+//The above command tests reorder function in checkAnswer_focus_errors.cpp.
 
-void read_file_into_array(Question ques[], int capacity);
+//8. To run main function from checkAnswer_focus_errors.cpp, do not use -DUNIT_TEST option. That is,
+//g++ -std=c++20 checkAnswer_focus_error.cpp -o check,
+//the main function in checkAnswer_focus_errors.cpp is called. The runnable file is called check.
+//Run code using command
+//./check
 
+#ifdef UNIT_TEST
 int main(int argc, char** argv) {
     if (argc < 2) {
        std::cout << "missing argument in main function" << std::endl;
@@ -27,7 +65,7 @@ int main(int argc, char** argv) {
 
     switch (*argv[1]) {
         case 'd': {
-            //test is_type_related
+            //test type_related
             //Check whether curr_type and type_to_focus is related or not. That is, curr_type contains at least one item of type_to_focus, if yes, return true, otherwise, return false.
             //bool is_type_related(string type_to_focus, string curr_type);
             string type_to_focus = "array; function";
@@ -116,3 +154,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+#endif
