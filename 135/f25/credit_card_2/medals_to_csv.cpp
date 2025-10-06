@@ -1,10 +1,10 @@
-//File name: /Users/laptopuser/Documents/courses_macbook_pro/cs135/f25/project2_credit_card_II/doc/../code/section_6_6_2d_array_medals/max_medals.cpp
+//File name: /Users/laptopuser/Documents/courses_macbook_pro/cs135/f25/project2_credit_card_II/doc/../code/section_6_6_2d_array_medals/medals_to_csv.cpp
 
 //code link: https://onlinegdb.com/8rU18e-SS5
 
 #include <iostream>
 #include <string>
-#include <fstream> //std::ifstream
+#include <fstream> //std::ifstream, std::ofstream
 
 //Suppose medals_original.csv has the following contents,
 //Country,Gold,Silver,Bronze
