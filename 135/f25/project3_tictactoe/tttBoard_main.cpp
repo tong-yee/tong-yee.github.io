@@ -25,6 +25,7 @@ int main(int argc, const char *argv[]) {
 
 //Sample output:
 //Call default constructor TicTacToeBoard board;
+//board size: 3
 //contents of board is
 // , , ,
 // , , ,
@@ -41,6 +42,7 @@ int main(int argc, const char *argv[]) {
 //Sample input/output:
 //Enter size of the board: 5
 //Call non-default constructor TicTacToeBoard board(5);
+//board size: 5
 //contents of board is
 // , , , , ,
 // , , , , ,
@@ -54,11 +56,11 @@ int main(int argc, const char *argv[]) {
 //another sample input/output:
 //Enter size of the board: 2
 //Call non-default constructor TicTacToeBoard board(2);
+//board size: 3
 //contents of board is
 // , , ,
 // , , ,
 // , , ,
-//
     }
     else if (type == 'C' || type == 'D') {
         //test clear method,
@@ -262,6 +264,7 @@ int main(int argc, const char *argv[]) {
     //'B' for non-default constructor
     if (type == 'A' || type == 'B') {
        std::cout << "Call " << prompt << '\n';
+       std::cout << "board size: " << tttBoard->size() << std::endl;
        std::cout << "contents of board is\n";
        for (int row = 0; row < tttBoard->size(); row++) {
            for (int col = 0; col < tttBoard->size(); col++) {
