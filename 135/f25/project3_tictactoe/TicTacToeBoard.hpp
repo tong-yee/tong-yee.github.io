@@ -5,21 +5,32 @@
 
 class TicTacToeBoard {
 public:
-    //a default 3x3 TicTacToe board 
+    //default constructor creates a 3x3 board 
     TicTacToeBoard();
   
-    //If the provided size is less than 3, default to creating a 3x3 board.
+    //If givenSize is less than 3, create a 3x3 board.
     //Otherwise, initialize the board with the given size for both rows and columns.
     TicTacToeBoard(int givenSize);
   
-    //Set each element of the board to be a space (' ').
+    //Set each cell of the board to be a space character.
+    //Warning: our clear method of TicTacToeBoard is different from clear method of a vector.
+    //(1) clear method of a vector removes all elements from the vector (which are destroyed), leaving the container with a size of 0.
+    //(2) That is, board.clear() removes all elements of board and make board an empty vector.
+    //(3) Our clear method does not change the structure of board -- its number of rows and number of columns will still keep the same -- just set each element to be a space.
     void clear();
   
-    //Return the value at cell (row, col)
+    //if row and col are valid indices,
+    //return the value of the cell of the board at (row, col)
+    //otherwise, return 'W' (means wrong)
+    //Warning: a function with non-void return type
+    //needs to return a value of that return type in every execution path.
     char getValue(int row, int col) const;
       
-    // Checks if the cell at (row, col) is available.
-    //A cell is available if its value is a space character (' ').
+    //Checks if the cell at (row, col) is available or not.
+    //A cell is available if the following conditions satisify.
+    //(1) row and col indices are valid
+    //(2) the value at that cell is a space character (' ').
+    //Otherwise, the cell is not available.
     bool isAvailable(int row, int col) const;
   
     //Check whether the given parameter row is valid row index or not.
@@ -27,23 +38,33 @@ public:
     bool isValidRow(int row) const;
   
     //Check whether the given parameter col is a valid column index or not
-    //that is, whether col is in [0, board.size()-1]
+    //that is, whether col is in [0, board[0].size()-1]
     bool isValidCol(int col) const;
-  
-    //Return the size of tic tac toe board  
+ 
+    //Return the number of rows of board  
     int size() const; 
   
-    //Place playerId at board[row][col].
-    void mark(int row, int col, char playerId);
+    //IF row and col are valid indices, 
+    //place symbol at board[row][col],
+    //otherwise, do nothing.
+    //Note that before we can use board[row][col],
+    //need to make sure that row and col indices are valid.
+    void mark(int row, int col, char symbol);
    
-    //Returns a string that visually represents the current layout of the board's elements.
+    //Return a string representation of the contents of board.
+    //(1) The returned string typically formats the board in a grid layout
+    //for easy display and debugging.
+    //(2) 'X', 'O', and ' ' characters in the string are
+    //    separated by ONLY ONE vertical bar pipe character '|'.
+    //    For example, one row with values 'X', ' ', and 'O' looks like
+    //    | X |  | O |
     std::string to_string() const;
   
-    //If every single row, column, main diagonal, AND anti-diagonal 
+    //If every single row, column, main diagonal, AND anti-diagonal
     //each contain both 'X' and 'O' symbols,
     //then the board is in a tie state (return true).
-    //Otherwise, if any of those lines (row/col/diagonals) is missing 
-    //an 'X' or an 'O', it means a win is still possible (return false).
+    //Otherwise, if any of those lines (row/col/main diagonal/anti-digonal)
+    //is missing an 'X' or an 'O', a win is still possible (return false for tie status).
     bool tie() const;
   
     //Check whether the player at row and col wins. 
@@ -59,12 +80,14 @@ public:
     //the function returns true (win found); otherwise, it returns false.
     //Check whether the player at (row, col) can win that row or not.
     bool winByRow(int row, int col) const;
+
     //Check Vertical Win: 
     //Evaluate the column containing the cell (row, col). 
     //If the current player's symbol forms a continuous, 
     //unbroken sequence of the required length within this column, 
     //the function returns true (win found); otherwise, it returns false.
     bool winByCol(int row, int col) const;
+
   	//Check Digonal (including both diagonal and anti-diagonal) Win: 
     //If the cell (row, col) is not in diagonal or anti-diagonal, return false.
     //If the cell (row, col) is in the diagonal,
@@ -80,5 +103,5 @@ public:
 
 private:
     std::vector<std::vector<char>> board; //board is a 2d array of chars
-};
+}; //do not forget ;
 #endif
