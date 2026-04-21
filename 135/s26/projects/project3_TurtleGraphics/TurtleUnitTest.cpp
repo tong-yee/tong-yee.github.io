@@ -1,3 +1,4 @@
+//file name: TurtleUnitTest.cpp
 #include <iostream>
 #include <cstdlib> //srand
 #include <ctime> //time
@@ -30,6 +31,12 @@ int main(int argc, const char *argv[]) {
       }
       break;
     }
+//When running ./turtle A, 
+//where turtle obtained by 
+//g++ -o turtle TurtleUnitTest.cpp Turtle.cpp
+//expected output is as follows 
+//reset method is correct
+
 
     case 'B': { //test isPenUp, liftUpPen, and putDownPen methods
       Turtle tur;
@@ -48,7 +55,11 @@ int main(int argc, const char *argv[]) {
 
       break;
     }
-    
+//Running the following two comands
+//g++ -o turble TurtleUnitTest.cpp Turtle.cpp
+//./turtle B
+//expected output: isPenUp, liftUpPen, and putDownPen methods are correct
+
     case 'C': { //test setRow and getRow methods
       Turtle tur;
       int row = rand() % SIZE;
@@ -62,6 +73,8 @@ int main(int argc, const char *argv[]) {
 
       break;
     }
+//expected output after running ./turtle C
+//setRow and getRow methods are correct
 
     case 'D': { //test setCol and getCol methods
       Turtle tur;
@@ -76,6 +89,8 @@ int main(int argc, const char *argv[]) {
 
       break;
     }
+//expected output after running ./turtle D
+//setCol and getCol methods are correct
 
     case 'E': { //test turnLeft, setHeading and getHeading methods
       Turtle tur;
@@ -111,6 +126,8 @@ int main(int argc, const char *argv[]) {
       std::cout << "turnLeft method is correct." << std::endl;
       break;
     }
+//expected output after running ./turtle E:
+//turnLeft method is correct.
 
     case 'F': { //test turnRight, setHeading and getHeading methods
       Turtle tur;
@@ -146,6 +163,8 @@ int main(int argc, const char *argv[]) {
       std::cout << "turnRight method is correct." << std::endl;
       break;
     }
+//expected output after running ./turtle F:
+//turnRight method is correct.
 
     case 'G': { //  void move(int steps);
       Turtle tur;
@@ -220,6 +239,8 @@ int main(int argc, const char *argv[]) {
 
       break;
     }
+//expected output after running ./turtle G:
+//move method is correct
 
     default: 
       std::cout << "Unrecognized option: " << type << std::endl;
