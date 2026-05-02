@@ -5,7 +5,7 @@
 //g++ -o tg Turtle.cpp Floor.cpp TurtleGraphics.cpp TurtleGraphicsUnitTest.cpp
 //test default constructor using
 //./tg A
-//test non-default constructor using
+//test restart method using
 //./tg B
 //test run commands stored in a vector using
 //./tg C
@@ -18,7 +18,7 @@ int main(int argc, const char *argv[]) {
      return -1;
   }
 
-  //unit-testing for methods of Turtle class, which has no constructors 
+  //unit-testing for methods of TurtleGraphics class
   char type = *argv[1];
   std::string prompt;
 
@@ -86,7 +86,7 @@ int main(int argc, const char *argv[]) {
    
         {2}, // pen down
         {5,1}, // draw from (3,16) to (3,16)
-        {3}, // trun right, from south to west
+        {3}, // turn right, from south to west
         {5,12}, // draw horizontal line from (3,15) to (3,4)
    
         // draw left upper vertical line of 5, from (4,4) to (4,9)
@@ -261,7 +261,27 @@ int main(int argc, const char *argv[]) {
 //g++ -o tg Turtle.cpp Floor.cpp TurtleGraphics.cpp TurtleGraphicsUnitTest.cpp
 //./tg D < input3.txt
 //Sample output:
-//             1         
+//Enter command, 9 to stop: pen up
+//Next command: row col at (0,3)
+//Next command: heading: SOUTH
+//Next command: row col at (3,3)
+//Next command: heading: EAST
+//Next command: pen down
+//Next command: row col at (3,16)
+//Next command: heading: SOUTH
+//Next command: row col at (9,16)
+//Next command: heading: WEST
+//Next command: row col at (9,4)
+//Next command: pen up
+//Next command: heading: SOUTH
+//Next command: row col at (14,4)
+//Next command: pen down
+//Next command: row col at (15,4)
+//Next command: heading: EAST
+//Next command: row col at (15,16)
+//Next command: heading: NORTH
+//Next command: row col at (9,16)
+//Next command:             1         
 //  01234567890123456789
 // 0                    
 // 1                    
@@ -282,7 +302,7 @@ int main(int argc, const char *argv[]) {
 // 6                    
 // 7                    
 // 8                    
-// 9
+// 9                    
 //
 //Next command: run (console) method is correct
 
