@@ -56,7 +56,7 @@ int main(int argc, const char *argv[]) {
       break;
     }
 //Running the following two comands
-//g++ -o turble TurtleUnitTest.cpp Turtle.cpp
+//g++ -o turtle TurtleUnitTest.cpp Turtle.cpp
 //./turtle B
 //expected output: isPenUp, liftUpPen, and putDownPen methods are correct
 
