@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSCI 235 Syllabus — Fall 2026</title>
+  <style>
+    :root {
+      --bg:        #f0f8ff;
+      --card:      #ffffff;
+      --hdr-bg:    #1565c0;
+      --hdr-text:  #ffffff;
+      --accent:    #1565c0;
+      --accent-lt: #eaf4fe;
+      --border:    #c2ddf5;
+      --text:      #212121;
+      --muted:     #555555;
+      --warn-bg:   #fff3e0;
+      --warn-bdr:  #e65100;
+      --link:      #0d47a1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 28px 18px;
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      background: var(--hdr-bg);
+      color: var(--hdr-text);
+      padding: 32px 36px;
+      border-radius: 10px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    }
+    .page-header h1 { font-size: 1.75em; margin-bottom: 4px; }
+    .page-header h2 { font-size: 1.1em; font-weight: 400; opacity: .9; margin-bottom: 18px; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 24px;
+      font-size: .92em;
+      opacity: .92;
+    }
+    .info-grid span { display: block; }
+    .info-grid strong { font-weight: 600; }
+
+    /* ── Sections ── */
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px 26px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    h3 {
+      color: var(--accent);
+      font-size: 1.05em;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+    }
+
+    p { margin-bottom: 10px; }
+    p:last-child { margin-bottom: 0; }
+
+    ul, ol { padding-left: 22px; margin-bottom: 10px; }
+    li { margin-bottom: 4px; }
+
+    a { color: var(--link); }
+
+    /* ── Grading table ── */
+    .grade-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95em;
+      margin-top: 8px;
+    }
+    .grade-table th {
+      background: var(--hdr-bg);
+      color: var(--hdr-text);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .grade-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .grade-table tr:nth-child(even) td { background: var(--accent-lt); }
+    .grade-table .total td {
+      font-weight: 700;
+      background: #deeefb !important;
+    }
+
+    /* ── Warning box ── */
+    .warn {
+      background: var(--warn-bg);
+      border-left: 5px solid var(--warn-bdr);
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin: 14px 0 0;
+      font-size: .94em;
+    }
+    .warn strong { color: var(--warn-bdr); }
+
+    /* ── Notice (blue) ── */
+    .note {
+      background: var(--accent-lt);
+      border-left: 5px solid var(--accent);
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin: 12px 0 0;
+      font-size: .94em;
+    }
+
+    /* ── Tips box ── */
+    .tips li { margin-bottom: 8px; }
+
+    footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: .82em;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<div class="page-header">
+  <h1>CSCI 235 &mdash; Software Design &amp; Analysis II</h1>
+  <h2>Hunter College, City University of New York &nbsp;&bull;&nbsp; Fall 2026</h2>
+  <div class="info-grid">
+    <span><strong>Instructor:</strong> Tong Yi</span>
+    <span><strong>Meeting Times:</strong> TuTh 8:30&nbsp;AM &ndash; 9:45&nbsp;AM</span>
+    <span><strong>Email:</strong> tong.yi46@login.cuny.edu</span>
+    <span><strong>Room:</strong> West Bldg W714</span>
+    <span><strong>Office:</strong> North Bldg N1001L</span>
+    <span><strong>Credits:</strong> 3</span>
+    <span><strong>Office Hours:</strong> TuTh 10:00&nbsp;AM &ndash; 11:00&nbsp;AM (in person); Tu 3:50&nbsp;PM &ndash; 4:50&nbsp;PM (online)</span>
+    <span><strong>Course Page:</strong> [URL TBD]</span>
+  </div>
+</div>
+
+<!-- ══════════════ COURSE DESCRIPTION ══════════════ -->
+<section>
+  <h3>Course Description</h3>
+  <p>This course is the second in a three-course series and a major stepping-stone in your software development journey. The primary focus is the design and analysis of algorithms and abstract data types. It introduces elementary data structures with related algorithms and their use in problem solving, covering core concepts such as abstraction, algorithm complexity, performance analysis, and the tradeoffs between running time, storage size, clarity, and extensibility that are at the heart of software design.</p>
+  <p>As a sequel to CSCI 135, this course enhances your C++ and Object-Oriented Programming skills by introducing Templates, Inheritance, Polymorphism, and extending your understanding of pointers and dynamic memory allocation.</p>
+  <p><strong>Prerequisites:</strong> CSCI 135 and CSCI 150.</p>
+</section>
+
+<!-- ══════════════ TOPICS ══════════════ -->
+<section>
+  <h3>Course Topics</h3>
+  <p>The course follows the department's established CSCI 235 curriculum with emphasis on conceptual understanding, software design, and practical problem solving. Big-O complexity analysis is woven into every topic rather than treated as a single isolated chapter.</p>
+
+  <p><strong>C++ Foundations</strong></p>
+  <ul>
+    <li>Abstraction &amp; OOP Review (inheritance, polymorphism)</li>
+    <li>Templates</li>
+    <li>Pointers &amp; Dynamic Memory Management</li>
+    <li>Rule of Three and an introduction to move semantics (Rule of Five)</li>
+    <li>Dynamic Arrays</li>
+  </ul>
+
+  <p><strong>Linear Data Structures</strong></p>
+  <ul>
+    <li>Abstract Data Types (ADTs) &amp; Algorithm Efficiency / Big-O</li>
+    <li>Linked Lists</li>
+    <li>Stacks &amp; Queues</li>
+  </ul>
+
+  <p><strong>Algorithm Design</strong></p>
+  <ul>
+    <li>Recursion &amp; Recursive Backtracking</li>
+    <li>Searching Algorithms and Complexity</li>
+    <li>Sorting Algorithms and Performance Comparison (Bubble, Selection, Insertion, Merge, Quick, Heap)</li>
+  </ul>
+
+  <p><strong>Nonlinear Data Structures</strong></p>
+  <ul>
+    <li>Binary Trees &amp; Binary Search Trees</li>
+    <li>Expression Trees &amp; Parsing</li>
+    <li>Tries</li>
+    <li>Hash Tables (overview)</li>
+  </ul>
+
+  <p><strong>Modern C++</strong></p>
+  <ul>
+    <li>C++ STL Containers (<code>std::vector</code>, <code>std::list</code>, <code>std::stack</code>, <code>std::queue</code>, <code>std::map</code>, <code>std::unordered_map</code>)</li>
+    <li>Smart Pointers and RAII (overview)</li>
+  </ul>
+
+  <p><strong>Advanced Topics (time permitting)</strong></p>
+  <ul>
+    <li>Graphs (representations, DFS, BFS, Dijkstra&rsquo;s)</li>
+  </ul>
+</section>
+
+<!-- ══════════════ REAL-WORLD CONNECTIONS ══════════════ -->
+<section>
+  <h3>Why Does This Matter? Real-World Connections</h3>
+  <p>Many of the ideas in this course power software systems that you use every day.</p>
+  <table class="grade-table" style="font-size:.9em; margin-top:8px;">
+    <thead>
+      <tr><th>Topic</th><th>Real-World Application</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Dynamic Arrays / Vector</td><td><code>std::vector</code>, game engine entity lists, spreadsheet rows</td></tr>
+      <tr><td>Linked Lists</td><td>Music playlist navigation, browser tab management</td></tr>
+      <tr><td>Stack</td><td>Undo/redo in editors, browser back button, function call stack</td></tr>
+      <tr><td>Queue</td><td>Print spoolers, CPU task scheduling, BFS in maps</td></tr>
+      <tr><td>Recursion</td><td>Directory traversal, compilers, fractals</td></tr>
+      <tr><td>Sorting</td><td>Database ORDER BY, contact lists, leaderboards</td></tr>
+      <tr><td>Binary Search Tree</td><td><code>std::map</code>, database indexes, range queries</td></tr>
+      <tr><td>Expression Trees</td><td>Compilers, spreadsheet formula engines, CAS systems</td></tr>
+      <tr><td>Trie</td><td>Google autocomplete, spell checkers, IP routing tables</td></tr>
+      <tr><td>Hash Table</td><td>Python dictionaries, <code>std::unordered_map</code>, caches, symbol tables</td></tr>
+      <tr><td>Graphs / Dijkstra</td><td>Google Maps, social networks, network routing</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════════ TEXTBOOK ══════════════ -->
+<section>
+  <h3>Textbook &amp; Resources</h3>
+  <p><strong>Required Textbook:</strong> <em>Data Abstraction and Problem Solving with C++: Walls and Mirrors</em>, 7th Edition, Frank M. Carrano, ISBN-13: 978-0134463971. Available for rent or purchase at <a href="https://www.vitalsource.com" target="_blank">VitalSource.com</a>.</p>
+  <p><strong>Other Useful Resources:</strong></p>
+  <ul>
+    <li><a href="http://opendatastructures.org/" target="_blank">Open Data Structures in C++</a> (free online)</li>
+    <li><a href="http://www.compsci.hunter.cuny.edu/~sweiss/course_materials/csci235/csci235_lecture_notes.php" target="_blank">Prof. Stewart Weiss&rsquo; lecture notes</a></li>
+    <li><a href="https://okunhardt.github.io/documents/Installing_WSL.pdf" target="_blank">Linux on Windows (WSL) tutorial</a></li>
+    <li><em>Effective Modern C++</em>, Scott Meyers (supplementary)</li>
+  </ul>
+</section>
+
+<!-- ══════════════ COMMUNICATION ══════════════ -->
+<section>
+  <h3>Communication &amp; Course Materials</h3>
+  <p>Supplemental materials &mdash; including course videos (when available) and answers to lecture questions &mdash; will be posted on <strong>BrightSpace</strong>. Please check it regularly for updates. You must also regularly check your <strong>Hunter email</strong> for important course announcements.</p>
+  <p>For questions about course content or assignments, the best path is to <strong>come to campus</strong>: ask during class, visit office hours, or drop in to the tutoring lab (Hunter North 1001B) where Teaching Assistants (TAs) are available <strong>face to face</strong>. In-person discussion is by far the most effective way to work through problems and get timely, detailed help.</p>
+  <p>There is no instructor-maintained online discussion forum for this course. If students choose to organize their own study group or peer forum, that is entirely their own initiative &mdash; the course does not officially endorse or monitor any such space.</p>
+</section>
+
+<!-- ══════════════ PROGRAMMING PROJECTS ══════════════ -->
+<section>
+  <h3>Programming Projects</h3>
+  <p>There will be <strong>five programming projects</strong>, forming the core of the course. Every program must comply with the <em>Programming Guidelines</em> document (posted on the course webpage). <strong>You must read this document</strong> &mdash; it contains guidelines about submission, lateness, plagiarism, grading, and logging into your Linux accounts.</p>
+  <p>Projects are cumulative: concepts and code developed in earlier projects may be reused or extended in later ones. They are designed as an integrated curriculum:</p>
+  <ul>
+    <li><strong>Project 1 (Weeks 1&ndash;3):</strong> MiniVector Library &mdash; dynamic array, <code>push_back</code>, <code>pop_back</code>, <code>operator[]</code>, resize, Rule of Three (with an introduction to move semantics where appropriate). Teaches heap memory and amortized growth before introducing nodes.</li>
+    <li><strong>Project 2 (Weeks 4&ndash;6):</strong> Maze Solver &mdash; DFS / BFS pathfinding with explicit stack/queue</li>
+    <li><strong>Project 3 (Weeks 7&ndash;9):</strong> Make 24 Puzzle Solver &mdash; recursive backtracking &amp; combinatorics</li>
+    <li><strong>Project 4 (Weeks 10&ndash;12):</strong> Expression Evaluator &mdash; parsing, operator precedence &amp; expression trees</li>
+    <li><strong>Project 5 (Weeks 13&ndash;15):</strong> Capstone Project (e.g., Autocomplete Engine or Network Routing) &mdash; Trie-based autocomplete or Dijkstra&rsquo;s shortest path</li>
+  </ul>
+  <p>Programming projects are expected to require substantially more time than programming exercises. Start each project as soon as it is released; the full allotted time is there because you will need it.</p>
+  <p>All projects are submitted through <strong>Gradescope</strong> and are auto-graded. Programs must compile and run correctly on the Linux lab machines (Hunter North, rooms 1001B/1001C). Confirm that your code works in the Linux environment <em>before</em> submitting.</p>
+  <div class="note">
+    <strong>Note:</strong> Many exam questions will be directly based on the programming projects. Understanding your own code thoroughly is the best exam preparation.
+  </div>
+</section>
+
+<!-- ══════════════ PROGRAMMING EXERCISES ══════════════ -->
+<section>
+  <h3>Programming Exercises</h3>
+  <p>There will be <strong>ten short programming exercises</strong>, distributed two per project unit. Each exercise is released on one class day and due at <strong>11:59 PM two days later</strong> (typically the next class meeting). Exercises are submitted on <strong>Gradescope</strong> and are fully auto-graded: submit typed code files.</p>
+  <p>Exercises are intended primarily for practice and are generally much shorter than the programming projects. They are designed to scaffold directly into the upcoming project, providing targeted practice with one key concept (e.g., pointer arithmetic, Big Three implementation, DFS tracing, tree traversal). They are short &mdash; expect 1&ndash;2 functions and a set of test cases.</p>
+  <p>No late submissions are accepted for exercises, as solutions are released promptly after the due date to allow you to review and learn from them. The <strong>lowest exercise grade is dropped</strong>; your best 9 out of 10 exercises count toward your final grade.</p>
+</section>
+
+<!-- ══════════════ GRADING ══════════════ -->
+<section>
+  <h3>Grading</h3>
+  <table class="grade-table">
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>Details</th>
+        <th>Weight</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Attendance</td>
+        <td>Tracked each class; 3 absences excused without reason; &ge;80% required for midterm replacement</td>
+        <td>5%</td>
+      </tr>
+      <tr>
+        <td>Programming Projects</td>
+        <td>5 projects &times; 9% each; no drops (3-week intervals)</td>
+        <td>45%</td>
+      </tr>
+      <tr>
+        <td>Programming Exercises</td>
+        <td>Best 9 of 10 &times; ~1.1% each (lowest dropped; auto-graded)</td>
+        <td>10%</td>
+      </tr>
+      <tr>
+        <td>Midterm Exam</td>
+        <td>In class, Week 7 (covers Projects 1 &amp; 2)</td>
+        <td>15%</td>
+      </tr>
+      <tr>
+        <td>Final Exam</td>
+        <td>Comprehensive, Finals Week (Dec 15&ndash;21)</td>
+        <td>25%</td>
+      </tr>
+      <tr class="total">
+        <td><strong>Total</strong></td>
+        <td></td>
+        <td><strong>100%</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:14px;"><strong>Letter Grade Scale:</strong> This course follows the official <a href="https://www.hunter.cuny.edu/students/registration/records-and-transcripts/grading-structure/" target="_blank">Hunter College Grading Structure</a>. The table below shows the grades used and their GPA quality points.</p>
+  <table class="grade-table" style="margin-top:8px; font-size:.9em;">
+    <thead>
+      <tr><th>Grade</th><th>Definition</th><th>Quality Points (GPA)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>A+</td><td>97.5 &ndash; 100%</td><td>4.0</td></tr>
+      <tr><td>A</td><td>92.5 &ndash; 97.4%</td><td>4.0</td></tr>
+      <tr><td>A&minus;</td><td>90.0 &ndash; 92.4%</td><td>3.7</td></tr>
+      <tr><td>B+</td><td>87.5 &ndash; 89.9%</td><td>3.3</td></tr>
+      <tr><td>B</td><td>82.5 &ndash; 87.4%</td><td>3.0</td></tr>
+      <tr><td>B&minus;</td><td>80.0 &ndash; 82.4%</td><td>2.7</td></tr>
+      <tr><td>C+</td><td>77.5 &ndash; 79.9%</td><td>2.3</td></tr>
+      <tr><td>C</td><td>70.0 &ndash; 77.4%</td><td>2.0</td></tr>
+      <tr><td>D</td><td>60.0 &ndash; 69.9%</td><td>1.0</td></tr>
+      <tr><td>F</td><td>0 &ndash; 59.9%</td><td>0</td></tr>
+      <tr><td>WU</td><td>Unofficial withdrawal (assigned by instructor)</td><td>0</td></tr>
+      <tr><td>P</td><td>Credit Earned (equivalent to A, B, C, or D)</td><td>&mdash;</td></tr>
+      <tr><td>NC</td><td>No credit granted (equivalent to F)</td><td>&mdash;</td></tr>
+      <tr><td>INC</td><td>Term&rsquo;s work incomplete (may include absence from final exam)</td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Makeup Exams:</strong> There is no makeup for the midterm exam under any circumstances. For the final exam, a makeup may be arranged for situations such as illness, late travel, or other unforeseen events — but you must contact the instructor <em>before</em> the scheduled final, or as soon as possible immediately afterward. Requests made well after the fact will not be considered.</p>
+
+  <p><strong>Midterm Grade Replacement:</strong> If your final exam score is higher than your midterm score <em>and</em> your attendance is at least 80%, the final exam grade will automatically replace the midterm grade in the calculation of your course average. In documented exceptional circumstances (e.g., serious illness that affected both the midterm and attendance), the instructor reserves the right to waive the attendance requirement at their sole discretion.</p>
+
+  <!-- ══ REGRADE POLICY ══ -->
+  <div class="warn">
+    <strong>&#9888; Regrade Policy &mdash; Read Carefully</strong>
+    <p style="margin-top:8px;">
+      Regrade requests must be submitted through <strong>Gradescope within 7 days</strong> after grades are released, unless a shorter deadline is announced (for example, for the final exam due to university grade submission deadlines).
+    </p>
+    <p>
+      When a regrade is requested, the entire problem will be re-evaluated according to the grading rubric. <strong>Your score may increase, decrease, or remain unchanged&mdash;the original score is not protected.</strong> Because the entire problem is regraded from scratch, additional grading discrepancies&mdash;whether favorable or unfavorable to the student&mdash;may be identified during the review. Please request a regrade only if you believe your work was graded incorrectly according to the rubric.
+    </p>
+    <p>
+      Regrade requests that simply ask for additional partial credit without identifying a specific grading error will generally not be considered.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ LATE WORK ══════════════ -->
+<section>
+  <h3>Late Work Policy</h3>
+  <p><strong>No late submissions are accepted</strong> for any assignment in this course &mdash; projects, exercises, or otherwise. Solutions are released immediately after each deadline so that everyone can review and learn from them promptly.</p>
+  <p>The built-in accommodations below are the only flexibility in this course and are designed to cover unforeseen circumstances. No additional exceptions will be made beyond these allowances, regardless of the reason:</p>
+  <ul>
+    <li><strong>Exercises:</strong> the lowest exercise grade is dropped automatically.</li>
+    <li><strong>Attendance:</strong> three absences are excused without requiring any explanation or documentation.</li>
+  </ul>
+  <p>Please budget these allowances wisely across the semester rather than using them early.</p>
+</section>
+
+<!-- ══════════════ LINUX / SOFTWARE ══════════════ -->
+<section>
+  <h3>Software &amp; Linux Environment</h3>
+  <p>This course is taught in C++ on a Linux platform. All submitted code must compile and run correctly using <code>g++</code> on the Linux lab machines (Hunter North rooms 1001B and 1001C, 10th floor). Please verify that your programs compile on the Linux machines <strong>before</strong> submitting to Gradescope.</p>
+  <p>If working from home, we recommend using <a href="https://ubuntu.com" target="_blank">Ubuntu Linux</a>, macOS (with <code>g++</code> via Xcode Command Line Tools), or Windows Subsystem for Linux (WSL). Avoid developing solely in native Windows environments, as file-path and compiler differences frequently cause submission failures.</p>
+  <p><strong>Tutoring Lab:</strong> The CS tutoring lab (Hunter North 1001B) is available Monday&ndash;Friday, 11:30&nbsp;AM&ndash;5:30&nbsp;PM. UTAs (Undergraduate Teaching Assistants) provide drop-in help with course material and projects.</p>
+</section>
+
+<!-- ══════════════ SUGGESTIONS FOR SUCCESS ══════════════ -->
+<section>
+  <h3>Suggestions for Success</h3>
+  <ul class="tips">
+    <li><strong>Read ahead.</strong> Read the assigned chapters <em>before</em> class. Lectures assume you have seen the material; reading ahead helps you ask better questions and follow the discussion more closely.</li>
+    <li><strong>Start projects early.</strong> Projects are substantial. Begin as soon as one is released &mdash; you will need the full allotted time. Leaving a project for the night before guarantees a bad experience.</li>
+    <li><strong>Ask questions.</strong> Come to class prepared to ask. Visit the tutoring lab and speak with TAs face to face — they are your most immediate resource. Come to office hours for anything that needs more time. There is no shortage of help available on campus; use it.</li>
+    <li><strong>Code, debug, repeat.</strong> There is no substitute for time spent writing, breaking, and fixing code. The more you practice, the more natural it becomes.</li>
+    <li><strong>Attend class.</strong> Some exam questions come directly from in-class discussions and examples. Attendance is your cheapest study tool.</li>
+    <li><strong>Submit on time.</strong> No late work is accepted. A working 80% solution submitted on time outscores a perfect solution submitted one day late.</li>
+    <li><strong>Think beyond this course.</strong> The concepts you learn here form the foundation for upper-level computer science courses and frequently appear in technical interviews. Aim for genuine understanding rather than simply producing working code.</li>
+  </ul>
+</section>
+
+<!-- ══════════════ ACADEMIC INTEGRITY ══════════════ -->
+<section>
+  <h3>Academic Integrity</h3>
+  <p>Hunter College regards acts of academic dishonesty (plagiarism, cheating on examinations, obtaining unfair advantage, falsification of records) as serious offenses against intellectual honesty. The college enforces the CUNY Policy on Academic Integrity and will pursue violations according to Hunter College Academic Integrity Procedures.</p>
+  <p>In this course, special attention is given to <strong>contract cheating</strong> (having work completed on your behalf and submitting it for credit). All submitted projects are checked with screening software for authenticity and originality.</p>
+  <p>You are encouraged to discuss ideas with others and consult available resources and examples to inform your work. However, <strong>you must write all your code yourself</strong>. You may not give code to, or receive code from, anyone else. If you are unsure whether something is permitted, ask before doing it.</p>
+  <p><strong>On Generative AI:</strong> You may use AI tools as a starting point or learning aid, but you must cite any AI-generated code and take full responsibility for understanding, testing, and debugging it. AI may help explain concepts, but it cannot replace understanding &mdash; you should be able to explain every line of code you submit. AI-generated code that is submitted without understanding is an integrity risk and will not reflect the skills expected of you in future coursework.</p>
+</section>
+
+<!-- ══════════════ ADA COMPLIANCE ══════════════ -->
+<section>
+  <h3>ADA Compliance</h3>
+  <p>In compliance with the American Disability Act of 1990 (ADA) and Section 504 of the Rehabilitation Act of 1973, Hunter College is committed to ensuring educational parity and accommodations for all students with documented disabilities and/or medical conditions. Students with documented disabilities (emotional, medical, physical, or learning) are encouraged to consult the <strong>Office of AccessABILITY</strong> (Room E1124) to secure necessary academic accommodations. For further information, call (212)&nbsp;772-4857 / TTY (212)&nbsp;650-3230.</p>
+</section>
+
+<!-- ══════════════ SEXUAL MISCONDUCT ══════════════ -->
+<section>
+  <h3>Hunter College Policy on Sexual Misconduct</h3>
+  <p>In compliance with the CUNY Policy on Sexual Misconduct, Hunter College reaffirms the prohibition of any sexual misconduct, including sexual violence, sexual harassment, and gender-based harassment or retaliation against students, employees, or visitors, as well as certain intimate relationships. Students who have experienced any form of sexual violence on or off campus (including CUNY-sponsored trips and events) are entitled to the rights outlined in the Bill of Rights for Hunter College.</p>
+  <ul>
+    <li><strong>Sexual Violence:</strong> Immediately call 911, contact the NYPD Special Victims Division Hotline (646-610-7272), or the College&rsquo;s Public Safety Office (212-772-4444).</li>
+    <li><strong>All Other Sexual Misconduct:</strong> Contact Title IX Campus Coordinator Dean John Rose (<a href="mailto:jtrose@hunter.cuny.edu">jtrose@hunter.cuny.edu</a>, 212-650-3262) or Colleen Barry (<a href="mailto:colleen.barry@hunter.cuny.edu">colleen.barry@hunter.cuny.edu</a>, 212-772-4534). Complimentary services are available through Counseling and Wellness Services, Hunter East 1123.</li>
+  </ul>
+</section>
+
+<!-- ══════════════ LEARNING GOALS ══════════════ -->
+<section>
+  <h3>Departmental Learning Goals</h3>
+  <p>This course satisfies the following learning goals as set forth by the Computer Science department. Students will develop an understanding of the basic foundations and relevant applications of mathematics and statistics as they relate to computer science, specifically by using mathematics to analyze algorithm performance. They will also understand the relationship between computer architectures and software systems, gain deep practical knowledge of C++ as a widely used programming language, and demonstrate the ability to apply principles of design and analysis in creating substantial programs.</p>
+</section>
+
+<!-- ══════════════ COMPLIANCE ══════════════ -->
+<section>
+  <h3>Syllabus Compliance</h3>
+  <p>Except for changes that substantially affect the grading policy, this syllabus is a guide and is subject to change. The course schedule, including topics, readings, and project assignments, may be updated as needed; the instructor reserves the right to adjust the scope or pacing of any topic as the semester progresses. All changes will be announced in class and on the course webpage. Check for updates regularly.</p>
+</section>
+
+<footer>
+  CSCI 235 &bull; Software Design &amp; Analysis II &bull; Hunter College, CUNY &bull; Fall 2026
+  &nbsp;&mdash;&nbsp; Last updated July 2026
+</footer>
+
+</body>
+</html>
