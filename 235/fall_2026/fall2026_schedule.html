@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSCI 235 — Data Structures — Fall 2026</title>
+  <style>
+    /* ── Color palette ── */
+    :root {
+      --bg:            #f0f8ff;
+      --card:          #ffffff;
+      --hdr-bg:        #1565c0;
+      --hdr-text:      #ffffff;
+      --band-green:    #eaf4fe;
+      --border:        #c2ddf5;
+      --unit-bg:       #1976d2;
+      --unit-text:     #ffffff;
+      --accent:        #0d47a1;
+      --link:          #0d47a1;
+      --text:          #212121;
+      --muted:         #757575;
+
+      /* row highlights */
+      --row-holiday:   #fffde7;
+      --row-exam:      #fce4ec;
+      --row-pdue:      #deeefb;
+      --row-noclass:   #f5f5f5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      background: var(--hdr-bg);
+      color: var(--hdr-text);
+      padding: 28px 32px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.15);
+    }
+    .page-header h1 { margin: 0 0 4px; font-size: 1.8em; }
+    .page-header h2 { margin: 0 0 10px; font-size: 1.1em; font-weight: 400; opacity: .9; }
+    .page-header p  { margin: 0; font-size: .95em; opacity: .85; }
+
+    /* ── Notice bar ── */
+    .notice {
+      background: #fff8e1;
+      border-left: 5px solid #f9a825;
+      padding: 10px 16px;
+      border-radius: 4px;
+      margin-bottom: 18px;
+      font-size: .9em;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+      font-size: .85em;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-swatch {
+      width: 16px; height: 16px; border-radius: 3px; border: 1px solid #ccc;
+    }
+
+    /* ── Table ── */
+    .tbl-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      min-width: 900px;
+    }
+
+    /* header row */
+    thead tr {
+      background: var(--hdr-bg);
+      color: var(--hdr-text);
+    }
+    th {
+      padding: 11px 10px;
+      text-align: left;
+      font-size: .85em;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+
+    /* body cells */
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tbody tr:nth-child(even)   { background: var(--band-green); }
+    tbody tr:nth-child(odd)    { background: var(--card); }
+
+    /* ── Project unit banner ── */
+    tr.unit-banner td {
+      background: var(--unit-bg) !important;
+      color: var(--unit-text);
+      font-weight: 700;
+      font-size: .88em;
+      letter-spacing: .03em;
+      padding: 10px 14px;
+    }
+
+    /* ── Special rows ── */
+    tr.no-class td {
+      background: var(--row-noclass) !important;
+      color: var(--muted);
+      font-style: italic;
+    }
+    tr.holiday td {
+      background: var(--row-holiday) !important;
+      color: var(--muted);
+      font-style: italic;
+    }
+    tr.exam td {
+      background: var(--row-exam) !important;
+      font-weight: 700;
+    }
+    tr.project-due td {
+      background: var(--row-pdue) !important;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: .78em;
+      font-weight: 700;
+      white-space: nowrap;
+      margin: 1px 0;
+    }
+    .b-proj    { background: #bbdefb; color: #0d47a1; }
+    .b-ex      { background: #d6eaf8; color: #154360; }
+    .b-due     { background: #ffccbc; color: #bf360c; }
+    .b-exam    { background: #f8bbd0; color: #880e4f; }
+
+    a { color: var(--link); }
+
+    .lec-num { color: var(--muted); font-size: .85em; }
+    .sub      { font-size: .82em; color: var(--muted); margin-top: 2px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: .82em;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ PAGE HEADER ═══════════════════════ -->
+<div class="page-header">
+  <h1>CSCI 235 &mdash; Data Structures</h1>
+  <h2>Hunter College, CUNY &nbsp;&bull;&nbsp; Fall 2026</h2>
+  <p>TuTh &nbsp;8:30&nbsp;AM&nbsp;&ndash;&nbsp;9:45&nbsp;AM
+     &nbsp;&nbsp;|&nbsp;&nbsp;
+     This schedule is <strong>tentative</strong> and subject to change &mdash; please check regularly.</p>
+</div>
+
+<div class="notice">
+  <strong>Note:</strong> All project submissions are due on Gradescope by <strong>11:59&nbsp;PM</strong> on the date listed.
+  Programming exercises are auto-graded; submit typed code files.
+  Exercises have no late submissions because solutions are released immediately afterward.
+</div>
+
+<!-- ═══════════════════════ LEGEND ═══════════════════════ -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#eaf4fe;"></div> Regular lecture</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#e3f2fd;"></div> Project due</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fce4ec;"></div> Exam</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fffde7;"></div> College closed / holiday</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#f5f5f5;"></div> No class</div>
+</div>
+
+<!-- ═══════════════════════ SCHEDULE TABLE ═══════════════════════ -->
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%;">#</th>
+      <th style="width:9%;">DATE</th>
+      <th style="width:31%;">TOPIC</th>
+      <th style="width:30%;">KEY CONCEPTS</th>
+      <th style="width:12%;">EXERCISE</th>
+      <th style="width:13%;">PROJECT</th>
+    </tr>
+  </thead>
+  <tbody>
+
+  <!-- ═══ PROJECT 1 BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#128230;&nbsp; PROJECT 1 &bull; MiniVector Library &nbsp;<span style="font-weight:400; opacity:.85;">(Pointers, Memory &amp; Dynamic Arrays)</span>&nbsp; &mdash;&nbsp; Weeks 1&ndash;3</td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">1</td>
+    <td>Tu, 9/1</td>
+    <td>Welcome &amp; OOP Review</td>
+    <td>Course overview; constructors, objects, references, pass-by-reference; inheritance &amp; polymorphism (quick review); Gradescope setup</td>
+    <td></td>
+    <td><span class="badge b-proj">&#35;1 Posted</span></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">2</td>
+    <td>Th, 9/3</td>
+    <td>Templates &mdash; Function Templates &amp; Class Templates</td>
+    <td>Why templates exist; function templates (<code>max&lt;T&gt;</code>, swap); class templates; type parameters; template implementations in headers</td>
+    <td></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">3</td>
+    <td>Tu, 9/8</td>
+    <td>MiniVector Interface &amp; Memory Management</td>
+    <td>MiniVector interface design (15 min); stack vs. heap, pointer arithmetic, <code>new</code> / <code>delete</code>, null pointers, memory leaks</td>
+    <td><span class="badge b-ex">Ex&nbsp;1 Posted</span>
+        <div class="sub">Pointer Practice</div></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">4</td>
+    <td>Th, 9/10</td>
+    <td>Dynamic Arrays, Capacity Growth &amp; Algorithm Analysis</td>
+    <td>Raw pointer arrays, resize strategy, amortized O(1) push; Big-O notation, O(1) / O(n) / O(log n) growth</td>
+    <td><span class="badge b-due">Ex&nbsp;1 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">5</td>
+    <td>Tu, 9/15</td>
+    <td>Resource Management (Rule of Three) &mdash; Copy Constructor, Destructor, Copy Assignment</td>
+    <td>Deep vs. shallow copy, RAII, self-assignment guard</td>
+    <td><span class="badge b-ex">Ex&nbsp;2 Posted</span>
+        <div class="sub">Big Three</div></td>
+    <td></td>
+  </tr>
+
+  <tr class="project-due">
+    <td class="lec-num">6</td>
+    <td>Th, 9/17</td>
+    <td>Completing MiniVector &mdash; Testing, Debugging &amp; Memory Errors</td>
+    <td>Edge-case testing, memory leaks, dangling pointers, double delete; Valgrind demonstration; brief closing preview of <code>std::move</code> and why it exists</td>
+    <td><span class="badge b-due">Ex&nbsp;2 Due</span></td>
+    <td><span class="badge b-due">&#35;1 Due</span></td>
+  </tr>
+
+  <!-- ═══ PROJECT 2 BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#127744;&nbsp; PROJECT 2 &bull; Maze Solver &nbsp;<span style="font-weight:400; opacity:.85;">(Linked Lists, Stacks, Queues &amp; DFS/BFS)</span>&nbsp; &mdash;&nbsp; Weeks 4&ndash;6</td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">7</td>
+    <td>Tu, 9/22</td>
+    <td>Abstract Data Types; Singly Linked List &mdash; Nodes &amp; Traversal</td>
+    <td>Interface vs. implementation, node structure, head pointer, sequential access</td>
+    <td></td>
+    <td><span class="badge b-proj">&#35;2 Posted</span></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">8</td>
+    <td>Th, 9/24</td>
+    <td>Linked List Operations &mdash; Insert, Delete, Reverse</td>
+    <td>Prepend, append, mid-list insert, pointer surgery, in-place reversal</td>
+    <td><span class="badge b-ex">Ex&nbsp;3 Posted</span>
+        <div class="sub">Linked List Ops</div></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">9</td>
+    <td>Tu, 9/29</td>
+    <td>Stack ADT &amp; Implementations</td>
+    <td>Array-based stack, linked-list stack, push/pop, call-stack analogy, applications</td>
+    <td><span class="badge b-due">Ex&nbsp;3 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">10</td>
+    <td>Th, 10/1</td>
+    <td>Queue ADT &amp; Implementations</td>
+    <td>Circular-buffer queue, linked queue, enqueue/dequeue, front &amp; back pointers, applications</td>
+    <td><span class="badge b-ex">Ex&nbsp;4 Posted</span>
+        <div class="sub">Stack &amp; Queue Trace</div></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">11</td>
+    <td>Tu, 10/6</td>
+    <td>Recursion and the Call Stack; Recursive DFS</td>
+    <td>Base case, recursive leap of faith, stack frames; recursion uses an implicit stack; recursive DFS on a grid</td>
+    <td><span class="badge b-due">Ex&nbsp;4 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr class="project-due">
+    <td class="lec-num">12</td>
+    <td>Th, 10/8</td>
+    <td>BFS; DFS vs. BFS Comparison; Midterm Review</td>
+    <td>Level-order traversal with explicit queue, shortest path, time/space tradeoffs, exam Q&amp;A</td>
+    <td></td>
+    <td><span class="badge b-due">&#35;2 Due</span></td>
+  </tr>
+
+  <!-- ═══ MIDTERM BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#128221;&nbsp; MIDTERM &mdash; Week 7</td>
+  </tr>
+
+  <tr class="no-class">
+    <td>&mdash;</td>
+    <td>Tu, 10/13</td>
+    <td>NO CLASS &mdash; Tuesday follows Monday schedule</td>
+    <td colspan="3"></td>
+  </tr>
+
+  <tr class="exam">
+    <td>&mdash;</td>
+    <td>Th, 10/15</td>
+    <td><span class="badge b-exam">MIDTERM EXAM</span> &nbsp; Covers Projects 1 &amp; 2 &nbsp;(in class, 8:30&ndash;9:45&nbsp;AM)</td>
+    <td colspan="2"></td>
+    <td><span class="badge b-proj">&#35;3 Posted</span></td>
+  </tr>
+
+  <!-- ═══ PROJECT 3 BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#127922;&nbsp; PROJECT 3 &bull; Make 24 Puzzle Solver &nbsp;<span style="font-weight:400; opacity:.85;">(Recursion &amp; Backtracking)</span>&nbsp; &mdash;&nbsp; Weeks 8&ndash;9</td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">13</td>
+    <td>Tu, 10/20</td>
+    <td>State Space Search; Recursive Enumeration of Expressions</td>
+    <td>Game trees, expression states, operator sets {+,&minus;,&times;,&divide;}</td>
+    <td></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">14</td>
+    <td>Th, 10/22</td>
+    <td>Permutations &amp; Operator Combinations</td>
+    <td>Factorial growth, generating permutations in-place, implicit state in vectors</td>
+    <td><span class="badge b-ex">Ex&nbsp;5 Posted</span>
+        <div class="sub">Permutation Trace</div></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">15</td>
+    <td>Tu, 10/27</td>
+    <td>Pruning the Search Tree; Early Termination</td>
+    <td>Symmetry reduction, divide-and-conquer subsets, avoiding duplicates</td>
+    <td><span class="badge b-due">Ex&nbsp;5 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr class="project-due">
+    <td class="lec-num">16</td>
+    <td>Th, 10/29</td>
+    <td>Finalizing the Solver; Code Review &amp; Testing</td>
+    <td>Edge cases, input validation, Gradescope submission checklist</td>
+    <td><span class="badge b-ex">Ex&nbsp;6 Posted</span>
+        <div class="sub">Big-O Analysis</div></td>
+    <td><span class="badge b-due">&#35;3 Due</span></td>
+  </tr>
+
+  <!-- ═══ PROJECT 4 BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#128288;&nbsp; PROJECT 4 &bull; Expression Evaluator &nbsp;<span style="font-weight:400; opacity:.85;">(Searching, Sorting, Trees &amp; Parsing)</span>&nbsp; &mdash;&nbsp; Weeks 10&ndash;12</td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">17</td>
+    <td>Tu, 11/3</td>
+    <td>Searching Algorithms and Complexity</td>
+    <td>Linear search O(n), binary search O(log n), sorted-array requirement</td>
+    <td><span class="badge b-due">Ex&nbsp;6 Due</span></td>
+    <td><span class="badge b-proj">&#35;4 Posted</span></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">18</td>
+    <td>Th, 11/5</td>
+    <td>Sorting Algorithms and Performance Comparison</td>
+    <td>Bubble, Selection, Insertion O(n&sup2;); Merge Sort, Quick Sort O(n log n); stability, in-place, divide-and-conquer</td>
+    <td><span class="badge b-ex">Ex&nbsp;7 Posted</span>
+        <div class="sub">Sorting Trace</div></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">19</td>
+    <td>Tu, 11/10</td>
+    <td>Binary Trees &amp; Tree Traversals</td>
+    <td>Tree structure, node/left/right pointers, in-order / pre-order / post-order traversal, recursive tree walkers</td>
+    <td><span class="badge b-due">Ex&nbsp;7 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">20</td>
+    <td>Th, 11/12</td>
+    <td>Binary Search Trees</td>
+    <td>BST property, insert, search, deletion, height analysis, comparison to sorted arrays</td>
+    <td><span class="badge b-ex">Ex&nbsp;8 Posted</span>
+        <div class="sub">BST Traversal</div></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">21</td>
+    <td>Tu, 11/17</td>
+    <td>Expression Trees &amp; Parsing; Shunting-Yard Algorithm</td>
+    <td>Infix / prefix / postfix notation, operator precedence, step-by-step trace</td>
+    <td><span class="badge b-due">Ex&nbsp;8 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr class="project-due">
+    <td class="lec-num">22</td>
+    <td>Th, 11/19</td>
+    <td>Expression Evaluator Review, Testing &amp; Debugging</td>
+    <td>Expression tree traversals, generating infix / prefix / postfix, minimal parenthesization, edge cases</td>
+    <td></td>
+    <td><span class="badge b-proj">&#35;5 Posted</span>&nbsp;<span class="badge b-due">&#35;4 Due</span></td>
+  </tr>
+
+  <!-- ═══ PROJECT 5 BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#127942;&nbsp; PROJECT 5 &bull; Capstone Project &nbsp;<span style="font-weight:400; opacity:.85;">(Tries, Hashing, Graphs &amp; STL)</span>&nbsp; &mdash;&nbsp; Weeks 13&ndash;15 &nbsp;&bull;&nbsp; <span style="font-weight:400; font-style:italic; opacity:.8;">These topics are introductions — hashing, heaps, balanced trees, and graph algorithms are studied in depth in CSCI 335.</span></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">23</td>
+    <td>Tu, 11/24</td>
+    <td>Tries &mdash; Insert, Search &amp; Prefix Matching</td>
+    <td>Trie nodes, insert, prefix enumeration, time complexity vs. BST/hash map</td>
+    <td><span class="badge b-ex">Ex&nbsp;9 Posted</span>
+        <div class="sub">Trie Operations</div></td>
+    <td></td>
+  </tr>
+
+  <tr class="holiday">
+    <td>&mdash;</td>
+    <td>Th, 11/26</td>
+    <td>NO CLASS &mdash; Thanksgiving Recess (College Closed)</td>
+    <td colspan="3"></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">24</td>
+    <td>Tu, 12/1</td>
+    <td>Hash Tables (overview) &mdash; Hash Functions, Collisions &amp; Chaining</td>
+    <td>Hash function design, collision resolution, chaining vs. open addressing, load factor</td>
+    <td><span class="badge b-due">Ex&nbsp;9 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">25</td>
+    <td>Th, 12/3</td>
+    <td>Graphs (overview) &mdash; Representations, DFS, BFS &amp; Dijkstra&rsquo;s</td>
+    <td>Adjacency list vs. matrix, directed/undirected, weighted edges, shortest path intuition</td>
+    <td><span class="badge b-ex">Ex&nbsp;10 Posted</span>
+        <div class="sub">STL &amp; Graph Concepts</div></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">26</td>
+    <td>Tu, 12/8</td>
+    <td>STL Containers &amp; Modern C++ (Overview)</td>
+    <td><code>std::vector</code>, <code>std::map</code>, <code>std::unordered_map</code>; why modern C++ uses smart pointers; <code>unique_ptr</code> (brief overview); why we implemented raw pointers first</td>
+    <td><span class="badge b-due">Ex&nbsp;10 Due</span></td>
+    <td></td>
+  </tr>
+
+  <tr class="project-due">
+    <td class="lec-num">27</td>
+    <td>Th, 12/10</td>
+    <td>Comprehensive Final Review and Course Wrap-Up</td>
+    <td>Data structure selection guide, CS electives overview, course survey</td>
+    <td></td>
+    <td><span class="badge b-due">&#35;5 Due</span></td>
+  </tr>
+
+  <!-- ═══ FINAL EXAM BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#127891;&nbsp; FINAL EXAMINATIONS &mdash; December 15&ndash;21, 2026</td>
+  </tr>
+
+  <tr class="exam">
+    <td>&mdash;</td>
+    <td>Dec 15&ndash;21</td>
+    <td><span class="badge b-exam">FINAL EXAM</span> &nbsp; Comprehensive &mdash; exact date &amp; room TBA by Registrar</td>
+    <td colspan="3">Covers all topics. Bring photo ID. No notes or electronic devices.</td>
+  </tr>
+
+  </tbody>
+</table>
+</div>
+
+<footer>
+  CSCI 235 &bull; Data Structures &bull; Hunter College, CUNY &bull; Fall 2026
+  &nbsp;&mdash;&nbsp;
+  Last updated: July 2026
+</footer>
+
+</body>
+</html>
