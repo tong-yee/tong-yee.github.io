@@ -122,7 +122,7 @@
   <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <pre><code class="language-bash">g++ -std=c++17 -Wall -Wextra -o evaluator evaluate_expression.cpp
 ./evaluator A    # Task A  (7 tests)
-./evaluator B    # Task B  (8 tests)
+./evaluator B    # Task B  (9 tests)
 ./evaluator C    # Task C  (10 tests)
 ./evaluator D    # Task D  (18 valid + 20 error tests)</code></pre>
 </div>
@@ -208,7 +208,7 @@ After call:
   <li>the operator is not one of <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> (unrecognized operator)</li>
 </ul>
 
-<h4>Unit tests (Task B &mdash; 8 tests)</h4>
+<h4>Unit tests (Task B &mdash; 9 tests)</h4>
 <table>
   <tr><th>operands (bottom&rarr;top)</th><th>operator</th><th>Expected result</th></tr>
   <tr><td><code>[3, 2]</code></td><td><code>+</code></td><td>5</td></tr>
@@ -219,6 +219,7 @@ After call:
   <tr><td><code>[5, 3]</code></td><td>(empty)</td><td>throws (empty operator stack)</td></tr>
   <tr><td><code>[1, 0]</code></td><td><code>/</code></td><td>throws</td></tr>
   <tr><td><code>[5]</code></td><td><code>+</code></td><td>throws (too few operands)</td></tr>
+  <tr><td><code>[4, 2]</code></td><td><code>?</code></td><td>throws (unrecognized operator)</td></tr>
 </table>
 <p>On failure: <code>FAIL: 5 - 3 (order check: should be 2, not -2) expected 2, got -2</code></p>
 </div>
@@ -815,7 +816,7 @@ result: 20</pre>
 <table>
   <tr><th>Task</th><th>Function(s)</th><th>Tests</th><th>Points</th></tr>
   <tr><td>A</td><td><code>precedence()</code></td><td>7</td><td>10</td></tr>
-  <tr><td>B</td><td><code>binaryOperation()</code></td><td>8</td><td>15</td></tr>
+  <tr><td>B</td><td><code>binaryOperation()</code></td><td>9</td><td>15</td></tr>
   <tr><td>C</td><td><code>processString()</code> basic + <code>calculate()</code> basic</td><td>10</td><td>25</td></tr>
   <tr><td>D</td><td><code>processString()</code> full + <code>calculate()</code> full</td>
       <td>18 valid + 20 errors</td><td>50</td></tr>
