@@ -410,7 +410,7 @@
     <td>Searching Algorithms and Complexity</td>
     <td>Linear search O(n), binary search O(log n), sorted-array requirement</td>
     <td><span class="badge b-due">Ex&nbsp;6 Due</span></td>
-    <td><a href="projects/p4/p4_expression_evaluator.html" style="text-decoration:none;"><span class="badge b-proj">&#35;4 Posted</span></a></td>
+    <td><a href="projects/p4/p4_expression_evaluator.html" data-available="2026-11-03" style="text-decoration:none;"><span class="badge b-proj">&#35;4 Posted</span></a></td>
   </tr>
 
   <tr>
@@ -541,5 +541,16 @@
   Last updated: July 2026
 </footer>
 
+
+<script>
+  // Hide project links that aren't available yet
+  document.querySelectorAll('a[data-available]').forEach(function(a) {
+    if (new Date() < new Date(a.dataset.available)) {
+      var parent = a.parentNode;
+      while (a.firstChild) parent.insertBefore(a.firstChild, a);
+      parent.removeChild(a);
+    }
+  });
+</script>
 </body>
 </html>
