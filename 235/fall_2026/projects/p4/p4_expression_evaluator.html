@@ -764,11 +764,10 @@ result: 20</pre>
   <tr>
     <td><strong>Time &mdash; O(<em>n</em>)</strong></td>
     <td>O(<em>n</em>)</td>
-    <td>Each character is visited exactly once during the scan.
-        Each token is pushed onto a stack at most once and popped at most once
-        (all stack operations are O(1)).
-        Every call to <code>binaryOperation()</code> pops two operands and one
-        operator and pushes one result &mdash; at most O(<em>n</em>) such calls total.</td>
+    <td>Each character is examined only a constant number of times.
+        Each operator is pushed onto the operator stack at most once and popped
+        at most once, and each call to <code>binaryOperation()</code> removes
+        one operator. Therefore, the total work is O(<em>n</em>).</td>
   </tr>
   <tr>
     <td><strong>Space &mdash; O(<em>n</em>)</strong></td>
@@ -781,9 +780,11 @@ result: 20</pre>
 
 <div class="note">
   <strong>Intuition.</strong>
-  The algorithm is a single left-to-right scan with no nested loops and no
-  recursion.  Every token enters the stacks exactly once and leaves exactly
-  once, so the total work is proportional to the length of the input.
+  Although the scan contains inner <code>while</code> loops (for reading
+  multi-digit numbers and for popping operators), the total work is still
+  linear. Each input character is examined only a constant number of times,
+  and each operator is pushed onto and popped from the operator stack at most
+  once. Therefore, the total running time is O(<em>n</em>).
 </div>
 
 <!-- ================================================================ -->
