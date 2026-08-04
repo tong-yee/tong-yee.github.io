@@ -514,6 +514,14 @@ return result;</code></pre>
   (4 was pushed last and will be popped first).
 </p>
 
+<div class="note">
+  <strong>Naming note:</strong>
+  <code>operator</code> is a reserved keyword in C++ (used for operator
+  overloading).  Name your stacks <code>operands</code> and
+  <code>operators</code> &mdash; the plural <code>operators</code> is
+  <em>not</em> a keyword.
+</div>
+
 <h3>The Shunting-Yard algorithm (two-stack approach)</h3>
 <p>
   Maintain two stacks.
@@ -745,6 +753,40 @@ result: 20</pre>
 </div>
 
 <!-- ================================================================ -->
+<h3>Complexity Analysis</h3>
+
+<p>
+  Let <em>n</em> = number of characters in the input string.
+</p>
+
+<table>
+  <tr><th>Resource</th><th>Bound</th><th>Why</th></tr>
+  <tr>
+    <td><strong>Time &mdash; O(<em>n</em>)</strong></td>
+    <td>O(<em>n</em>)</td>
+    <td>Each character is visited exactly once during the scan.
+        Each token is pushed onto a stack at most once and popped at most once
+        (all stack operations are O(1)).
+        Every call to <code>binaryOperation()</code> pops two operands and one
+        operator and pushes one result &mdash; at most O(<em>n</em>) such calls total.</td>
+  </tr>
+  <tr>
+    <td><strong>Space &mdash; O(<em>n</em>)</strong></td>
+    <td>O(<em>n</em>)</td>
+    <td>The two stacks together hold at most O(<em>n</em>) elements, bounded by
+        the number of tokens in the expression (at most <em>n</em>).
+        No auxiliary arrays are allocated; the input string itself is O(<em>n</em>).</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>Intuition.</strong>
+  The algorithm is a single left-to-right scan with no nested loops and no
+  recursion.  Every token enters the stacks exactly once and leaves exactly
+  once, so the total work is proportional to the length of the input.
+</div>
+
+<!-- ================================================================ -->
 <h2>What Is Provided</h2>
 
 <p>The skeleton already includes:</p>
@@ -901,18 +943,18 @@ int main(int argc, char* argv[]) {
     // a is the deeper operand (pushed first), b is on top.
     auto chk = [&amp;](double a, char op, double b, double expected,
                    const char* label) {
-      std::stack&lt;double&gt; nums;
-      std::stack&lt;char&gt;   ops;
-      nums.push(a); nums.push(b);
-      ops.push(op);
+      std::stack&lt;double&gt; operands;
+      std::stack&lt;char&gt;   operators;
+      operands.push(a); operands.push(b);
+      operators.push(op);
       try {
-        binaryOperation(nums, ops);
-        if (nums.size() == 1 &amp;&amp; std::fabs(nums.top() - expected) &lt;= DELTA) {
+        binaryOperation(operands, operators);
+        if (operands.size() == 1 &amp;&amp; std::fabs(operands.top() - expected) &lt;= DELTA) {
           pass++;
         } else {
           std::cout &lt;&lt; &quot;FAIL: &quot; &lt;&lt; label &lt;&lt; &quot; expected &quot; &lt;&lt; expected;
-          if (nums.size() == 1) std::cout &lt;&lt; &quot;, got &quot; &lt;&lt; nums.top();
-          else std::cout &lt;&lt; &quot; (wrong stack size: &quot; &lt;&lt; nums.size() &lt;&lt; &quot;)&quot;;
+          if (operands.size() == 1) std::cout &lt;&lt; &quot;, got &quot; &lt;&lt; operands.top();
+          else std::cout &lt;&lt; &quot; (wrong stack size: &quot; &lt;&lt; operands.size() &lt;&lt; &quot;)&quot;;
           std::cout &lt;&lt; &quot;\n&quot;;
         }
       } catch (const std::runtime_error&amp; e) {
