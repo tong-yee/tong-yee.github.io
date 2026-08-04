@@ -205,6 +205,7 @@ After call:
   <li>fewer than 2 values are on the operand stack</li>
   <li>the operator stack is empty</li>
   <li>the operator is <code>/</code> and the divisor is zero</li>
+  <li>the operator is not one of <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> (unrecognized operator)</li>
 </ul>
 
 <h4>Unit tests (Task B &mdash; 8 tests)</h4>
@@ -1117,6 +1118,7 @@ int precedence(char ch) {
 //   - fewer than 2 operands are available
 //   - the operator stack is empty
 //   - op is &#x27;/&#x27; and num2 == 0 (divide by zero)
+//   - op is not one of +, -, *, / (unrecognized operator)
 void binaryOperation(std::stack&lt;double&gt;&amp; operands, std::stack&lt;char&gt;&amp; operators) {
   // TODO
 }
@@ -1131,7 +1133,7 @@ void binaryOperation(std::stack&lt;double&gt;&amp; operands, std::stack&lt;char&
 //   Read a complete integer (advance i while the next char is also a digit).
 //   After the loop, backtrack: i-- so the outer i++ lands correctly.
 //   Push the value onto operands.  Set prev = NUMBER.
-//   Error if prev == NUMBER or CLOSE_PAREN (missing operator between operands).
+//   Error if prev == NUMBER or CLOSE_PAREN (a new number cannot immediately follow a number or &#x27;)&#x27;).
 //
 // Operators (+, -, *, /):
 //   Binary context (prev == NUMBER or CLOSE_PAREN):
