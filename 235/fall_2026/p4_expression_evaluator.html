@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P4: Expression Evaluator &mdash; CSCI 235 Fall 2026</title>
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+  header { border-bottom: 2px solid #1a1a1a; padding-bottom: .75rem; margin-bottom: 2rem; }
+  header h1 { font-size: 1.6rem; font-weight: bold; }
+  header .meta { font-family: "Courier New", monospace; font-size: .85rem; color: #444; margin-top: .3rem; }
+  h2 { font-size: 1.2rem; font-weight: bold; margin: 2.2rem 0 .5rem;
+       border-bottom: 1px solid #ccc; padding-bottom: .2rem; }
+  h3 { font-size: 1.05rem; font-weight: bold; margin: 1.6rem 0 .3rem; }
+  h4 { font-size: 1rem; font-weight: bold; font-family: "Courier New", monospace;
+       margin: 1.2rem 0 .25rem; }
+  p  { margin: .5rem 0; }
+  ul, ol { margin: .4rem 0 .4rem 1.6rem; }
+  li { margin: .25rem 0; }
+  code {
+    font-family: "Courier New", monospace; font-size: .88em;
+    background: #f3f3f3; padding: .1em .3em; border-radius: 3px;
+  }
+  .week-banner {
+    background: #1a1a1a; color: #fff;
+    padding: .45rem 1rem; border-radius: 4px;
+    font-family: "Courier New", monospace; font-size: .9rem;
+    margin: 2.4rem 0 1.2rem;
+    letter-spacing: .04em;
+  }
+  .task-box {
+    border: 1px solid #bbb; border-radius: 5px;
+    padding: 1rem 1.2rem; margin: 1rem 0 1.6rem;
+  }
+  .task-box h3 { margin-top: 0; }
+  table { border-collapse: collapse; width: 100%; margin: .8rem 0; font-size: .9rem; }
+  th { background: #f0f0f0; text-align: left; padding: .4rem .7rem; border: 1px solid #bbb;
+       font-family: "Courier New", monospace; }
+  td { padding: .35rem .7rem; border: 1px solid #ccc; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .code-wrap { position: relative; margin: .8rem 0; }
+  .copy-btn {
+    position: absolute; top: .4rem; right: .4rem;
+    font-family: "Courier New", monospace; font-size: .75rem;
+    padding: .2rem .55rem; background: #e8e8e8;
+    border: 1px solid #bbb; border-radius: 3px;
+    cursor: pointer; z-index: 10; transition: background .15s;
+  }
+  .copy-btn:hover  { background: #d0d0d0; }
+  .copy-btn.copied { background: #c6ecc6; border-color: #7cb97c; }
+  .code-wrap pre { margin: 0; border-radius: 4px; border: 1px solid #ddd; overflow-x: auto; }
+  .code-wrap pre code.hljs { font-size: .82rem; padding: 1rem; }
+  .note {
+    background: #fffbe6; border-left: 4px solid #e6a817;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+  }
+  .warn {
+    background: #fff0f0; border-left: 4px solid #c0392b;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+  }
+  .hint {
+    background: #f0f7ff; border-left: 4px solid #3a7bd5;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+  }
+  .subtle {
+    background: #f3f0ff; border-left: 4px solid #7c3aed;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+    font-family: "Courier New", monospace;
+  }
+  .subtle b { font-family: Georgia, serif; }
+  footer {
+    margin-top: 3rem; border-top: 1px solid #ccc; padding-top: .5rem;
+    font-size: .8rem; color: #666; font-family: "Courier New", monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>P4 &mdash; Expression Evaluator</h1>
+  <div class="meta">
+    CSCI 235 &nbsp;|&nbsp; Software Design &amp; Analysis II &nbsp;|&nbsp;
+    Hunter College, CUNY &nbsp;|&nbsp; Fall 2026<br>
+    Posted: Tuesday, November 3 &nbsp;|&nbsp;
+    <strong>Due: Thursday, November 19, 11:59&nbsp;PM</strong>
+    &nbsp;|&nbsp; Submit via Gradescope
+  </div>
+</header>
+
+<h2>Overview</h2>
+
+<p>
+  In this project you build a calculator that evaluates infix arithmetic expressions
+  such as <code>3&nbsp;*&nbsp;(4&nbsp;+&nbsp;2)&nbsp;-&nbsp;-1</code> using the
+  <strong>Shunting-Yard algorithm</strong> (two stacks: one for operands, one for operators).
+  Complete tasks A &rarr; B &rarr; C &rarr; D in order; each task has its own unit tests
+  so you can verify each module before moving on.
+</p>
+<p>
+  The skeleton file <code>evaluate_expression.cpp</code> (at the end of this page) already
+  compiles. The four functions you must implement start as stubs; the test harness
+  is already complete. Tests will fail until you fill in the <code>// TODO</code> sections.
+</p>
+<p>
+  Compile and run:
+</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-bash">g++ -std=c++17 -Wall -Wextra -o evaluator evaluate_expression.cpp
+./evaluator A    # Task A  (7 tests)
+./evaluator B    # Task B  (8 tests)
+./evaluator C    # Task C  (10 tests)
+./evaluator D    # Task D  (18 valid + 20 error tests)</code></pre>
+</div>
+
+<p>
+  Individual failure messages are printed only for failed tests. At the end of
+  each task group, the program prints a summary of how many tests passed.
+</p>
+
+<!-- ================================================================ -->
+<div class="week-banner">Suggested checkpoint &mdash; Tasks A &amp; B by 11/09/2026</div>
+
+<!-- Task A -->
+<div class="task-box">
+<h3>Task A &mdash; <code>precedence(char ch)</code></h3>
+
+<p>
+  Return the precedence level of operator <code>ch</code>.
+  Higher value &rarr; evaluated first.
+  Throw <code>std::runtime_error</code> for any character that is not a valid operator.
+</p>
+
+<table>
+  <tr><th>Operator</th><th>Return value</th><th>Reason</th></tr>
+  <tr><td><code>+</code> &nbsp; <code>-</code></td><td>1</td><td>lowest binary precedence</td></tr>
+  <tr><td><code>*</code> &nbsp; <code>/</code></td><td>2</td><td>higher than add/subtract</td></tr>
+  <tr><td><code>(</code></td><td>0</td>
+      <td><code>(</code> acts as a barrier on the operator stack;
+          giving it precedence 0 means no incoming operator ever pops it</td></tr>
+  <tr><td><code>)</code></td><td>0</td>
+      <td><code>)</code> is handled immediately when encountered
+          and is never pushed onto the operator stack</td></tr>
+  <tr><td>anything else</td><td>throw</td><td></td></tr>
+</table>
+
+<p>A <code>switch</code> statement is the natural implementation.</p>
+
+<h4>Unit tests (Task A &mdash; 7 tests)</h4>
+<p>On failure: <code>FAIL: precedence('+') expected 1, got -1</code></p>
+</div>
+
+<!-- Task B -->
+<div class="task-box">
+<h3>Task B &mdash; <code>binaryOperation(stack&lt;double&gt;&amp;, stack&lt;char&gt;&amp;)</code></h3>
+
+<p>
+  Pop one operator and two operands, compute the result, and push it back.
+</p>
+
+<p><strong>Operand order matters.</strong>
+The second operand (<code>num2</code>) was pushed after the first (<code>num1</code>),
+so it sits on top.  Pop <code>num2</code> first, then <code>num1</code>.
+Compute <code>num1&nbsp;op&nbsp;num2</code>.
+For <code>5&nbsp;-&nbsp;3</code> that is <code>2</code>, not <code>-2</code>.
+</p>
+
+<div class="hint">
+  <strong>Stack layout (example: evaluating <code>5 - 3</code>).</strong>
+<pre style="margin:.6rem 0 .2rem;font-size:.85rem;line-height:1.4;background:none;border:none;padding:0">Before call:
+
+  operands        operators
+  | 3 |           | - |
+  | 5 |           +---+
+  +---+
+
+Pop 3 &rarr; num2,  pop 5 &rarr; num1,  pop &lsquo;-&rsquo; &rarr; op
+Compute  num1 - num2  =  5 - 3  =  2
+
+After call:
+
+  operands        operators
+  | 2 |           (empty)
+  +---+</pre>
+</div>
+
+<p>
+  Throw <code>std::runtime_error</code> if:
+</p>
+<ul>
+  <li>fewer than 2 values are on the operand stack</li>
+  <li>the operator stack is empty</li>
+  <li>the operator is <code>/</code> and the divisor is zero</li>
+  <li>the operator is not one of <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> (unrecognized operator)</li>
+</ul>
+
+<h4>Unit tests (Task B &mdash; 8 tests)</h4>
+<table>
+  <tr><th>operands (bottom&rarr;top)</th><th>operator</th><th>Expected result</th></tr>
+  <tr><td><code>[3, 2]</code></td><td><code>+</code></td><td>5</td></tr>
+  <tr><td><code>[7, 3]</code></td><td><code>-</code></td><td>4</td></tr>
+  <tr><td><code>[4, 5]</code></td><td><code>*</code></td><td>20</td></tr>
+  <tr><td><code>[9, 4]</code></td><td><code>/</code></td><td>2.25</td></tr>
+  <tr><td><code>[5, 3]</code></td><td><code>-</code></td><td>2 &nbsp;<em>(order check: not &minus;2)</em></td></tr>
+  <tr><td><code>[5, 3]</code></td><td>(empty)</td><td>throws (empty operator stack)</td></tr>
+  <tr><td><code>[1, 0]</code></td><td><code>/</code></td><td>throws</td></tr>
+  <tr><td><code>[5]</code></td><td><code>+</code></td><td>throws (too few operands)</td></tr>
+</table>
+<p>On failure: <code>FAIL: 5 - 3 (order check: should be 2, not -2) expected 2, got -2</code></p>
+</div>
+
+<!-- ================================================================ -->
+<div class="week-banner">Suggested checkpoint &mdash; Task C by 11/16/2026</div>
+
+<!-- Task C -->
+<div class="task-box">
+<h3>Task C &mdash; <code>processString()</code> (numbers &amp; operators) + basic <code>calculate()</code></h3>
+
+<p>
+  Implement the <strong>digit branch</strong> and the <strong>binary-operator branch</strong>
+  inside <code>processString()</code>, then implement Steps 1, 2, and 3
+  inside <code>calculate()</code>.  Task C tests do not use parentheses or
+  unary minus&mdash;those come in Task D.
+</p>
+
+<h3>Digit branch</h3>
+<p>
+  When you encounter a digit character, read the complete integer that starts
+  there &mdash; it may be more than one digit wide (e.g., <code>42</code>,
+  <code>123</code>).  Use the standard <em>place-value accumulation</em> formula:
+  for each digit character <code>d</code>, update the running total with
+</p>
+<pre style="font-family:&quot;Courier New&quot;,monospace;font-size:.85rem;padding:.4rem .8rem;background:#fafafa;border:1px solid #ddd;border-radius:4px;margin:.4rem 0">num = num * 10 + (d - '0');</pre>
+<p>
+  For example, parsing <code>"12"</code> starting at <code>'1'</code>:
+</p>
+<table style="width:auto;margin:.6rem 0">
+  <tr><th>character</th><th>computation</th><th>num</th></tr>
+  <tr><td><code>'1'</code></td><td>0 &times; 10 + 1</td><td>1</td></tr>
+  <tr><td><code>'2'</code></td><td>1 &times; 10 + 2</td><td>12</td></tr>
+</table>
+<p>
+  Use <code>std::isdigit(static_cast&lt;unsigned char&gt;(str[i]))</code> as the
+  loop condition to read additional digits.
+  Advance <code>i</code> for each digit consumed inside the loop.
+  After the loop, back up one position (<code>i--</code>) so that the outer
+  <code>i++</code> in <code>processString()</code> does not skip the first
+  character after the number.
+</p>
+<p>
+  <strong>Task C:</strong> push the parsed number and set
+  <code>prev = PreviousToken::NUMBER</code>.
+  <strong>Task D:</strong> additionally, if <code>prev == UNARY_MINUS</code>,
+  negate the number before pushing it.
+</p>
+<p>
+  Throw if <code>prev == NUMBER</code> or <code>prev == CLOSE_PAREN</code>
+  (two operands in a row with no operator between them).
+</p>
+
+<h3>Binary-operator branch (Shunting-Yard precedence loop)</h3>
+<p>
+  When the previous token is a <code>NUMBER</code> or <code>CLOSE_PAREN</code>,
+  the incoming operator is binary.
+</p>
+<div class="note">
+  <strong>Rule of thumb &mdash; before pushing a binary operator:</strong><br>
+  Check the operator at the top of the operator stack.
+  While the stack is not empty and its top operator has precedence
+  <strong>greater than or equal to</strong> that of the incoming operator,
+  pop and evaluate that operator by calling <code>binaryOperation()</code>.
+  Repeat until the stack is empty or the top operator has lower precedence.
+  Then push the incoming operator.
+</div>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">while (!operators.empty() &amp;&amp;
+       precedence(operators.top()) &gt;= precedence(ch)) {
+    binaryOperation(operands, operators);
+}
+operators.push(ch);
+prev = PreviousToken::OPERATOR;</code></pre>
+</div>
+
+<div class="warn">
+  <strong>Use <code>while</code>, not <code>if</code>.</strong><br>
+  Example: <code>"1 - 12 / 7 + 5"</code> &mdash; when <code>+</code> arrives,
+  the operator stack is <code>[&minus;,&nbsp;/]</code>.
+  Both <code>/</code> (precedence&nbsp;2) and <code>&minus;</code> (precedence&nbsp;1)
+  must be popped before pushing <code>+</code>.
+  An <code>if</code> only pops <code>/</code>, leaving <code>&minus;</code>
+  and producing the wrong answer.
+</div>
+
+<h3>calculate() &mdash; Steps 1, 2, 3</h3>
+<p>
+  Task C tests call <code>calculate()</code> directly,
+  so complete all three steps below as part of Task C.
+</p>
+<p>
+  <strong>Step 1 &mdash; Parse the expression.</strong><br>
+  Call <code>processString(expr, operands, operators)</code> to fill the two stacks.
+</p>
+<p>
+  <strong>Step 2 &mdash; Drain the operator stack.</strong><br>
+  After <code>processString()</code> finishes, repeatedly call
+  <code>binaryOperation()</code> until the operator stack is empty.
+  In Task D you will extend this step by checking for an unmatched
+  <code>(</code> before each call to <code>binaryOperation()</code>.
+</p>
+<p>
+  <strong>Step 3 &mdash; Return the result.</strong><br>
+  Verify that exactly one value remains on the operand stack
+  (<code>operands.size()&nbsp;==&nbsp;1</code>), then return it.
+  Remove the placeholder <code>return 0.0</code>.
+</p>
+
+<h4>Unit tests (Task C &mdash; 10 tests)</h4>
+<table>
+  <tr><th>Expression</th><th>Expected</th></tr>
+  <tr><td><code>"1"</code></td><td>1</td></tr>
+  <tr><td><code>"1+2"</code></td><td>3</td></tr>
+  <tr><td><code>"2-1"</code></td><td>1</td></tr>
+  <tr><td><code>"2*3"</code></td><td>6</td></tr>
+  <tr><td><code>"1/2"</code></td><td>0.5</td></tr>
+  <tr><td><code>"1+2*3"</code></td><td>7 &nbsp;<em>(precedence: * before +)</em></td></tr>
+  <tr><td><code>"2+3*4-5"</code></td><td>9 &nbsp;<em>(2 + 12 &minus; 5)</em></td></tr>
+  <tr><td><code>"1 + 2 * 3"</code></td><td>7 &nbsp;<em>(spaces skipped)</em></td></tr>
+  <tr><td><code>"42"</code></td><td>42</td></tr>
+  <tr><td><code>"12+34*56"</code></td><td>1916</td></tr>
+</table>
+</div>
+
+<!-- ================================================================ -->
+<div class="week-banner">Due 11/19/2026 &mdash; Task D (complete project)</div>
+
+<!-- Task D -->
+<div class="task-box">
+<h3>Task D &mdash; <code>processString()</code> (parentheses &amp; errors) + full <code>calculate()</code></h3>
+
+<p>Complete the remaining branches of <code>processString()</code> and finalize <code>calculate()</code>.</p>
+
+<h3>Unary minus</h3>
+<p>
+  A <code>-</code> sign is <em>unary</em> when the parser is currently expecting an operand
+  &mdash; that is, when <code>prev</code> is <code>START</code>, <code>OPERATOR</code>,
+  or <code>OPEN_PAREN</code>.
+  Do <strong>not</strong> push <code>-</code> onto the operator stack.
+  Instead, set <code>prev = PreviousToken::UNARY_MINUS</code>.
+  When the next number is parsed, negate it before pushing.
+</p>
+<p>
+  Any operator other than <code>-</code> in unary position is an error
+  (e.g., <code>*3</code>, <code>+1</code>).
+  Consecutive unary operators are also an error (e.g., <code>--3</code>):
+  throw if <code>prev == UNARY_MINUS</code> when another operator arrives.
+</p>
+
+<div class="subtle">
+  <b>Subtle difference &mdash; prev state determines everything, not spacing:</b><br><br>
+  <code>"- -3"</code> &rarr; <strong>ERROR</strong><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;First <code>-</code>: prev==START &rarr; UNARY_MINUS<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;Space: skipped (prev unchanged, still UNARY_MINUS)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;Second <code>-</code>: prev==UNARY_MINUS &rarr; consecutive unary &rarr; <strong>throw</strong><br><br>
+  <code>"3 - - 5"</code> &rarr; <strong>VALID (= 8)</strong><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;Token <code>3</code>: prev &rarr; NUMBER<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;First <code>-</code>: prev==NUMBER &rarr; binary, push <code>-</code>; prev &rarr; OPERATOR<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;Second <code>-</code>: prev==OPERATOR &rarr; unary; prev &rarr; UNARY_MINUS<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;Token <code>5</code>: prev==UNARY_MINUS &rarr; push &minus;5; drain: 3&minus;(&minus;5) = <strong>8</strong>
+</div>
+
+<div class="note">
+  <strong>Scope limit: unary minus only before a number.</strong><br>
+  <code>-(3+4)</code> would require evaluating a sub-expression before negating &mdash;
+  a different algorithm.  Throw <code>std::runtime_error</code> if
+  <code>prev == UNARY_MINUS</code> and the next character is <code>(</code>.
+</div>
+
+<h3>Open parenthesis <code>(</code></h3>
+<p>
+  Push <code>(</code> onto the operator stack and set <code>prev = OPEN_PAREN</code>.
+  Throw if <code>prev == NUMBER</code> or <code>CLOSE_PAREN</code>
+  (missing operator before <code>(</code>, e.g., <code>"2(3+4)"</code>).
+  Throw if <code>prev == UNARY_MINUS</code>
+  (unary minus before <code>(</code> is not supported, e.g., <code>"-(3+4)"</code>).
+</p>
+
+<h3>Close parenthesis <code>)</code></h3>
+<p>
+  Drain operators until the matching <code>(</code> is found, then discard it.
+</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">while (!operators.empty() &amp;&amp; operators.top() != '(')
+    binaryOperation(operands, operators);
+if (operators.empty()) throw std::runtime_error("Missing (");
+operators.pop();   // discard '('
+prev = PreviousToken::CLOSE_PAREN;</code></pre>
+</div>
+
+<div class="warn">
+  <strong>Common mistake in the <code>)</code> handler.</strong><br>
+  A wrong but tempting version:
+<pre style="margin:.4rem 0;font-size:.82rem;background:#fff0f0;border:none;padding:0;font-family:'Courier New',monospace">while (!operators.empty()) {
+    if (operators.top() == '(') throw ...;  // WRONG
+    binaryOperation(...);
+}</pre>
+  Finding <code>(</code> is the <em>success</em> condition, not an error.
+  Counter-example: <code>"(-3)"</code>&mdash;when <code>)</code> arrives the only
+  item on the operator stack is <code>(</code>.  The wrong loop throws immediately;
+  the correct loop stops at <code>(</code> and then checks whether one was found.
+</div>
+
+<h3>Finalizing <code>calculate()</code></h3>
+<p>
+  Task D adds one guard inside the drain loop: check for an unmatched
+  <code>(</code> before each <code>binaryOperation()</code> call.
+  The final size check (<code>operands.size()&nbsp;!=&nbsp;1</code>)
+  was already part of Task C Step&nbsp;3.
+</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">while (!operators.empty()) {
+    if (operators.top() == '(')       // unmatched open paren
+        throw std::runtime_error("Unmatched (");
+    binaryOperation(operands, operators);
+}
+if (operands.size() != 1)
+    throw std::runtime_error("Invalid expression");
+double result = operands.top();
+operands.pop();
+return result;</code></pre>
+</div>
+<div class="hint">
+  <strong>Why check <code>(</code> before calling <code>binaryOperation</code>?</strong><br>
+  If an unmatched <code>(</code> is on the operator stack and the operand stack has only
+  one value, <code>binaryOperation</code> will throw &ldquo;too few operands&rdquo; before
+  you ever identify the real problem.  Checking for <code>(</code> first gives the correct,
+  informative error message.
+</div>
+
+<h4>Unit tests (Task D)</h4>
+
+<p><strong>Valid expressions (18 tests)</strong> &mdash; parentheses (6) + unary minus (12):</p>
+<table>
+  <tr><th>Expression</th><th>Expected</th><th>Notes</th></tr>
+  <tr><td><code>2*(1+3)</code></td><td>8</td><td></td></tr>
+  <tr><td><code>(1+3)*2</code></td><td>8</td><td></td></tr>
+  <tr><td><code>((4+3)/(3*2))</code></td><td>1.16667&hellip;</td><td></td></tr>
+  <tr><td><code>(1+2*3)</code></td><td>7</td><td>precedence inside parens</td></tr>
+  <tr><td><code>7+((4+3)-(3*2))</code></td><td>8</td><td></td></tr>
+  <tr><td><code>((3))</code></td><td>3</td><td>nested parens, single number</td></tr>
+  <tr><td><code>-3</code></td><td>&minus;3</td><td>unary at start</td></tr>
+  <tr><td><code>-3-(-2)</code></td><td>&minus;1</td><td></td></tr>
+  <tr><td><code>-3--5</code></td><td>2</td><td>&minus;3&minus;(&minus;5)=2</td></tr>
+  <tr><td><code>-1+3</code></td><td>2</td><td></td></tr>
+  <tr><td><code>3--2</code></td><td>5</td><td>3&minus;(&minus;2)=5</td></tr>
+  <tr><td><code>- 3</code></td><td>&minus;3</td><td>space between unary &lsquo;&minus;&rsquo; and digit</td></tr>
+  <tr><td><code>3 - - 5</code></td><td>8</td><td>binary then unary; see purple box above</td></tr>
+  <tr><td><code>3+-2</code></td><td>1</td><td>3+(&minus;2)=1</td></tr>
+  <tr><td><code>(- 5)</code></td><td>&minus;5</td><td>unary inside parens with space</td></tr>
+  <tr><td><code>3 + (-2)</code></td><td>1</td><td></td></tr>
+  <tr><td><code>3*-2</code></td><td>&minus;6</td><td></td></tr>
+  <tr><td><code>3/-2</code></td><td>&minus;1.5</td><td></td></tr>
+</table>
+
+<p><strong>Error expressions (20 tests)</strong> &mdash; each must throw <code>std::runtime_error</code>:</p>
+<table>
+  <tr><th>Expression</th><th>Reason</th></tr>
+  <tr><td><code>"&nbsp;&nbsp;&nbsp;"</code></td><td>whitespace-only</td></tr>
+  <tr><td><code>1+</code></td><td>trailing operator</td></tr>
+  <tr><td><code>((1+2)</code></td><td>unmatched <code>(</code></td></tr>
+  <tr><td><code>()</code></td><td>empty parentheses</td></tr>
+  <tr><td><code>*3</code></td><td>non-unary leading operator</td></tr>
+  <tr><td><code>-()</code></td><td>unary minus before <code>(</code></td></tr>
+  <tr><td><code>3 + -</code></td><td>dangling unary minus at end</td></tr>
+  <tr><td><code>-(3+4)</code></td><td>unary minus before <code>(</code></td></tr>
+  <tr><td><code>2(3+4)</code></td><td>missing operator before <code>(</code></td></tr>
+  <tr><td><code>(1+2)3</code></td><td>missing operator after <code>)</code></td></tr>
+  <tr><td><code>(3)(4)</code></td><td>missing operator between <code>)</code> and <code>(</code></td></tr>
+  <tr><td><code>3 4</code></td><td>missing operator between two numbers</td></tr>
+  <tr><td><code>--3</code></td><td>consecutive unary minus</td></tr>
+  <tr><td><code>- -3</code></td><td>consecutive unary minus (with space)</td></tr>
+  <tr><td><code>3-</code></td><td>trailing subtraction operator</td></tr>
+  <tr><td><code>(</code></td><td>lone open paren</td></tr>
+  <tr><td><code>)</code></td><td>unmatched <code>)</code></td></tr>
+  <tr><td><code>3/0</code></td><td>divide by zero</td></tr>
+  <tr><td><code>((&nbsp;))</code></td><td>parens containing only whitespace</td></tr>
+  <tr><td><code>(3+)</code></td><td>missing operand before <code>)</code></td></tr>
+</table>
+</div>
+
+<!-- ================================================================ -->
+<h2>Algorithm Reference</h2>
+
+<h3>Stack notation</h3>
+<p>
+  Stacks are shown <strong>bottom &rarr; top</strong> throughout this document.
+  So <code>[3,&thinsp;4]</code> means 3 is at the bottom and 4 is on top
+  (4 was pushed last and will be popped first).
+</p>
+
+<div class="note">
+  <strong>Naming note:</strong>
+  <code>operator</code> is a reserved keyword in C++ (used for operator
+  overloading).  Name your stacks <code>operands</code> and
+  <code>operators</code> &mdash; the plural <code>operators</code> is
+  <em>not</em> a keyword.
+</div>
+
+<h3>The Shunting-Yard algorithm (two-stack approach)</h3>
+<p>
+  Maintain two stacks.
+  Scan the expression left to right; for each token:
+</p>
+<ul>
+  <li><strong>Number</strong> &rarr; push onto the operand stack.</li>
+  <li><strong>Operator</strong> &rarr; pop and evaluate any pending operators with
+      equal or higher precedence, then push the new operator.</li>
+  <li><strong><code>(</code></strong> &rarr; push onto the operator stack (barrier).</li>
+  <li><strong><code>)</code></strong> &rarr; drain until the matching <code>(</code>;
+      discard the <code>(</code>.</li>
+</ul>
+<p>After scanning: drain all remaining operators; the operand stack holds the result.</p>
+
+<h3>Walkthrough: <code>3 * (4 + 2)</code></h3>
+<p>State of both stacks after each token (open top = top of stack):</p>
+<pre style="font-family:"Courier New",monospace;font-size:.82rem;line-height:1.5;margin:.5rem 0;padding:.6rem .8rem;background:#fafafa;border:1px solid #ddd;border-radius:4px;overflow-x:auto">token    operands              operators           action
+&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;
+  3      | 3 |                                     push number
+         +---+                (empty)
+
+  *      | 3 |                | * |                stack empty &#x2192; push *
+         +---+                +---+
+
+  (      | 3 |                | ( |                push (
+         +---+                | * |
+                              +---+
+
+  4      | 4 |                | ( |                push number
+         | 3 |                | * |
+         +---+                +---+
+
+  +      | 4 |                | + |                prec(&#x28;) = 0 &lt; prec(+) = 1 &#x2192; push +
+         | 3 |                | ( |
+         +---+                | * |
+                              +---+
+
+  2      | 2 |                | + |                push number
+         | 4 |                | ( |
+         | 3 |                | * |
+         +---+                +---+
+
+  )      | 6 |                | * |                eval 4+2=6; discard (
+         | 3 |                +---+
+         +---+
+
+ drain   | 18|                                     eval 3&#xD7;6=18
+         +---+                (empty)
+
+result: 18</pre>
+
+<h3>Walkthrough: <code>2 + 3 * 4 - 5</code> &mdash; why the loop condition matters</h3>
+<p>
+  When <code>-</code> arrives, the condition
+  <code>while (!operators.empty() &amp;&amp; precedence(top) &ge; precedence(incoming))</code>
+  triggers <em>two</em> pops before pushing <code>-</code>:
+  first <code>*</code> (higher precedence), then <code>+</code> (equal precedence,
+  left-to-right associativity).  An <code>if</code> would only pop one.
+</p>
+<pre style="font-family:&quot;Courier New&quot;,monospace;font-size:.82rem;line-height:1.5;margin:.5rem 0;padding:.6rem .8rem;background:#fafafa;border:1px solid #ddd;border-radius:4px;overflow-x:auto">token    operands              operators           action
+&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;
+  2      | 2 |                                     push number
+         +---+                (empty)
+
+  +      | 2 |                | + |                stack empty &#x2192; push +
+         +---+                +---+
+
+  3      | 3 |                | + |                push number
+         | 2 |                +---+
+         +---+
+
+  *      | 3 |                | * |                prec(+)=1 &lt; prec(*)=2 &#x2192; push *
+         | 2 |                | + |
+         +---+                +---+
+
+  4      | 4 |                | * |                push number
+         | 3 |                | + |
+         | 2 |                +---+
+         +---+
+
+         &#x2500;&#x2500; incoming &#x2018;-&#x2019; triggers the precedence-popping loop &#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;
+
+  -      &#x2500;&#x2500; pop #1: prec(*)=2 &ge; prec(-)=1 &#x2192; eval 3&#xD7;4=12 &#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;
+         | 12|                | + |
+         | 2 |                +---+
+         +---+
+         &#x2500;&#x2500; pop #2: prec(+)=1 &ge; prec(-)=1 &#x2192; eval 2+12=14 &#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;
+         | 14|
+         +---+                (empty)
+         &#x2500;&#x2500; loop exits (stack empty); push - &#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;
+         | 14|                | - |
+         +---+                +---+
+
+  5      | 5 |                | - |                push number
+         | 14|                +---+
+         +---+
+
+ drain   | 9 |                                     eval 14&#x2212;5=9
+         +---+                (empty)
+
+result: 9</pre>
+<div class="hint">
+  <strong>Both parts of the loop condition are essential.</strong><br>
+  <code>!operators.empty()</code> &mdash; without this guard, the second iteration would call
+  <code>operators.top()</code> on an empty stack (undefined behavior).<br>
+  <code>precedence(top) &ge; precedence(incoming)</code> &mdash; the <code>&ge;</code>
+  (not just <code>&gt;</code>) ensures left-to-right order: equal-precedence operators
+  are evaluated left to right, so <code>+</code> is popped before <code>-</code> is pushed.
+</div>
+
+
+<h3>Comparison: <code>4 * (2 + 3)</code> vs. <code>(2 + 3) * 4</code></h3>
+<p>
+  Both expressions equal 20, but the stack traces differ.
+  In <code>4*(2+3)</code>, the <code>*</code> is pushed before the parenthesized
+  sub-expression; the <code>(</code> acts as a barrier protecting it.
+  In <code>(2+3)*4</code>, the sub-expression is resolved first and
+  the operator stack is empty when <code>*</code> arrives.
+</p>
+<table style="table-layout:fixed;border-collapse:collapse;width:100%">
+  <tr>
+    <th style="vertical-align:top;padding:.5rem .6rem;width:50%;background:#f0f0f0;border:1px solid #bbb;font-family:'Courier New',monospace">4 * (2 + 3) &nbsp;&#x2192;&nbsp; 20</th>
+    <th style="vertical-align:top;padding:.5rem .6rem;width:50%;background:#f0f0f0;border:1px solid #bbb;font-family:'Courier New',monospace">(2 + 3) * 4 &nbsp;&#x2192;&nbsp; 20</th>
+  </tr>
+  <tr>
+    <td style="vertical-align:top;padding:.5rem .6rem;width:50%;border:1px solid #ccc">
+<pre style="font-family:"Courier New",monospace;font-size:.82rem;line-height:1.5;margin:.5rem 0;padding:.6rem .8rem;background:#fafafa;border:1px solid #ddd;border-radius:4px;overflow-x:auto">token  operands  operators
+
+  4    | 4 |
+       +---+     (empty)
+
+  *    | 4 |     | * |    stack empty &#x2192; push *
+       +---+     +---+
+
+  (    | 4 |     | ( |    push (  [barrier above *]
+       +---+     | * |
+                 +---+
+
+  2    | 2 |     | ( |
+       | 4 |     | * |
+       +---+     +---+
+
+  +  prec(&#x28;)=0 &lt; prec(+)=1 &#x2192; push +
+       | 2 |     | + |
+       | 4 |     | ( |
+       +---+     | * |
+                 +---+
+
+  3    | 3 |     | + |
+       | 2 |     | ( |
+       | 4 |     | * |
+       +---+     +---+
+
+  )  drain until (; eval 2+3=5; discard (
+       | 5 |     | * |    * now exposed
+       | 4 |     +---+
+       +---+
+
+drain  | 20|              4&#xD7;5=20
+       +---+     (empty)
+
+result: 20</pre>
+    </td>
+    <td style="vertical-align:top;padding:.5rem .6rem;width:50%;border:1px solid #ccc">
+<pre style="font-family:"Courier New",monospace;font-size:.82rem;line-height:1.5;margin:.5rem 0;padding:.6rem .8rem;background:#fafafa;border:1px solid #ddd;border-radius:4px;overflow-x:auto">token  operands  operators
+
+  (              | ( |    push (
+       (empty)   +---+
+
+  2    | 2 |     | ( |
+       +---+     +---+
+
+  +  prec(&#x28;)=0 &lt; prec(+)=1 &#x2192; push +
+       | 2 |     | + |
+       +---+     | ( |
+                 +---+
+
+  3    | 3 |     | + |
+       | 2 |     | ( |
+       +---+     +---+
+
+  )  drain until (; eval 2+3=5; discard (
+       | 5 |              stack empty
+       +---+     (empty)
+
+  *    | 5 |     | * |    stack empty &#x2192; push *
+       +---+     +---+
+
+  4    | 4 |     | * |
+       | 5 |     +---+
+       +---+
+
+drain  | 20|              5&#xD7;4=20
+       +---+     (empty)
+
+result: 20</pre>
+    </td>
+  </tr>
+</table>
+
+<h3>Unary minus</h3>
+<p>
+  A <code>-</code> sign is <em>unary</em> or <em>binary</em> depending on the
+  <strong>previous token state</strong> &mdash; not on whether it is surrounded by spaces.
+</p>
+<table>
+  <tr><th>prev state</th><th>Role of <code>-</code></th><th>Example</th></tr>
+  <tr><td><code>START</code></td><td>unary</td><td><code>-3</code></td></tr>
+  <tr><td><code>OPEN_PAREN</code></td><td>unary</td><td><code>(- 5)</code></td></tr>
+  <tr><td><code>OPERATOR</code></td><td>unary</td><td><code>3 * -2</code></td></tr>
+  <tr><td><code>NUMBER</code></td><td>binary</td><td><code>3 - 2</code></td></tr>
+  <tr><td><code>CLOSE_PAREN</code></td><td>binary</td><td><code>(1+2) - 1</code></td></tr>
+</table>
+
+<div class="subtle">
+  <b>Subtle difference (repeated from Task D for emphasis):</b><br><br>
+  <code>"- -3"</code> is <strong>ERROR</strong>:
+  first <code>-</code> sets <code>UNARY_MINUS</code>;
+  space is skipped; second <code>-</code> sees <code>prev==UNARY_MINUS</code>
+  &rarr; consecutive unary &rarr; throw.<br><br>
+  <code>"3 - - 5"</code> is <strong>VALID (= 8)</strong>:
+  first <code>-</code> is binary (prev==NUMBER), sets <code>OPERATOR</code>;
+  second <code>-</code> is unary (prev==OPERATOR), sets <code>UNARY_MINUS</code>;
+  <code>5</code> becomes <code>-5</code>;
+  drain evaluates <code>3 &minus; (&minus;5) = 8</code>.<br><br>
+  <b>Rule:</b> what matters is the <code>prev</code> state <em>before</em> the
+  <code>-</code> arrives, not the surrounding whitespace.
+</div>
+
+<!-- ================================================================ -->
+<h3>Complexity Analysis</h3>
+
+<p>
+  Let <em>n</em> = number of characters in the input string.
+</p>
+
+<table>
+  <tr><th>Resource</th><th>Bound</th><th>Why</th></tr>
+  <tr>
+    <td><strong>Time &mdash; O(<em>n</em>)</strong></td>
+    <td>O(<em>n</em>)</td>
+    <td>Each character is examined only a constant number of times.
+        Each operator is pushed onto the operator stack at most once and popped
+        at most once, and each call to <code>binaryOperation()</code> removes
+        one operator. Therefore, the total work is O(<em>n</em>).</td>
+  </tr>
+  <tr>
+    <td><strong>Space &mdash; O(<em>n</em>)</strong></td>
+    <td>O(<em>n</em>)</td>
+    <td>The two stacks together hold at most O(<em>n</em>) elements, bounded by
+        the number of tokens in the expression (at most <em>n</em>).
+        No auxiliary arrays are allocated; the input string itself is O(<em>n</em>).</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>Intuition.</strong>
+  Although the scan contains inner <code>while</code> loops (for reading
+  multi-digit numbers and for popping operators), the total work is still
+  linear. Each input character is examined only a constant number of times,
+  and each operator is pushed onto and popped from the operator stack at most
+  once. Therefore, the total running time is O(<em>n</em>).
+</div>
+
+<!-- ================================================================ -->
+<h2>What Is Provided</h2>
+
+<p>The skeleton already includes:</p>
+<ul>
+  <li><code>PreviousToken</code> enum with all 6 states, with inline comments</li>
+  <li>Function declarations and the outer <code>while</code> loop structure in
+      <code>processString()</code></li>
+  <li>The <code>main()</code> test harness for all four tasks</li>
+</ul>
+<p>
+  <strong>Do not modify <code>main()</code> or the enum.</strong>
+  Fill in only the sections marked <code>// TODO</code>.
+</p>
+
+<!-- ================================================================ -->
+<h2>Grading</h2>
+
+<p>
+  Submitted via Gradescope, auto-graded (100 pts total).
+  Partial credit is awarded within each task based on sub-tests passed.
+  The autograder compiles with <code>g++ -std=c++17 -Wall</code> on Linux;
+  make sure your code compiles on the Hunter lab machines before submitting.
+</p>
+
+<table>
+  <tr><th>Task</th><th>Function(s)</th><th>Tests</th><th>Points</th></tr>
+  <tr><td>A</td><td><code>precedence()</code></td><td>7</td><td>10</td></tr>
+  <tr><td>B</td><td><code>binaryOperation()</code></td><td>8</td><td>15</td></tr>
+  <tr><td>C</td><td><code>processString()</code> basic + <code>calculate()</code> basic</td><td>10</td><td>25</td></tr>
+  <tr><td>D</td><td><code>processString()</code> full + <code>calculate()</code> full</td>
+      <td>18 valid + 20 errors</td><td>50</td></tr>
+  <tr><td colspan="3"><strong>Total</strong></td><td><strong>100</strong></td></tr>
+</table>
+
+<div class="note">
+  <strong>Floating-point comparison.</strong>
+  Never compare <code>double</code> values with <code>==</code>.
+  The test harness uses <code>std::fabs(got &minus; expected) &le; 1e&minus;4</code>.
+</div>
+
+<!-- ================================================================ -->
+<h2>Skeleton Code</h2>
+
+<p>
+  Copy the code below into a file named exactly <code>evaluate_expression.cpp</code>.
+  It compiles immediately with stub implementations.
+  Fill in every <code>// TODO</code> section; do not modify anything else.
+</p>
+
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// File name: evaluate_expression.cpp
+// Name:
+// Email:
+//
+// P4 — Expression Evaluator
+//
+// Implement the four functions marked TO IMPLEMENT below.
+// The main() test harness is already written; do not modify it.
+//
+// Compile:
+//   g++ -std=c++17 -Wall -Wextra -o evaluator evaluate_expression.cpp
+//
+// Run tests:
+//   ./evaluator A   — Task A: precedence()
+//   ./evaluator B   — Task B: binaryOperation()
+//   ./evaluator C   — Task C: processString() basic  (numbers + operators, no parens)
+//   ./evaluator D   — Task D: processString() full + calculate()
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;stack&gt;
+#include &lt;cmath&gt;
+#include &lt;cctype&gt;
+#include &lt;stdexcept&gt;
+
+// ── PreviousToken ─────────────────────────────────────────────────────────────
+// Tracks the kind of token most recently parsed.
+// processString() uses this to decide whether &#x27;-&#x27; is unary negation or
+// binary subtraction, and to detect malformed expressions.
+enum class PreviousToken {
+  START,        // beginning of the expression
+  NUMBER,       // just processed a number (operand)
+  UNARY_MINUS,  // just processed unary &#x27;-&#x27;, waiting for a number
+  OPERATOR,     // just processed a binary operator
+  OPEN_PAREN,   // just processed &#x27;(&#x27;
+  CLOSE_PAREN   // just processed &#x27;)&#x27;
+};
+
+// ── Function declarations ─────────────────────────────────────────────────────
+int    precedence(char ch);
+void   binaryOperation(std::stack&lt;double&gt;&amp; operands, std::stack&lt;char&gt;&amp; operators);
+void   processString(const std::string&amp; str,
+                     std::stack&lt;double&gt;&amp; operands,
+                     std::stack&lt;char&gt;&amp;   operators);
+double calculate(const std::string&amp; expr);
+
+// ── Helpers for main() ────────────────────────────────────────────────────────
+static void print_result(const std::string&amp; label, int passed, int total) {
+  if (passed == total)
+    std::cout &lt;&lt; &quot;Task &quot; &lt;&lt; label &lt;&lt; &quot;: all &quot; &lt;&lt; total &lt;&lt; &quot; tests passed.\n&quot;;
+  else
+    std::cout &lt;&lt; &quot;Task &quot; &lt;&lt; label &lt;&lt; &quot;: &quot; &lt;&lt; passed &lt;&lt; &quot;/&quot; &lt;&lt; total
+              &lt;&lt; &quot; tests passed.\n&quot;;
+}
+
+// ── main() — do not modify ────────────────────────────────────────────────────
+int main(int argc, char* argv[]) {
+  if (argc &lt; 2) {
+    std::cerr &lt;&lt; &quot;Usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;A|B|C|D&gt;\n&quot;;
+    return 1;
+  }
+  const std::string opt(argv[1]);
+  const double DELTA = 1e-4;
+
+  // ── Task A: precedence() ───────────────────────────────────────────────────
+  // Tests that each operator returns its correct precedence level.
+  if (opt == &quot;A&quot;) {
+    int pass = 0, total = 7;
+
+    auto chk = [&amp;](char c, int expected) {
+      try {
+        int got = precedence(c);
+        if (got == expected) { pass++; return; }
+        std::cout &lt;&lt; &quot;FAIL: precedence(&#x27;&quot; &lt;&lt; c &lt;&lt; &quot;&#x27;) expected &quot;
+                  &lt;&lt; expected &lt;&lt; &quot;, got &quot; &lt;&lt; got &lt;&lt; &quot;\n&quot;;
+      } catch (...) {
+        std::cout &lt;&lt; &quot;FAIL: precedence(&#x27;&quot; &lt;&lt; c &lt;&lt; &quot;&#x27;) threw unexpectedly\n&quot;;
+      }
+    };
+
+    chk(&#x27;+&#x27;, 1);
+    chk(&#x27;-&#x27;, 1);
+    chk(&#x27;*&#x27;, 2);
+    chk(&#x27;/&#x27;, 2);
+    chk(&#x27;(&#x27;, 0);
+    chk(&#x27;)&#x27;, 0);
+
+    // unknown character must throw
+    try {
+      precedence(&#x27;?&#x27;);
+      std::cout &lt;&lt; &quot;FAIL: precedence(&#x27;?&#x27;) should throw but returned a value\n&quot;;
+    } catch (const std::runtime_error&amp;) { pass++; }
+
+    print_result(&quot;A&quot;, pass, total);
+  }
+
+  // ── Task B: binaryOperation() ─────────────────────────────────────────────
+  // Tests stack pop/push behavior and operand order.
+  else if (opt == &quot;B&quot;) {
+    int pass = 0, total = 8;
+
+    // Push a op b, call binaryOperation, check result.
+    // a is the deeper operand (pushed first), b is on top.
+    auto chk = [&amp;](double a, char op, double b, double expected,
+                   const char* label) {
+      std::stack&lt;double&gt; operands;
+      std::stack&lt;char&gt;   operators;
+      operands.push(a); operands.push(b);
+      operators.push(op);
+      try {
+        binaryOperation(operands, operators);
+        if (operands.size() == 1 &amp;&amp; std::fabs(operands.top() - expected) &lt;= DELTA) {
+          pass++;
+        } else {
+          std::cout &lt;&lt; &quot;FAIL: &quot; &lt;&lt; label &lt;&lt; &quot; expected &quot; &lt;&lt; expected;
+          if (operands.size() == 1) std::cout &lt;&lt; &quot;, got &quot; &lt;&lt; operands.top();
+          else std::cout &lt;&lt; &quot; (wrong stack size: &quot; &lt;&lt; operands.size() &lt;&lt; &quot;)&quot;;
+          std::cout &lt;&lt; &quot;\n&quot;;
+        }
+      } catch (const std::runtime_error&amp; e) {
+        std::cout &lt;&lt; &quot;FAIL: &quot; &lt;&lt; label &lt;&lt; &quot; threw unexpectedly: &quot;
+                  &lt;&lt; e.what() &lt;&lt; &quot;\n&quot;;
+      }
+    };
+
+    chk(3, &#x27;+&#x27;, 2, 5,    &quot;3 + 2&quot;);
+    chk(7, &#x27;-&#x27;, 3, 4,    &quot;7 - 3&quot;);
+    chk(4, &#x27;*&#x27;, 5, 20,   &quot;4 * 5&quot;);
+    chk(9, &#x27;/&#x27;, 4, 2.25, &quot;9 / 4&quot;);
+    chk(5, &#x27;-&#x27;, 3, 2,    &quot;5 - 3 (order check: should be 2, not -2)&quot;);
+
+    // empty operator stack must throw
+    try {
+      std::stack&lt;double&gt; n; n.push(5); n.push(3);
+      std::stack&lt;char&gt;   o;             // deliberately empty
+      binaryOperation(n, o);
+      std::cout &lt;&lt; &quot;FAIL: binaryOperation with empty operator stack should throw but didn&#x27;t\n&quot;;
+    } catch (const std::runtime_error&amp;) { pass++; }
+
+    // divide by zero must throw
+    try {
+      std::stack&lt;double&gt; n; n.push(1); n.push(0);
+      std::stack&lt;char&gt;   o; o.push(&#x27;/&#x27;);
+      binaryOperation(n, o);
+      std::cout &lt;&lt; &quot;FAIL: 1 / 0 should throw but returned a value\n&quot;;
+    } catch (const std::runtime_error&amp;) { pass++; }
+
+    // too few operands must throw
+    try {
+      std::stack&lt;double&gt; n; n.push(5);   // only one operand
+      std::stack&lt;char&gt;   o; o.push(&#x27;+&#x27;);
+      binaryOperation(n, o);
+      std::cout &lt;&lt; &quot;FAIL: binaryOperation with 1 operand should throw but didn&#x27;t\n&quot;;
+    } catch (const std::runtime_error&amp;) { pass++; }
+
+    print_result(&quot;B&quot;, pass, total);
+  }
+
+  // ── Task C: processString() basic — no parentheses, no unary minus ─────────
+  // Implement the digit-extraction and binary-operator branches of
+  // processString(), plus Steps 1, 2, and 3 of calculate(), to pass these tests.
+  else if (opt == &quot;C&quot;) {
+    int pass = 0, total = 10;
+
+    auto chk = [&amp;](const char* expr, double expected) {
+      try {
+        double got = calculate(expr);
+        if (std::fabs(got - expected) &lt;= DELTA) { pass++; return; }
+        std::cout &lt;&lt; &quot;FAIL: calculate(\&quot;&quot; &lt;&lt; expr &lt;&lt; &quot;\&quot;) expected &quot;
+                  &lt;&lt; expected &lt;&lt; &quot;, got &quot; &lt;&lt; got &lt;&lt; &quot;\n&quot;;
+      } catch (const std::runtime_error&amp; e) {
+        std::cout &lt;&lt; &quot;FAIL: calculate(\&quot;&quot; &lt;&lt; expr &lt;&lt; &quot;\&quot;) threw unexpectedly: &quot;
+                  &lt;&lt; e.what() &lt;&lt; &quot;\n&quot;;
+      }
+    };
+
+    chk(&quot;1&quot;,          1);
+    chk(&quot;1+2&quot;,        3);
+    chk(&quot;2-1&quot;,        1);
+    chk(&quot;2*3&quot;,        6);
+    chk(&quot;1/2&quot;,        0.5);
+    chk(&quot;1+2*3&quot;,      7);        // precedence: * before +
+    chk(&quot;2+3*4-5&quot;,    9);        // 2 + 12 - 5
+    chk(&quot;1 + 2 * 3&quot;,  7);        // spaces are skipped
+    chk(&quot;42&quot;,         42);
+    chk(&quot;12+34*56&quot;,   1916);
+
+    print_result(&quot;C&quot;, pass, total);
+  }
+
+  // ── Task D: full calculate() — parentheses, unary minus, error handling ────
+  // Complete processString() (parentheses + unary minus + all error cases)
+  // and add the unmatched &#x27;(&#x27; guard to calculate().
+  else if (opt == &quot;D&quot;) {
+    int vpass = 0;
+
+    auto chk = [&amp;](const char* expr, double expected) {
+      try {
+        double got = calculate(expr);
+        if (std::fabs(got - expected) &lt;= DELTA) { vpass++; return; }
+        std::cout &lt;&lt; &quot;FAIL: calculate(\&quot;&quot; &lt;&lt; expr &lt;&lt; &quot;\&quot;) expected &quot;
+                  &lt;&lt; expected &lt;&lt; &quot;, got &quot; &lt;&lt; got &lt;&lt; &quot;\n&quot;;
+      } catch (const std::runtime_error&amp; e) {
+        std::cout &lt;&lt; &quot;FAIL: calculate(\&quot;&quot; &lt;&lt; expr &lt;&lt; &quot;\&quot;) threw unexpectedly: &quot;
+                  &lt;&lt; e.what() &lt;&lt; &quot;\n&quot;;
+      }
+    };
+
+    // Valid — parentheses (6)
+    chk(&quot;2*(1+3)&quot;,                   8);
+    chk(&quot;(1+3)*2&quot;,                   8);
+    chk(&quot;((4+3)/(3*2))&quot;,       1.16667);
+    chk(&quot;(1+2*3)&quot;,                   7);
+    chk(&quot;7+((4+3)-(3*2))&quot;,           8);
+    chk(&quot;((3))&quot;,                     3);   // nested parens around single number
+
+    // Valid — unary minus (12)
+    // ┌─ SUBTLE DIFFERENCE ─────────────────────────────────────────────────┐
+    // │  &quot;- -3&quot;   is an ERROR:  first &#x27;-&#x27; → UNARY_MINUS; second &#x27;-&#x27; arrives  │
+    // │           while prev==UNARY_MINUS → consecutive unary → throw.        │
+    // │  &quot;3 - -5&quot; is VALID:     first &#x27;-&#x27; is BINARY (prev==NUMBER) → OPERATOR;│
+    // │           second &#x27;-&#x27; arrives while prev==OPERATOR → UNARY_MINUS;      │
+    // │           &#x27;5&#x27; is negated to -5; result 3-(-5)=8.                      │
+    // │  Rule: what matters is prev *before* the &#x27;-&#x27; arrives, not spacing.    │
+    // └─────────────────────────────────────────────────────────────────────┘
+    chk(&quot;-3&quot;,          -3);
+    chk(&quot;-3-(-2)&quot;,     -1);
+    chk(&quot;-3--5&quot;,        2);   // -3 - (-5) = 2
+    chk(&quot;-1+3&quot;,         2);
+    chk(&quot;3--2&quot;,         5);   // 3 - (-2) = 5
+    chk(&quot;- 3&quot;,         -3);   // space between unary &#x27;-&#x27; and operand
+    chk(&quot;3 - - 5&quot;,      8);   // binary &#x27;-&#x27;, then unary &#x27;-&#x27;; 3-(-5)=8
+    chk(&quot;3+-2&quot;,         1);   // binary &#x27;+&#x27;, then unary &#x27;-&#x27;; 3+(-2)=1
+    chk(&quot;(- 5)&quot;,       -5);   // unary &#x27;-&#x27; inside parens with space
+    chk(&quot;3 + (-2)&quot;,     1);
+    chk(&quot;3*-2&quot;,        -6);   // binary &#x27;*&#x27;, then unary &#x27;-&#x27;
+    chk(&quot;3/-2&quot;,       -1.5);  // binary &#x27;/&#x27;, then unary &#x27;-&#x27;
+
+    print_result(&quot;D valid&quot;, vpass, 18);
+
+    // Error expressions — each must throw std::runtime_error (20 cases)
+    int epass = 0, etotal = 20;
+
+    auto chk_err = [&amp;](const char* expr) {
+      try {
+        double result = calculate(expr);
+        std::cout &lt;&lt; &quot;FAIL: calculate(\&quot;&quot; &lt;&lt; expr
+                  &lt;&lt; &quot;\&quot;) should throw but returned &quot; &lt;&lt; result &lt;&lt; &quot;\n&quot;;
+      } catch (const std::runtime_error&amp;) { epass++; }
+    };
+
+    chk_err(&quot;   &quot;);      // whitespace-only
+    chk_err(&quot;1+&quot;);       // trailing operator
+    chk_err(&quot;((1+2)&quot;);   // unmatched &#x27;(&#x27;
+    chk_err(&quot;()&quot;);       // empty parentheses
+    chk_err(&quot;*3&quot;);       // non-unary leading operator
+    chk_err(&quot;-()&quot;);      // unary minus before &#x27;(&#x27; not supported
+    chk_err(&quot;3 + -&quot;);    // dangling unary minus at end
+    chk_err(&quot;-(3+4)&quot;);   // unary minus before &#x27;(&#x27; not supported
+    chk_err(&quot;2(3+4)&quot;);   // missing operator before &#x27;(&#x27;
+    chk_err(&quot;(1+2)3&quot;);   // missing operator after &#x27;)&#x27;
+    chk_err(&quot;(3)(4)&quot;);   // missing operator between &#x27;)&#x27; and &#x27;(&#x27;
+    chk_err(&quot;3 4&quot;);      // missing operator between two numbers
+    chk_err(&quot;--3&quot;);      // consecutive unary minus
+    chk_err(&quot;- -3&quot;);     // consecutive unary minus (with space)
+    chk_err(&quot;3-&quot;);       // trailing operator (subtraction)
+    chk_err(&quot;(&quot;);        // lone open paren
+    chk_err(&quot;)&quot;);        // unmatched &#x27;)&#x27;
+    chk_err(&quot;3/0&quot;);      // divide by zero
+    chk_err(&quot;(( ))&quot;);    // parens with only whitespace inside
+    chk_err(&quot;(3+)&quot;);     // missing operand before &#x27;)&#x27;
+
+    print_result(&quot;D errors&quot;, epass, etotal);
+  }
+
+  else {
+    std::cerr &lt;&lt; &quot;Unknown task: &quot; &lt;&lt; opt &lt;&lt; &quot;\n&quot;;
+    return 1;
+  }
+  return 0;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  IMPLEMENT THE FOUR FUNCTIONS BELOW
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Task A: precedence() ──────────────────────────────────────────────────────
+// Return the precedence (priority) of operator ch:
+//   +  and  -   →  1
+//   *  and  /   →  2
+//   (  and  )   →  0
+//   '(' acts as a barrier on the operator stack;
+//   ')' is handled immediately when encountered.
+// Throw std::runtime_error for any other character.
+//
+// Why &#x27;(&#x27; returns 0: during the Shunting-Yard scan, we pop operators whose
+// precedence is &gt;= the incoming operator&#x27;s precedence.  Giving &#x27;(&#x27; a value of
+// 0 means no ordinary operator ever pops it — it acts as a barrier until a
+// matching &#x27;)&#x27; is found.
+int precedence(char ch) {
+  // TODO
+  return -1;  // placeholder — remove this line when you implement
+}
+
+// ── Task B: binaryOperation() ────────────────────────────────────────────────
+// Apply the top operator to the top two operands and push the result.
+//
+// Stack state before the call (example: &quot;5 - 3&quot;):
+//   operands:  [5, 3]   ← 3 is on top
+//   operators: [&#x27;-&#x27;]
+//
+// Steps:
+//   1. Pop the top of operands → num2   (3)
+//   2. Pop the next operand    → num1   (5)
+//   3. Pop the top of operators → op   (&#x27;-&#x27;)
+//   4. Compute num1 op num2            (5 - 3 = 2)
+//   5. Push the result                 (operands: [2])
+//
+// Throw std::runtime_error if:
+//   - fewer than 2 operands are available
+//   - the operator stack is empty
+//   - op is &#x27;/&#x27; and num2 == 0 (divide by zero)
+//   - op is not one of +, -, *, / (unrecognized operator)
+void binaryOperation(std::stack&lt;double&gt;&amp; operands, std::stack&lt;char&gt;&amp; operators) {
+  // TODO
+}
+
+// ── Tasks C &amp; D: processString() ─────────────────────────────────────────────
+// Scan str character by character, building the operands and operators stacks.
+// PreviousToken prev records what was just seen, guiding each decision.
+//
+// ── Task C: handle digits and binary operators ───────────────────────────────
+//
+// Digits (std::isdigit):
+//   Read a complete integer (advance i while the next char is also a digit).
+//   After the loop, backtrack: i-- so the outer i++ lands correctly.
+//   Push the value onto operands.  Set prev = NUMBER.
+//   Error if prev == NUMBER or CLOSE_PAREN (a new number cannot immediately follow a number or &#x27;)&#x27;).
+//
+// Operators (+, -, *, /):
+//   Binary context (prev == NUMBER or CLOSE_PAREN):
+//     Shunting-Yard: while the operator stack is not empty and
+//       precedence(operators.top()) &gt;= precedence(ch), call binaryOperation().
+//     Then push ch onto operators.  Set prev = OPERATOR.
+//   [Unary context handled in Task D]
+//
+// Spaces: skip silently (do NOT write a second i++).
+// Unknown character: throw std::runtime_error.
+//
+// ── Task D: add parentheses, unary minus, and error handling ─────────────────
+//
+// Unary minus (prev == START, OPERATOR, or OPEN_PAREN, and ch == &#x27;-&#x27;):
+//   Do NOT push &#x27;-&#x27; onto operators.  Set prev = UNARY_MINUS.
+//   When the next number is parsed, negate it before pushing.
+//   Any other operator (+, *, /) in unary position is an error.
+//   Consecutive unary operators (prev == UNARY_MINUS) are an error.
+//
+// ┌─ SUBTLE DIFFERENCE ───────────────────────────────────────────────────────┐
+// │  &quot;- -3&quot;   ERROR:  first &#x27;-&#x27; → UNARY_MINUS; second &#x27;-&#x27; sees                │
+// │           prev==UNARY_MINUS → consecutive unary → throw.                  │
+// │  &quot;3 - -5&quot; VALID:  first &#x27;-&#x27; is binary (prev==NUMBER) → OPERATOR;          │
+// │           second &#x27;-&#x27; sees prev==OPERATOR → UNARY_MINUS; &#x27;5&#x27; negated.      │
+// │  Spaces do not matter — only the prev state before &#x27;-&#x27; arrives counts.    │
+// └───────────────────────────────────────────────────────────────────────────┘
+//
+// Open parenthesis &#x27;(&#x27;:
+//   Push &#x27;(&#x27; onto operators.  Set prev = OPEN_PAREN.
+//   Error if prev == NUMBER or CLOSE_PAREN (write: &quot;Need operator before (&quot;).
+//   Error if prev == UNARY_MINUS (write: &quot;Unary minus before &#x27;(&#x27; is not supported&quot;).
+//
+// Close parenthesis &#x27;)&#x27;:
+//   Pop and evaluate operators until &#x27;(&#x27; is found; discard the &#x27;(&#x27;.
+//   Set prev = CLOSE_PAREN.
+//   Error if an operand is still expected (prev == START, UNARY_MINUS,
+//     OPERATOR, or OPEN_PAREN): write &quot;Need operand before )&quot;.
+//   Error if no matching &#x27;(&#x27; is found: write &quot;Missing (&quot;.
+void processString(const std::string&amp; str,
+                   std::stack&lt;double&gt;&amp; operands,
+                   std::stack&lt;char&gt;&amp;   operators) {
+  int i   = 0;
+  int len = static_cast&lt;int&gt;(str.size());
+  PreviousToken prev = PreviousToken::START;
+
+  while (i &lt; len) {
+    char ch = str[i];
+
+    if (std::isdigit(static_cast&lt;unsigned char&gt;(ch))) {
+      // Task C: extract multi-digit number, push onto operands
+      // TODO
+
+    } else if (ch == &#x27;+&#x27; || ch == &#x27;-&#x27; || ch == &#x27;*&#x27; || ch == &#x27;/&#x27;) {
+      // Task C: implement the binary-operator case
+      //   (prev == NUMBER or CLOSE_PAREN).
+      // Task D: your Task C code becomes one branch of a larger if/else;
+      //   add unary-context handling and error checks in the other branches.
+      // TODO
+
+    } else if (ch == &#x27;(&#x27;) {
+      // Task D: push onto operators; handle error cases
+      // TODO
+
+    } else if (ch == &#x27;)&#x27;) {
+      // Task D: drain until &#x27;(&#x27;; handle missing-&#x27;(&#x27; error
+      // TODO
+
+    } else if (ch == &#x27; &#x27;) {
+      ;  // skip — do NOT write i++ here; the outer i++ already advances
+
+    } else {
+      throw std::runtime_error(std::string(&quot;wrong symbol: &quot;) + ch);
+    }
+
+    i++;
+  }
+}
+
+// ── Task C &amp; D: calculate() ──────────────────────────────────────────────────
+// Evaluate expr and return the numeric result.
+//
+// *** Task C tests call calculate() directly.
+//     Complete all three steps below as part of Task C. ***
+//
+// Step 1 (Task C) — parse the expression:
+//   Call processString(expr, operands, operators).
+//
+// Step 2 (Task C) — basic drain loop:
+//   while (!operators.empty()) { binaryOperation(operands, operators); }
+//
+//   Task D upgrade: inside the loop, guard against an unmatched &#x27;(&#x27; BEFORE
+//   calling binaryOperation:
+//     if (operators.top() == &#x27;(&#x27;) throw std::runtime_error(&quot;Unmatched (&quot;);
+//
+// Step 3 (Task C) — return the result:
+//   if (operands.size() != 1) throw std::runtime_error(&quot;Invalid expression&quot;);
+//   return operands.top();
+//   Remove the placeholder return 0.0 below when you reach this step.
+double calculate(const std::string&amp; expr) {
+  std::stack&lt;double&gt; operands;
+  std::stack&lt;char&gt;   operators;
+
+  // Step 1 (Task C): call processString()
+  // TODO
+
+  // Step 2 (Task C): drain loop
+  // TODO: while (!operators.empty()) { binaryOperation(operands, operators); }
+  // Step 2 (Task D): add &#x27;(&#x27; guard inside the loop before calling binaryOperation
+
+  // Step 3 (Task C &amp; D): verify and return
+  // TODO: if (operands.size() != 1) throw std::runtime_error(&quot;Invalid expression&quot;);
+  // TODO: return operands.top();
+  return 0.0;  // placeholder — remove this line when you implement Step 3
+}
+</code></pre>
+</div>
+
+<footer>
+  CSCI 235 &mdash; Fall 2026 &nbsp;|&nbsp; Tong Yi &nbsp;|&nbsp;
+  Hunter College, CUNY &nbsp;|&nbsp; ty680@hunter.cuny.edu
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('pre code').forEach(function (block) {
+      hljs.highlightElement(block);
+    });
+  });
+  function copyCode(btn) {
+    const code = btn.nextElementSibling.querySelector('code');
+    const text = code.innerText;
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(function () {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
