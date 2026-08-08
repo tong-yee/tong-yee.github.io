@@ -96,6 +96,20 @@
     margin: 1.2rem 0;
     border-radius: 0 4px 4px 0;
   }
+  .badge-optional {
+    display: inline-block;
+    font-size: 0.62em;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--bg-note);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15em 0.65em;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+  }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -138,6 +152,18 @@
     color: var(--muted);
     font-size: 0.85rem;
   }
+
+  .code-wrap { position: relative; margin: .8rem 0; }
+  .copy-btn {
+    position: absolute; top: .4rem; right: .4rem;
+    font-family: "Courier New", monospace; font-size: .75rem;
+    padding: .2rem .55rem; background: #e8e8e8;
+    border: 1px solid #bbb; border-radius: 3px;
+    cursor: pointer; z-index: 10; transition: background .15s;
+  }
+  .copy-btn:hover  { background: #d0d0d0; }
+  .copy-btn.copied { background: #c6ecc6; border-color: #7cb97c; }
+  .code-wrap pre { margin: 0; }
 </style>
 </head>
 <body>
@@ -262,8 +288,8 @@
 <p>
   Once two positions <code>i &lt; j</code> have been chosen and combined, both must be
   removed from the working copy of the vector and replaced by the single combined
-  value. A common bug is removing them in the wrong order and shifting an index out
-  from under you. The reference implementation uses a specific trick:
+  value. A common bug is removing them in the wrong order and changing which value
+  occupies the other selected index. The reference implementation uses a specific trick:
 </p>
 <pre><code class="language-cpp">std::swap(cloneVec[j], cloneVec[size-1]);
 cloneVec.pop_back();
@@ -323,7 +349,12 @@ return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;</code></pre>
   result.push_back(num / num2);
 }</code></pre>
 
-<h2>4. Complexity Analysis</h2>
+<h2>4. Complexity Analysis <span class="badge-optional">optional</span></h2>
+<p style="color:var(--muted); font-style:italic; font-size:0.94em;">
+  This section is optional. If you're not ready for it yet, skip ahead to
+  Section&nbsp;5 &mdash; nothing later in the handout depends on the formulas
+  here, and you can always come back once you've started coding.
+</p>
 <p>
   The lesson that matters here is qualitative, not the formula: each recursive
   call branches into every pair of positions <em>and</em> every operation on
@@ -373,95 +404,41 @@ return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;</code></pre>
   </tr>
 </table>
 <div class="note">
-  <strong>Note:</strong> this bound is for the worst case, where the search must
-  exhaust every possibility because no solution exists. When a solution
-  <em>does</em> exist, the recursion returns <code>true</code> as soon as it is
-  found and unwinds immediately &mdash; in practice, far fewer than the worst-case
-  number of combinations are ever tried.
+  <strong>Note:</strong> for Tasks A and B, this bound is reached when the search
+  must exhaust every possibility; when a solution is found early, the recursion
+  can stop and unwind immediately. Task C is different: because it must collect
+  <em>every</em> required solution, it does not short-circuit and must exhaust
+  the full search space.
 </div>
 
-<h2>5. Reference Implementation</h2>
+<h2>5. From Idea to Code</h2>
 <p>
-  The current version of <code>make24_v1.cpp</code> implements the boolean version
-  of the puzzle: it reports only whether 24 is reachable, not how to reach it. There
-  is exactly one base case (<code>size == 1</code>) and exactly one recursive rule
-  (pick two, combine, replace with one, recurse) &mdash; matching the recursive
-  definition and worked example above all the way down.
+  The recursive definition in Section 2 translates into code almost
+  line-for-line. In pseudocode, Task A's <code>make24()</code> looks like
+  this:
 </p>
-<pre><code class="language-cpp">//File name: p3_make24/code/make24_v1.cpp
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;cmath&gt;
-const double DELTA = 1e-6;
-const int GOAL = 24;
-bool make24(std::vector&lt;double&gt; numsVec);
-std::vector&lt;double&gt; arithmetic(double num, double num2);
-void print(const std::vector&lt;double&gt;&amp; numsVec);
+<pre><code class="language-text">make24(hand):
+    if hand has exactly one value:
+        return whether that value is approximately 24
 
-int main() {
-  // std::vector&lt;double&gt; numsVec = {24}; // true
-  // std::vector&lt;double&gt; numsVec = {1}; // false
-  // std::vector&lt;double&gt; numsVec = {12, 4, 2}; // true, 12 * 4 / 2
-  // std::vector&lt;double&gt; numsVec = {1, 1, 1}; // false
-  // std::vector&lt;double&gt; numsVec = {1, 2, 4}; // false
-  // std::vector&lt;double&gt; numsVec = {1, 2, 3, 4}; // true, 1 * 2 * 3 * 4
-  // std::vector&lt;double&gt; numsVec = {4, 4, 7, 7}; // true
-  std::vector&lt;double&gt; numsVec = {1, 2, 2, 2}; // false
-  std::cout &lt;&lt; std::boolalpha &lt;&lt; make24(numsVec) &lt;&lt; std::endl; // false
-  return 0;
-}
+    for every pair of positions i &lt; j in hand:
+        for every result arithmetic(hand[i], hand[j]) produces:
+            build a smaller hand: remove i and j, append the result
+            if make24(smaller hand) is true:
+                return true
 
-bool make24(std::vector&lt;double&gt; numsVec) {
-  int size = static_cast&lt;int&gt;(numsVec.size());
-  if (size == 1) {
-    return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;
-  }
-  // size &gt;= 2: pick two positions, combine, recurse on the smaller hand
-  for (int i = 0; i &lt; size-1; ++i) {
-    for (int j = i+1; j &lt; size; ++j) {
-      std::vector&lt;double&gt; cloneVec = numsVec; // KEY, cannot put this statement outside the second inner loop
-      std::vector&lt;double&gt; tmpVec = arithmetic(numsVec[i], numsVec[j]);
-      // correct: since j &gt; i, remove j first will not affect the value of i
-      std::swap(cloneVec[j], cloneVec[size-1]);
-      cloneVec.pop_back();
-      // now cloneVec has one fewer element
-      std::swap(cloneVec[i], cloneVec[size-2]);
-      cloneVec.pop_back();
-      for (int k = 0; k &lt; static_cast&lt;int&gt;(tmpVec.size()); k++) {
-        cloneVec.push_back(tmpVec[k]);
-        if (make24(cloneVec)) {
-          return true;
-        }
-        cloneVec.pop_back(); // erase the last element, so that the cloned vector will not grow incrementally
-      }
-    }
-  }
-  return false;
-}
-
-// do +, -, *, / between num and num2
-std::vector&lt;double&gt; arithmetic(double num, double num2) {
-  std::vector&lt;double&gt; result;
-  result.push_back(num + num2);
-  result.push_back(num - num2);
-  result.push_back(num2 - num);
-  result.push_back(num * num2);
-  if (std::fabs(num2) &gt; DELTA) {
-    result.push_back(num / num2);
-  }
-  if (std::fabs(num) &gt; DELTA) {
-    result.push_back(num2 / num);
-  }
-  return result;
-}
-
-void print(const std::vector&lt;double&gt;&amp; numsVec) {
-  // std::cout &lt;&lt; "print vector" &lt;&lt; "\n"; // debug
-  for (int i = 0; i &lt; static_cast&lt;int&gt;(numsVec.size()); ++i) {
-    std::cout &lt;&lt; numsVec[i] &lt;&lt; " ";
-  }
-  std::cout &lt;&lt; std::endl;
-}</code></pre>
+    return false  // no pair, no operation, led to 24</code></pre>
+<p>
+  Writing the actual C++ requires translating that pseudocode into working
+  vector manipulation, backtracking, and short-circuiting &mdash; that
+  translation, plus the removal-order subtlety worked through in Section 2,
+  is Task A itself. The starter file <code>p3_taskA_skeleton.cpp</code>
+  gives you the function signatures, a self-check <code>main()</code>, and
+  detailed comments describing exactly what each piece of the pseudocode
+  above should do; it does not give you the loops themselves. See Section 6
+  for what each task's skeleton expects of you, and download your task's
+  starter file from the course page.
+</p>
 
 <h2>6. Tasks A&ndash;C</h2>
 <p>
@@ -476,13 +453,13 @@ void print(const std::vector&lt;double&gt;&amp; numsVec) {
     <td>A</td>
     <td><code>bool make24(std::vector&lt;double&gt; numsVec);</code></td>
     <td><code>true</code>/<code>false</code> &mdash; can this hand make 24 at all?</td>
-    <td>30</td>
+    <td>35</td>
   </tr>
   <tr>
     <td>B</td>
     <td><code>std::string make24(std::vector&lt;double&gt; numsVec);</code></td>
     <td>one expression that evaluates to 24, or <code>""</code> if none exists</td>
-    <td>35</td>
+    <td>30</td>
   </tr>
   <tr>
     <td>C</td>
@@ -493,15 +470,19 @@ void print(const std::vector&lt;double&gt;&amp; numsVec) {
   </tr>
 </table>
 <p class="sub" style="color:var(--muted); font-size:0.9em;">
-  Point split shown is a suggested default (100 pts across the three tasks) &mdash;
-  adjust to taste when wiring up the Gradescope assignments.
+  100 points across the three tasks, submitted and graded as three separate
+  Gradescope assignments.
 </p>
 
 <h3>Task A &mdash; boolean solver</h3>
 <p>
-  This is exactly the reference implementation in Section 5. Every call either
-  returns <code>true</code> (24 is reachable) or <code>false</code> (it isn't) &mdash;
-  no expression is ever constructed or returned.
+  Implement the pseudocode from Section 5 in C++: every call either returns
+  <code>true</code> (24 is reachable) or <code>false</code> (it isn't)
+  &mdash; no expression is ever constructed or returned. Start from
+  <code>p3_taskA_skeleton.cpp</code>, which gives you the
+  <code>arithmetic()</code> and <code>make24()</code> signatures, a
+  self-check <code>main()</code>, and detailed comments; both functions are
+  left for you to write.
 </p>
 
 <h3>Task B &mdash; return one expression</h3>
@@ -520,8 +501,12 @@ void print(const std::vector&lt;double&gt;&amp; numsVec) {
   produces <code>"(4*(3+(1+2)))"</code>) and whose <code>value</code> field is the
   actual arithmetic result. The base case (<code>size == 1</code>) returns that
   element's <code>expression</code> string if its <code>value</code> is 24, or
-  <code>""</code> otherwise. The outermost parentheses are stripped once, at the
-  very end, before the result is shown to a user.
+  <code>""</code> otherwise. The outermost parentheses may be stripped once at
+  the very end for display; the autograder accepts either form. Start from
+  <code>p3_taskB_skeleton.cpp</code>, which gives you the
+  <code>Expression_Value</code> struct and function signatures; both
+  <code>make24()</code> overloads and <code>arithmetic()</code> are left
+  for you to write.
 </p>
 
 <h3>Task C &mdash; return every expression</h3>
@@ -559,6 +544,12 @@ void print(const std::vector&lt;double&gt;&amp; numsVec) {
   <em>extending</em> the supplied algorithm to collect everything it can
   produce, not in enumerating every algebraically distinct way to reach 24.
 </div>
+<p>
+  Start from <code>p3_taskC_skeleton.cpp</code>, which gives you the
+  <code>Expression_Value</code> struct, the <code>contains()</code>
+  helper, and function signatures; both <code>make24()</code> overloads
+  and <code>arithmetic()</code> are left for you to write.
+</p>
 
 <h2>7. How Your Submission Is Graded</h2>
 <div class="note">
@@ -629,12 +620,17 @@ void print(const std::vector&lt;double&gt;&amp; numsVec) {
   <em>exact</em> set of expression strings the reference search algorithm
   produces for that hand (well-defined by the required pair selection,
   arithmetic results, and expression-construction rules &mdash; see Section 6),
-  strips a single pair of outermost parentheses from every string on both
-  sides (the same normalization the reference's own <code>main()</code> applies
-  before printing), and requires your returned set to match <em>exactly</em>:
+  strips a single pair of outermost parentheses from every string you
+  return (the same normalization the reference's own <code>main()</code> applies
+  before printing), and requires your <em>normalized</em> set to match the
+  reference's <em>exactly</em>:
 </p>
-<pre><code class="language-cpp">std::set&lt;std::string&gt; expected(reference.begin(), reference.end());
-std::set&lt;std::string&gt; actual(student.begin(), student.end());
+<pre><code class="language-cpp">std::vector&lt;std::string&gt; normalized;
+for (const std::string&amp; s : student) {
+  normalized.push_back(normalize_outer_parentheses(s));
+}
+std::set&lt;std::string&gt; actual(normalized.begin(), normalized.end());
+std::set&lt;std::string&gt; expected(reference.begin(), reference.end());
 
 if (actual == expected) {
   // complete and correct
@@ -642,15 +638,19 @@ if (actual == expected) {
 <p>
   Comparing as sets (rather than vectors) means you may discover the
   solutions in any order you like &mdash; only the final collection matters.
-  Your returned vector also may not contain duplicate strings (checked
-  separately by comparing <code>vector::size()</code> to the size of its own
-  string set). This design catches every failure mode that matters:
+  Normalizing before comparing also means your returned vector may not
+  contain duplicate strings <em>after</em> that same normalization: two raw
+  strings that differ only by an optional outer pair of parentheses (for
+  example <code>"(7*(4-(4/7)))"</code> and <code>"7*(4-(4/7))"</code>) are the
+  same solution, so returning both counts as a duplicate (checked by
+  comparing the size of the <code>normalized</code> vector above to the size
+  of its own set). This design catches every failure mode that matters:
 </p>
 <table>
   <tr><th>Symptom</th><th>Detected as</th></tr>
-  <tr><td>missing a valid solution</td><td>returned set is smaller than the expected set</td></tr>
+  <tr><td>missing a valid solution</td><td>normalized returned set is smaller than the expected set</td></tr>
   <tr><td>an invented or malformed expression</td><td>fails the per-expression validity check, and/or makes the returned set differ from the expected set</td></tr>
-  <tr><td>the same solution returned twice</td><td>vector size &ne; set size</td></tr>
+  <tr><td>the same solution returned twice (with or without an extra outer paren pair)</td><td>normalized vector size &ne; normalized set size</td></tr>
   <tr><td>solutions found in a different order</td><td>accepted &mdash; order is never checked</td></tr>
 </table>
 <p>
@@ -673,21 +673,678 @@ if (actual == expected) {
 
 <h2>8. What's Next</h2>
 <div class="status">
-  Autograders for all three tasks (<code>p3_taskA_autograder.zip</code>,
-  <code>p3_taskB_autograder.zip</code>, <code>p3_taskC_autograder.zip</code>)
-  implement exactly the grading rules described in Section 7: a small
-  grader-side recursive-descent expression parser validates every returned
-  expression for Tasks B and C, and Task C additionally compares your full
-  returned set against a reference-generated expected set (not a single fixed
-  string) to check exhaustiveness. This page is still the
-  <strong>instructor/reference version</strong>. Turning Sections 5&ndash;6 into
-  student-facing skeletons with <code>// TODO</code> stubs (one per task) is the
-  remaining step before this is ready to post.
+  Each task is a separate submission with its own starter file
+  (<code>p3_taskA_skeleton.cpp</code>, <code>p3_taskB_skeleton.cpp</code>,
+  <code>p3_taskC_skeleton.cpp</code>) and its own Gradescope autograder
+  (<code>p3_taskA_autograder.zip</code>, <code>p3_taskB_autograder.zip</code>,
+  <code>p3_taskC_autograder.zip</code>), which implement exactly the grading
+  rules described in Section 7: a small grader-side recursive-descent
+  expression parser validates every returned expression for Tasks B and C,
+  and Task C additionally compares your full returned set against a
+  reference-generated expected set (not a single fixed string) to check
+  exhaustiveness. Rename your completed file to <code>make24.cpp</code>
+  before submitting.
+</div>
+
+
+<h2>9. Skeleton Code</h2>
+<p>
+  Each task is its own submission. Copy the corresponding code below into a
+  file named exactly <code>make24.cpp</code>. Each skeleton compiles
+  immediately with stub implementations and a self-check <code>main()</code>
+  that you should not modify. Fill in every <code>// TODO</code> section.
+</p>
+
+<h3>Task A Skeleton: <code>p3_taskA_skeleton.cpp</code></h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// File name: make24.cpp  (rename this file to make24.cpp before submitting)
+// Name:
+// Email:
+//
+// P3 — Make 24, Task A: Boolean Solver
+//
+// Implement make24() and arithmetic() below.
+// The main() test harness is already written; do not modify it.
+//
+// Compile:
+//   g++ -std=c++17 -Wall -Wextra -o make24 make24.cpp
+//
+// Run:
+//   ./make24
+
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;cmath&gt;
+#include &lt;exception&gt;
+#include &lt;utility&gt;
+
+const double DELTA = 1e-6;
+const int GOAL = 24;
+
+bool make24(std::vector&lt;double&gt; numsVec);
+std::vector&lt;double&gt; arithmetic(double num, double num2);
+void print(const std::vector&lt;double&gt;&amp; numsVec);
+
+// ── Helper for main() ─────────────────────────────────────────────────────
+static void print_result(int passed, int total) {
+  if (passed == total)
+    std::cout &lt;&lt; "All " &lt;&lt; total &lt;&lt; " tests passed.\n";
+  else
+    std::cout &lt;&lt; passed &lt;&lt; "/" &lt;&lt; total &lt;&lt; " tests passed.\n";
+}
+
+// ── main() — do not modify ────────────────────────────────────────────────
+// These are the same example hands worked through in the project handout.
+// The Gradescope autograder checks additional hands you have not seen here
+// (including some five-number hands), so passing every test below is
+// necessary but not sufficient for full credit.
+int main() {
+  struct TestCase { std::vector&lt;double&gt; data; bool expected; const char* label; };
+  std::vector&lt;TestCase&gt; tests = {
+    {{24},         true,  "{24}"},
+    {{1},          false, "{1}"},
+    {{12, 4, 2},   true,  "{12,4,2} -- 12*4/2"},
+    {{1, 2, 4},    false, "{1,2,4}"},
+    {{1, 1, 1},    false, "{1,1,1}"},
+    {{1, 2, 3, 4}, true,  "{1,2,3,4} -- 1*2*3*4"},
+    {{4, 4, 7, 7}, true,  "{4,4,7,7} -- 7*(4-4/7)"},
+    {{1, 2, 2, 2}, false, "{1,2,2,2}"},
+  };
+
+  int pass = 0;
+  auto chk = [&amp;](const TestCase&amp; t) {
+    try {
+      bool got = make24(t.data);
+      if (got == t.expected) { pass++; return; }
+      std::cout &lt;&lt; "FAIL: make24(" &lt;&lt; t.label &lt;&lt; ") expected "
+                &lt;&lt; std::boolalpha &lt;&lt; t.expected &lt;&lt; ", got " &lt;&lt; got &lt;&lt; "\n";
+    } catch (const std::exception&amp; e) {
+      std::cout &lt;&lt; "FAIL: make24(" &lt;&lt; t.label &lt;&lt; ") threw unexpectedly: "
+                &lt;&lt; e.what() &lt;&lt; "\n";
+    }
+  };
+
+  for (const TestCase&amp; t : tests) chk(t);
+  print_result(pass, static_cast&lt;int&gt;(tests.size()));
+  return 0;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  IMPLEMENT make24() BELOW
+// ════════════════════════════════════════════════════════════════════════
+//
+// Returns true iff every number in numsVec can be combined -- using each
+// number exactly once, with +, -, *, /, and any parenthesization -- to
+// produce 24. See Section 2 of the project handout for the full recursive
+// definition and a worked example trace.
+//
+// You may assume numsVec contains at least one number; you do not need to
+// handle the empty-vector case.
+//
+// Base case (size == 1):
+//   The hand can make 24 iff its one remaining value is (approximately --
+//   see the DELTA discussion in Section 3 of the handout) equal to GOAL.
+//
+// Recursive case (size &gt;= 2):
+//   Consider every pair of positions (i, j) with i &lt; j. For each pair,
+//   arithmetic() (also below -- its own TODO) gives every way of combining
+//   numsVec[i] and numsVec[j] into a single value. For each candidate
+//   value, build a smaller hand by removing positions i and j and
+//   appending the candidate, then recurse on that smaller hand. If any
+//   pair, any candidate, and the recursive call on the resulting hand
+//   returns true, the whole hand can make 24. If nothing works for any
+//   pair or candidate, the hand cannot make 24.
+//
+// ┌─ GOTCHA ──────────────────────────────────────────────────────────────┐
+// │  Removing two selected elements by swap() + pop_back() is easy to    │
+// │  get subtly wrong. A swap used to remove one selected element may    │
+// │  change what value is stored at the other selected index.            │
+// │                                                                      │
+// │  Since i &lt; j, remove the element at the LARGER index j first.        │
+// │  Doing so does not disturb the element at index i. After j has been  │
+// │  removed, remove i. Section 2 of the handout works through a full    │
+// │  counterexample.                                                     │
+// │                                                                      │
+// │  Remember: after removing j, cloneVec has size - 1 elements, so its  │
+// │  last valid index is size - 2 -- not size - 1.                       │
+// └─────────────────────────────────────────────────────────────────────┘
+bool make24(std::vector&lt;double&gt; numsVec) {
+  // TODO
+  return false;  // placeholder -- remove this line when you implement the above
+}
+
+// ── IMPLEMENT arithmetic() BELOW ──────────────────────────────────────────
+//
+// Returns every well-defined result of combining num and num2 with +, -,
+// *, and /.
+//
+// Addition and multiplication are commutative (num + num2 is the same
+// value as num2 + num), so each needs only one entry. Subtraction and
+// division are NOT commutative, so both orders matter and both must be
+// included: num - num2 as well as num2 - num, and likewise for division.
+//
+// A division is only well-defined when its divisor is nonzero. Guard each
+// division separately (skip it rather than computing it) when the
+// relevant operand is within DELTA of zero -- see Section 3 of the
+// handout for why comparing against DELTA is safer here than testing
+// == 0 exactly.
+//
+// A call with two ordinary nonzero operands should return six values, in
+// this order: num+num2, num-num2, num2-num, num*num2, num/num2, num2/num.
+std::vector&lt;double&gt; arithmetic(double num, double num2) {
+  // TODO
+  return {};  // placeholder -- remove this line when you implement the above
+}
+
+// Prints the elements of numsVec on one line, space-separated. Handy for
+// tracing your own recursion while debugging; not used by main().
+void print(const std::vector&lt;double&gt;&amp; numsVec) {
+  for (int i = 0; i &lt; static_cast&lt;int&gt;(numsVec.size()); ++i) {
+    std::cout &lt;&lt; numsVec[i] &lt;&lt; " ";
+  }
+  std::cout &lt;&lt; std::endl;
+}
+</code></pre>
+</div>
+
+<h3>Task B Skeleton: <code>p3_taskB_skeleton.cpp</code></h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// File name: make24.cpp  (rename this file to make24.cpp before submitting)
+// Name:
+// Email:
+//
+// P3 — Make 24, Task B: Single-Expression Solver
+//
+// Implement the three functions marked TODO below: both make24() overloads
+// and arithmetic(). The main() test harness is already written; do not
+// modify it.
+//
+// Task B returns an actual expression string instead of just true/false.
+// The autograder does NOT compare your string against one fixed reference
+// answer -- it independently checks that your expression (1) evaluates to
+// 24 and (2) uses exactly the given operands. Two different, equally
+// correct expressions for the same hand are both accepted. See Section 7
+// of the project handout.
+//
+// The autograder accepts a valid expression whether or not it has an
+// extra pair of outermost parentheses -- both "(7*(4-(4/7)))" and
+// "7*(4-(4/7))" are fine. You do not need to simplify or prettify the
+// expression string before returning it.
+//
+// Compile:
+//   g++ -std=c++17 -Wall -Wextra -o make24 make24.cpp
+//
+// Run:
+//   ./make24
+
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+#include &lt;exception&gt;
+#include &lt;utility&gt;
+
+const double DELTA = 1e-6;
+const int GOAL = 24;
+
+// Pairs a running sub-expression's text with its numeric value, so that
+// once you find a hand that reduces to a single value equal to GOAL, its
+// paired expression string is the answer.
+//
+// Do not change the name of this struct or its field names, order, or
+// types. The autograder uses this exact interface when testing
+// arithmetic().
+struct Expression_Value {
+  std::string expression;
+  double value;
+};
+
+// A non-empty return value is one valid solution expression.
+// An empty string "" means that no solution exists.
+std::string make24(std::vector&lt;double&gt; numsVec);
+std::string make24(std::vector&lt;Expression_Value&gt; ev_vec);
+std::vector&lt;Expression_Value&gt; arithmetic(Expression_Value ev1, Expression_Value ev2);
+void print(const std::vector&lt;double&gt;&amp; numsVec);
+
+// ── Helper for main() ─────────────────────────────────────────────────────
+static void print_result(int passed, int total) {
+  if (passed == total)
+    std::cout &lt;&lt; "All " &lt;&lt; total &lt;&lt; " tests passed.\n";
+  else
+    std::cout &lt;&lt; passed &lt;&lt; "/" &lt;&lt; total &lt;&lt; " tests passed.\n";
+}
+
+// ── main() — do not modify ────────────────────────────────────────────────
+// These are the same example hands worked through in the project handout.
+// The Gradescope autograder checks additional hands you have not seen here
+// (including some five-number hands), so passing every test below is
+// necessary but not sufficient for full credit.
+//
+// This self-check only confirms whether you found *some* solution when one
+// exists (or correctly reported none when it doesn't) -- it does not
+// re-verify your expression's arithmetic. For any test that reports a
+// found expression, check by hand (or with a calculator) that it actually
+// evaluates to 24 using each of the given numbers exactly once.
+int main() {
+  struct TestCase { std::vector&lt;double&gt; data; bool expectedSolvable; const char* label; };
+  std::vector&lt;TestCase&gt; tests = {
+    {{24},         true,  "{24}"},
+    {{1},          false, "{1}"},
+    {{12, 4, 2},   true,  "{12,4,2}"},
+    {{1, 2, 4},    false, "{1,2,4}"},
+    {{1, 1, 1},    false, "{1,1,1}"},
+    {{1, 2, 3, 4}, true,  "{1,2,3,4}"},
+    {{4, 4, 7, 7}, true,  "{4,4,7,7}"},
+    {{1, 2, 2, 2}, false, "{1,2,2,2}"},
+  };
+
+  int pass = 0;
+  auto chk = [&amp;](const TestCase&amp; t) {
+    try {
+      std::string got = make24(t.data);
+      bool solvable = !got.empty();
+      if (solvable == t.expectedSolvable) {
+        pass++;
+        if (solvable) {
+          std::cout &lt;&lt; "  found for " &lt;&lt; t.label &lt;&lt; ": " &lt;&lt; got
+                    &lt;&lt; "  (verify by hand that this equals 24)\n";
+        }
+        return;
+      }
+      std::cout &lt;&lt; "FAIL: make24(" &lt;&lt; t.label &lt;&lt; ") expected "
+                &lt;&lt; (t.expectedSolvable ? "a solution" : "no solution (\"\")")
+                &lt;&lt; ", got " &lt;&lt; (solvable ? ("\"" + got + "\"") : std::string("\"\"")) &lt;&lt; "\n";
+    } catch (const std::exception&amp; e) {
+      std::cout &lt;&lt; "FAIL: make24(" &lt;&lt; t.label &lt;&lt; ") threw unexpectedly: "
+                &lt;&lt; e.what() &lt;&lt; "\n";
+    }
+  };
+
+  for (const TestCase&amp; t : tests) chk(t);
+  print_result(pass, static_cast&lt;int&gt;(tests.size()));
+  return 0;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  IMPLEMENT make24(vector&lt;double&gt;) BELOW
+// ════════════════════════════════════════════════════════════════════════
+//
+// This overload is the entry point the autograder calls. It should do very
+// little: convert each number in numsVec into a "trivial" Expression_Value
+// (its expression is just its own literal value as a string; its value is
+// itself), collect those into a vector, and delegate to the
+// make24(vector&lt;Expression_Value&gt;) overload below.
+//
+// You may assume every entry of numsVec is an integer value (as always in
+// this project) and that numsVec contains at least one number.
+//
+// Hint: std::to_string(static_cast&lt;int&gt;(x)) turns a whole-number double x
+// into the text you want for its starting expression.
+std::string make24(std::vector&lt;double&gt; numsVec) {
+  // TODO
+  return "";  // placeholder -- remove this line when you implement the above
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  IMPLEMENT make24(vector&lt;Expression_Value&gt;) BELOW
+// ════════════════════════════════════════════════════════════════════════
+//
+// Returns an expression string that evaluates to 24 using every value in
+// ev_vec exactly once (each carrying the sub-expression that produced it
+// so far), or "" if no such expression exists. See Section 2 of the
+// project handout for the full recursive definition and a worked example
+// trace; the structure is identical to Task A's make24(), except that
+// instead of returning true/false you return (and propagate upward) the
+// first solution expression you find.
+//
+// Base case (size == 1):
+//   The hand can make 24 iff its one remaining value is (approximately --
+//   see the DELTA discussion in Section 3 of the handout) equal to GOAL.
+//   If so, ITS EXPRESSION STRING is the answer.
+//
+// Recursive case (size &gt;= 2):
+//   Consider every pair of positions (i, j) with i &lt; j. For each pair,
+//   arithmetic() (also below -- its own TODO) gives every way of combining
+//   ev_vec[i] and ev_vec[j] into a single Expression_Value. For each
+//   candidate, build a smaller hand by removing positions i and j and
+//   appending the candidate, then recurse on that smaller hand. As soon as
+//   any pair, any candidate, and the recursive call on the resulting hand
+//   returns a non-empty string, that string is your answer -- stop
+//   searching and return it immediately. If nothing works for any pair or
+//   candidate, return "" (no solution).
+//
+// ┌─ GOTCHA ──────────────────────────────────────────────────────────────┐
+// │  Removing two selected elements by swap() + pop_back() is easy to    │
+// │  get subtly wrong. A swap used to remove one selected element may    │
+// │  change what value is stored at the other selected index.            │
+// │                                                                      │
+// │  Since i &lt; j, remove the element at the LARGER index j first.        │
+// │  Doing so does not disturb the element at index i. After j has been  │
+// │  removed, remove i. Section 2 of the handout works through a full    │
+// │  counterexample.                                                     │
+// │                                                                      │
+// │  Remember: after removing j, cloneVec has size - 1 elements, so its  │
+// │  last valid index is size - 2 -- not size - 1.                       │
+// └─────────────────────────────────────────────────────────────────────┘
+std::string make24(std::vector&lt;Expression_Value&gt; ev_vec) {
+  // TODO
+  return "";  // placeholder -- remove this line when you implement the above
+}
+
+// ── IMPLEMENT arithmetic() BELOW ──────────────────────────────────────────
+//
+// Returns every well-defined result of combining ev1 and ev2 with +, -, *,
+// and /, as Expression_Value objects: each result pairs the computed
+// numeric value with the corresponding combined expression string.
+//
+// Build each expression string as "(" + left + op + right + ")" -- always
+// keep the parentheses, even though it looks redundant for a single pair
+// right now. Once these results get combined again in a later recursive
+// call, the parentheses are what keep the precedence correct (compare
+// 5/(2*3) with the wrong, unparenthesized 5/2*3).
+//
+// Addition and multiplication are commutative, so each needs only one
+// entry. Subtraction and division are NOT commutative, so both orders
+// matter and both must be included: ev1.value - ev2.value as well as
+// ev2.value - ev1.value, and likewise for division. A division is only
+// well-defined when its divisor is nonzero -- guard each division
+// separately (skip it rather than computing it) when the relevant value
+// is within DELTA of zero, exactly as in Task A's arithmetic().
+//
+// A call with two ordinary nonzero operands should return six results, in
+// this order (values shown; build the matching expression string for
+// each): ev1+ev2, ev1-ev2, ev2-ev1, ev1*ev2, ev1/ev2, ev2/ev1.
+std::vector&lt;Expression_Value&gt; arithmetic(Expression_Value ev1, Expression_Value ev2) {
+  // TODO
+  return {};  // placeholder -- remove this line when you implement the above
+}
+
+// Prints the elements of numsVec on one line, space-separated. Handy for
+// tracing your own recursion while debugging; not used by main().
+void print(const std::vector&lt;double&gt;&amp; numsVec) {
+  for (int i = 0; i &lt; static_cast&lt;int&gt;(numsVec.size()); ++i) {
+    std::cout &lt;&lt; numsVec[i] &lt;&lt; " ";
+  }
+  std::cout &lt;&lt; std::endl;
+}
+</code></pre>
+</div>
+
+<h3>Task C Skeleton: <code>p3_taskC_skeleton.cpp</code></h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// File name: make24.cpp  (rename this file to make24.cpp before submitting)
+// Name:
+// Email:
+//
+// P3 — Make 24, Task C: All-Expressions Solver
+//
+// Implement the three functions marked TODO below: both make24() overloads
+// and arithmetic(). The main() test harness is already written; do not
+// modify it.
+//
+// Task C returns EVERY distinct expression the required search algorithm
+// finds, instead of just one. Unlike Task B, Task C IS graded on
+// exhaustiveness: the autograder checks your result against the exact set
+// the required algorithm produces for each hand -- not just "some correct
+// subset." See Section 7 of the project handout.
+//
+// IMPORTANT:
+// "All solutions" means all distinct expression strings generated by the
+// algorithm specified in the project handout. Follow arithmetic() exactly:
+// generate one addition result and one multiplication result; do NOT add
+// the commutative duplicates ev2+ev1 or ev2*ev1. Task C's contract is
+// stricter than Task B's: Task B accepts any one valid solution, but Task C
+// must produce the complete required set, built the required way.
+//
+// The autograder treats an expression with or without one extra pair of
+// outermost parentheses as the same solution. You do not need to simplify
+// or prettify the expression strings before returning them.
+//
+// This file's own main() only checks the COUNT of expressions you find
+// (against a known-correct count for a few small hands) and that your
+// result contains no duplicate strings. Matching the count and having no
+// duplicates is necessary but NOT sufficient for full credit -- the
+// autograder also checks that the actual expressions are the right ones.
+//
+// Compile:
+//   g++ -std=c++17 -Wall -Wextra -o make24 make24.cpp
+//
+// Run:
+//   ./make24
+
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+#include &lt;exception&gt;
+#include &lt;utility&gt;
+
+const double DELTA = 1e-6;
+const int GOAL = 24;
+
+// Pairs a running sub-expression's text with its numeric value, so that
+// once you find a hand that reduces to a single value equal to GOAL, its
+// paired expression string is one answer.
+//
+// Do not change the name of this struct or its field names, order, or
+// types. The autograder uses this exact interface when testing
+// arithmetic().
+struct Expression_Value {
+  std::string expression;
+  double value;
+};
+
+// Returns every distinct expression string that evaluates to 24 using
+// every number in numsVec exactly once, or an empty vector if none exist.
+std::vector&lt;std::string&gt; make24(std::vector&lt;double&gt; numsVec);
+
+// Accumulator overload: appends every solution expression found while
+// searching ev_vec onto solutions (skipping exact-duplicate strings).
+// Unlike Task B's make24(), this returns nothing -- it must keep searching
+// every remaining pair and candidate after finding a solution, instead of
+// stopping at the first one, so that every distinct expression gets a
+// chance to be found.
+void make24(std::vector&lt;Expression_Value&gt; ev_vec, std::vector&lt;std::string&gt;&amp; solutions);
+
+std::vector&lt;Expression_Value&gt; arithmetic(Expression_Value ev1, Expression_Value ev2);
+void print(const std::vector&lt;double&gt;&amp; numsVec);
+
+// Returns true iff str already appears in vec. You are not required to
+// modify this function.
+bool contains(const std::vector&lt;std::string&gt;&amp; vec, const std::string&amp; str) {
+  for (int i = 0; i &lt; static_cast&lt;int&gt;(vec.size()); i++) {
+    if (vec[i] == str) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// ── Helper for main() ─────────────────────────────────────────────────────
+static void print_result(int passed, int total) {
+  if (passed == total)
+    std::cout &lt;&lt; "All " &lt;&lt; total &lt;&lt; " tests passed.\n";
+  else
+    std::cout &lt;&lt; passed &lt;&lt; "/" &lt;&lt; total &lt;&lt; " tests passed.\n";
+}
+
+// ── main() — do not modify ────────────────────────────────────────────────
+// expectedCount below is the true number of distinct expressions the
+// required algorithm finds for each hand (independently verified, not
+// something you need to take on faith). The Gradescope autograder checks
+// additional hands you have not seen here (including some five-number
+// hands) and, for every hand, checks the ACTUAL expressions returned, not
+// just their count -- so passing every test below is necessary but far
+// from sufficient for full credit.
+int main() {
+  struct TestCase { std::vector&lt;double&gt; data; int expectedCount; const char* label; };
+  std::vector&lt;TestCase&gt; tests = {
+    {{24},          1,  "{24}"},
+    {{1},           0,  "{1}"},
+    {{12, 4, 2},    6,  "{12,4,2}"},
+    {{1, 2, 4},     0,  "{1,2,4}"},
+    {{1, 1, 1},     0,  "{1,1,1}"},
+    {{1, 2, 3, 4}, 61,  "{1,2,3,4}"},
+    {{4, 4, 7, 7},  1,  "{4,4,7,7}"},
+    {{1, 2, 2, 2},  0,  "{1,2,2,2}"},
+  };
+
+  int pass = 0;
+  auto chk = [&amp;](const TestCase&amp; t) {
+    try {
+      std::vector&lt;std::string&gt; got = make24(t.data);
+
+      // No-duplicates self-check: every returned string should be unique.
+      std::vector&lt;std::string&gt; seen;
+      for (const std::string&amp; s : got) {
+        if (contains(seen, s)) {
+          std::cout &lt;&lt; "FAIL: make24(" &lt;&lt; t.label &lt;&lt; ") returned a duplicate expression: \""
+                    &lt;&lt; s &lt;&lt; "\"\n";
+          return;
+        }
+        seen.push_back(s);
+      }
+
+      if (static_cast&lt;int&gt;(got.size()) == t.expectedCount) {
+        pass++;
+        return;
+      }
+      std::cout &lt;&lt; "FAIL: make24(" &lt;&lt; t.label &lt;&lt; ") expected " &lt;&lt; t.expectedCount
+                &lt;&lt; " distinct expression(s), got " &lt;&lt; got.size() &lt;&lt; "\n";
+    } catch (const std::exception&amp; e) {
+      std::cout &lt;&lt; "FAIL: make24(" &lt;&lt; t.label &lt;&lt; ") threw unexpectedly: "
+                &lt;&lt; e.what() &lt;&lt; "\n";
+    }
+  };
+
+  for (const TestCase&amp; t : tests) chk(t);
+  print_result(pass, static_cast&lt;int&gt;(tests.size()));
+  return 0;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  IMPLEMENT make24(vector&lt;double&gt;) BELOW
+// ════════════════════════════════════════════════════════════════════════
+//
+// Same wrapper pattern as Task B: convert each number in numsVec into a
+// "trivial" Expression_Value (its expression is just its own literal value
+// as a string; its value is itself), collect those into a vector, and
+// delegate to the make24(vector&lt;Expression_Value&gt;, vector&lt;string&gt;&amp;)
+// overload below, passing an initially-empty solutions vector. Return that
+// vector once the search finishes.
+//
+// You may assume every entry of numsVec is an integer value and that
+// numsVec contains at least one number.
+//
+// Hint: std::to_string(static_cast&lt;int&gt;(x)) turns a whole-number double x
+// into the text you want for its starting expression.
+std::vector&lt;std::string&gt; make24(std::vector&lt;double&gt; numsVec) {
+  // TODO
+  return {};  // placeholder -- remove this line when you implement the above
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  IMPLEMENT make24(vector&lt;Expression_Value&gt;, vector&lt;string&gt;&amp;) BELOW
+// ════════════════════════════════════════════════════════════════════════
+//
+// Appends every distinct solution expression found while searching ev_vec
+// onto solutions. See Section 2 of the project handout for the full
+// recursive definition and a worked example trace; the pair-traversal
+// structure is identical to Task A/B's make24(). The key difference from
+// Task B is that this function returns nothing and never stops early --
+// after finding a solution it must keep exploring every remaining pair and
+// candidate, because a different pair or a different candidate value may
+// lead to a different, equally valid expression that also needs to be
+// collected.
+//
+// Base case (size == 1):
+//   If the one remaining value is (approximately -- see the DELTA
+//   discussion in Section 3 of the handout) equal to GOAL, its expression
+//   is a solution -- append it to solutions, UNLESS an identical string is
+//   already present (use contains(), given above). Duplicate expression
+//   strings for the same hand can and do arise: different (i, j) pairs, or
+//   different orders of combining the same values, sometimes reduce to
+//   the exact same expression text, especially when the input has
+//   repeated values. Either way, this function returns nothing -- there is
+//   no more recursing to do once size == 1.
+//
+// Recursive case (size &gt;= 2):
+//   Consider every pair of positions (i, j) with i &lt; j. For each pair,
+//   arithmetic() (also below -- its own TODO) gives every way of combining
+//   ev_vec[i] and ev_vec[j] into a single Expression_Value. For each
+//   candidate, build a smaller hand by removing positions i and j and
+//   appending the candidate, then recurse on that smaller hand -- every
+//   time, for every pair and every candidate, regardless of what earlier
+//   recursive calls already added to solutions.
+//
+// ┌─ GOTCHA ──────────────────────────────────────────────────────────────┐
+// │  Removing two selected elements by swap() + pop_back() is easy to    │
+// │  get subtly wrong. A swap used to remove one selected element may    │
+// │  change what value is stored at the other selected index.            │
+// │                                                                      │
+// │  Since i &lt; j, remove the element at the LARGER index j first.        │
+// │  Doing so does not disturb the element at index i. After j has been  │
+// │  removed, remove i. Section 2 of the handout works through a full    │
+// │  counterexample.                                                     │
+// │                                                                      │
+// │  Remember: after removing j, cloneVec has size - 1 elements, so its  │
+// │  last valid index is size - 2 -- not size - 1.                       │
+// └─────────────────────────────────────────────────────────────────────┘
+void make24(std::vector&lt;Expression_Value&gt; ev_vec, std::vector&lt;std::string&gt;&amp; solutions) {
+  // TODO
+}
+
+// ── IMPLEMENT arithmetic() BELOW ──────────────────────────────────────────
+//
+// Returns every well-defined result of combining ev1 and ev2 with +, -, *,
+// and /, as Expression_Value objects: each result pairs the computed
+// numeric value with the corresponding combined expression string.
+//
+// Build each expression string as "(" + left + op + right + ")" -- always
+// keep the parentheses, even though it looks redundant for a single pair
+// right now. Once these results get combined again in a later recursive
+// call, the parentheses are what keep the precedence correct (compare
+// 5/(2*3) with the wrong, unparenthesized 5/2*3).
+//
+// Addition and multiplication are commutative, so each needs only one
+// entry. Subtraction and division are NOT commutative, so both orders
+// matter and both must be included: ev1.value - ev2.value as well as
+// ev2.value - ev1.value, and likewise for division. A division is only
+// well-defined when its divisor is nonzero -- guard each division
+// separately (skip it rather than computing it) when the relevant value
+// is within DELTA of zero, exactly as in Task A's arithmetic().
+//
+// A call with two ordinary nonzero operands should return six results, in
+// this order (values shown; build the matching expression string for
+// each): ev1+ev2, ev1-ev2, ev2-ev1, ev1*ev2, ev1/ev2, ev2/ev1.
+//
+// IMPORTANT FOR TASK C:
+// Follow this arithmetic() construction exactly. Generate only one
+// addition result and one multiplication result. Do NOT also generate
+// ev2+ev1 or ev2*ev1. Task C is graded against the exact expression set
+// produced by the algorithm specified in the project handout.
+std::vector&lt;Expression_Value&gt; arithmetic(Expression_Value ev1, Expression_Value ev2) {
+  // TODO
+  return {};  // placeholder -- remove this line when you implement the above
+}
+
+// Prints the elements of numsVec on one line, space-separated. Handy for
+// tracing your own recursion while debugging; not used by main().
+void print(const std::vector&lt;double&gt;&amp; numsVec) {
+  for (int i = 0; i &lt; static_cast&lt;int&gt;(numsVec.size()); ++i) {
+    std::cout &lt;&lt; numsVec[i] &lt;&lt; " ";
+  }
+  std::cout &lt;&lt; std::endl;
+}
+</code></pre>
 </div>
 
 <p style="margin-top:2.6rem; padding-top:1.2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.92rem; font-style:italic;">
-  Acknowledgement: I learned this game from my late high school friend, Wudong
-  Luo, who was a kind person and an avid player of Make 24.
+  Acknowledgement: I learned this game from my late friend, Wudong
+  Luo, a kind lady and an excellent player of Make 24.
 </p>
 
 <footer>
@@ -696,6 +1353,22 @@ if (actual == expected) {
 
 </div>
 
-<script>hljs.highlightAll();</script>
+<script>
+  hljs.highlightAll();
+  function copyCode(btn) {
+    const code = btn.nextElementSibling.querySelector('code');
+    const text = code.innerText;
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(function () {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
 </body>
 </html>
