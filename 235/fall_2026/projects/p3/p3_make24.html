@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 3: Make 24 &mdash; CSCI 235</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --ink: #1c1f26;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-dark: #1d4fc4;
+    --bg-note: #eef4ff;
+    --bg-warn: #fff6e6;
+    --border: #d9dee6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.6;
+    background: #fbfbfd;
+  }
+  .header {
+    background: #1c1f26;
+    color: #f4f6fb;
+    padding: 2.2rem 1.5rem 1.6rem;
+  }
+  .header h1 {
+    margin: 0 0 0.3rem;
+    font-size: 1.9rem;
+  }
+  .header .subtitle {
+    color: #b7c1d6;
+    font-size: 1.02rem;
+  }
+  .header .due {
+    margin-top: 0.6rem;
+    display: inline-block;
+    background: #2f6fed;
+    color: #fff;
+    padding: 0.25rem 0.7rem;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  h2 {
+    margin-top: 2.6rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 2px solid var(--border);
+    font-size: 1.35rem;
+  }
+  h3 {
+    margin-top: 1.8rem;
+    color: var(--accent-dark);
+    font-size: 1.08rem;
+  }
+  p, li { color: #2b2f38; }
+  code:not(pre code) {
+    background: #eef0f4;
+    padding: 0.12rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+  pre {
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 0.86rem;
+  }
+  pre code {
+    display: block;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  .note {
+    background: var(--bg-note);
+    border-left: 4px solid var(--accent);
+    padding: 0.9rem 1.1rem;
+    margin: 1.2rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .note strong { color: var(--accent-dark); }
+  .warn {
+    background: var(--bg-warn);
+    border-left: 4px solid #e0a339;
+    padding: 0.9rem 1.1rem;
+    margin: 1.2rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2rem 0;
+    font-size: 0.94rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f2f4f8;
+  }
+  .status {
+    background: #f2f4f8;
+    border: 1px dashed #aab3c2;
+    padding: 0.9rem 1.1rem;
+    margin: 1.4rem 0;
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+  .trace {
+    font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.9rem;
+    background: #1c1f26;
+    color: #d8ddea;
+    padding: 1rem 1.2rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .trace .lvl { color: #7fb1ff; }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Project 3: Make 24</h1>
+  <div class="subtitle">CSCI 235 &mdash; Data Structures and Algorithms &middot; Hunter College, CUNY</div>
+  <div class="due">Due: Thursday, October 29 at 11:59 PM</div>
+</div>
+
+<div class="container">
+
+<h2>1. Overview</h2>
+<p>
+  The <strong>24 Game</strong> is a classic arithmetic puzzle: you are given a hand of
+  numbers, and your job is to combine <em>all</em> of them &mdash; using addition,
+  subtraction, multiplication, and division, and parentheses in any order you like &mdash;
+  so that the result is exactly 24. For example, given the hand
+  <code>{1, 2, 3, 4}</code>, one valid combination is
+  <code>1 * 2 * 3 * 4 = 24</code>. Given <code>{4, 4, 7, 7}</code>, one valid
+  combination is <code>7 * (4 - 4 / 7) = 24</code>.
+</p>
+<p>
+  In this project, you will progressively build a recursive Make 24 solver in
+  three stages. You will first determine <em>whether</em> a hand can make 24
+  (Task A), then return <em>one</em> valid expression that proves it (Task B),
+  and finally find <em>every</em> distinct expression the search algorithm can
+  generate (Task C). Every number in the hand must be used exactly once at
+  every stage. This handout walks through the recursive strategy shared by all
+  three tasks and the reference implementation you'll be extending.
+</p>
+
+<h2>2. The Recursive Idea</h2>
+<p>
+  Think of the hand of numbers as a set of cards on a table. You pick up any
+  <strong>two</strong> cards, combine them with one arithmetic operation to produce a
+  single new card, and place that new card back on the table in place of the two you
+  removed. The table now has one fewer card than before. You repeat this process until
+  only one card remains: if that final card's value is 24, the original hand can make
+  24.
+</p>
+<p>
+  This gives a natural recursive definition. Let <code>numsVec</code> be the current
+  hand of numbers.
+</p>
+<ul>
+  <li><strong>Base case</strong>: if <code>numsVec</code> has exactly one element,
+    the hand can make 24 if and only if that element's value is (approximately) 24.</li>
+  <li><strong>Recursive case</strong>: if <code>numsVec</code> has two or more
+    elements, try every pair of positions <code>(i, j)</code>. For each pair, compute
+    every possible result of combining <code>numsVec[i]</code> and
+    <code>numsVec[j]</code> with <code>+</code>, <code>-</code>, <code>*</code>, or
+    <code>/</code>. Replace the pair with one candidate result at a time, forming a
+    smaller hand, and recurse. If <em>any</em> pair, <em>any</em> operation, and the
+    recursive call on the resulting smaller hand returns <code>true</code>, the whole
+    hand can make 24.</li>
+</ul>
+
+<div class="note">
+  <strong>Key idea:</strong> the recursion always shrinks the hand by exactly one
+  card per call (two cards go in, one comes out). A hand of <code>n</code> numbers
+  therefore recurses to depth <code>n&nbsp;&minus;&nbsp;1</code> before hitting the
+  base case.
+</div>
+
+<h3>Worked Example: {1, 2, 3, 4}</h3>
+<p>
+  Each recursive call is one node in a call tree. Below is a single root-to-leaf
+  path through that tree (there are many others &mdash; the function tries every
+  pair and every operation at each level until one succeeds or all are exhausted):
+</p>
+<svg viewBox="0 0 620 512" xmlns="http://www.w3.org/2000/svg"
+     style="width:100%;max-width:520px;display:block;margin:0.5rem auto;font-family:'SFMono-Regular',Menlo,Consolas,monospace;">
+  <defs>
+    <marker id="arrowhead" markerWidth="9" markerHeight="9" refX="5.5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"></path>
+    </marker>
+  </defs>
+
+  <!-- level 0 -->
+  <text x="168" y="37" text-anchor="end" font-size="12" fill="var(--muted)">size 4</text>
+  <rect x="180" y="10" width="260" height="46" rx="8" fill="var(--bg-note)" stroke="var(--accent)" stroke-width="1.5"></rect>
+  <text x="310" y="38" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">{1, 2, 3, 4}</text>
+
+  <line x1="310" y1="58" x2="310" y2="148" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrowhead)"></line>
+  <text x="326" y="98" font-size="12" fill="var(--muted)">pick i=0 (1), j=1 (2)</text>
+  <text x="326" y="116" font-size="13" font-weight="700" fill="var(--accent-dark)">1 * 2 = 2</text>
+
+  <!-- level 1 -->
+  <text x="168" y="177" text-anchor="end" font-size="12" fill="var(--muted)">size 3</text>
+  <rect x="180" y="150" width="260" height="46" rx="8" fill="var(--bg-note)" stroke="var(--accent)" stroke-width="1.5"></rect>
+  <text x="310" y="178" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">{3, 4, 2}</text>
+
+  <line x1="310" y1="198" x2="310" y2="288" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrowhead)"></line>
+  <text x="326" y="238" font-size="12" fill="var(--muted)">pick i=0 (3), j=2 (2)</text>
+  <text x="326" y="256" font-size="13" font-weight="700" fill="var(--accent-dark)">3 * 2 = 6</text>
+
+  <!-- level 2 -->
+  <text x="168" y="317" text-anchor="end" font-size="12" fill="var(--muted)">size 2</text>
+  <rect x="180" y="290" width="260" height="46" rx="8" fill="var(--bg-note)" stroke="var(--accent)" stroke-width="1.5"></rect>
+  <text x="310" y="318" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">{4, 6}</text>
+
+  <line x1="310" y1="338" x2="310" y2="428" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrowhead)"></line>
+  <text x="326" y="378" font-size="12" fill="var(--muted)">pick i=0 (4), j=1 (6)</text>
+  <text x="326" y="396" font-size="13" font-weight="700" fill="var(--accent-dark)">4 * 6 = 24</text>
+
+  <!-- level 3: base case, success -->
+  <text x="168" y="457" text-anchor="end" font-size="12" fill="var(--muted)">size 1</text>
+  <rect x="180" y="430" width="260" height="46" rx="8" fill="#e8f7ee" stroke="#2f9e58" stroke-width="1.5"></rect>
+  <text x="310" y="458" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">{24}</text>
+  <text x="310" y="498" text-anchor="middle" font-size="13" font-weight="700" fill="#1f7a43">&#10003; fabs(24 &minus; 24) &le; DELTA &rarr; true</text>
+</svg>
+<p>
+  Every level combines exactly two numbers into one and passes the smaller hand down
+  to the next call &mdash; one edge in the tree per recursive call. The
+  <code>true</code> at the leaf propagates all the way back up through every level
+  of the recursion, short-circuiting any remaining pairs or operations at each level
+  that hadn't been tried yet.
+</p>
+
+<h3>Why remove index <code>j</code> before index <code>i</code>?</h3>
+<p>
+  Once two positions <code>i &lt; j</code> have been chosen and combined, both must be
+  removed from the working copy of the vector and replaced by the single combined
+  value. A common bug is removing them in the wrong order and shifting an index out
+  from under you. The reference implementation uses a specific trick:
+</p>
+<pre><code class="language-cpp">std::swap(cloneVec[j], cloneVec[size-1]);
+cloneVec.pop_back();
+// cloneVec now has size-1 elements
+std::swap(cloneVec[i], cloneVec[size-2]);
+cloneVec.pop_back();</code></pre>
+<p>
+  Because <code>j &gt; i</code>, swapping <code>cloneVec[j]</code> to the end and
+  popping it off does <em>not</em> disturb the position of index <code>i</code>
+  &mdash; index <code>i</code> is guaranteed to be less than <code>j</code>, so it
+  is untouched by that swap. Only <em>after</em> <code>j</code> has been removed is
+  it safe to swap <code>cloneVec[i]</code> to the (now new) last position and pop it
+  too.
+</p>
+<div class="warn">
+  <strong>Common mistake:</strong> swapping <em>both</em> <code>i</code> and
+  <code>j</code> to the last two positions before popping either one (e.g.
+  <code>swap(i, size-1); swap(j, size-2); pop_back(); pop_back();</code>) looks
+  symmetric but is wrong. Consider <code>{10, 20, 30, 40, 50}</code> with
+  <code>i = 1</code>, <code>j = 4</code> (the values <code>20</code> and
+  <code>50</code>):
+  <div class="trace">start:               {10, 20, 30, 40, 50}
+swap(i, size-1):     {10, 50, 30, 40, 20}   // 20 and 50 swap places
+swap(j, size-2):     {10, 50, 30, 20, 40}   // index j=4 now holds 40, not 50!
+pop_back(); pop_back():  {10, 50, 30}</div>
+  You meant to remove <code>20</code> and <code>50</code>, leaving
+  <code>{10, 30, 40}</code>. Instead the method removes <code>20</code> and
+  <code>40</code>, and <code>50</code> &mdash; the value you meant to
+  discard &mdash; incorrectly survives. The bug is that the second swap
+  targets index <code>j</code> by <em>position</em>, but the first swap already
+  moved a different value into that position. Removing the <em>larger</em> index
+  first, and only then the smaller one (as the reference implementation does),
+  is what keeps both positions valid throughout.
+</div>
+
+<h2>3. Comparing Floating-Point Numbers Safely</h2>
+<p>
+  All values in this project are stored as <code>double</code>, even though the
+  puzzle is usually played with integers. This matters because division can produce
+  non-integer intermediate results (for example, <code>4 / 7</code> in the
+  <code>{4, 4, 7, 7}</code> example above). Two floating-point values that are
+  <em>mathematically</em> equal are not guaranteed to be <em>bit-for-bit</em> equal
+  after a sequence of arithmetic operations, so the code never uses <code>==</code>
+  to compare doubles. Instead it uses a small tolerance:
+</p>
+<pre><code class="language-cpp">const double DELTA = 1e-6;
+...
+return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;</code></pre>
+<p>
+  The same tolerance is used to guard against division by zero. Checking
+  <code>num2 != 0</code> only rejects a denominator that is <em>exactly</em> zero;
+  a denominator that is merely very close to zero (due to rounding) would still slip
+  through and could blow up into a huge, meaningless value. Comparing against
+  <code>DELTA</code> instead catches both cases:
+</p>
+<pre><code class="language-cpp">if (std::fabs(num2) &gt; DELTA) {
+  result.push_back(num / num2);
+}</code></pre>
+
+<h2>4. Complexity Analysis</h2>
+<p>
+  The lesson that matters here is qualitative, not the formula: each recursive
+  call branches into every pair of positions <em>and</em> every operation on
+  that pair before recursing, so the search explores a branching tree
+  (backtracking) whose size explodes far faster than the size of the hand
+  grows &mdash; which is exactly why the 24 Game is traditionally played with a
+  small, fixed hand size (four numbers). The closed-form bound below makes
+  that precise, but deriving it is optional; understanding <em>why</em> the
+  tree explodes is the point.
+</p>
+<p>
+  Let <code>n</code> be the number of values in the hand. At each recursive call on
+  a hand of size <code>k</code>, the algorithm considers every pair of positions
+  (<code>C(k, 2) = k(k&minus;1)/2</code> pairs) and, for each pair, up to
+  <strong>6</strong> possible results (<code>+</code>, two orders of <code>&minus;</code>,
+  <code>*</code>, and up to two orders of <code>/</code>), before recursing on a hand
+  of size <code>k&nbsp;&minus;&nbsp;1</code>.
+</p>
+<table>
+  <tr><th>Resource</th><th>Bound</th><th>Why</th></tr>
+  <tr>
+    <td>Time (worst case &mdash; no solution exists)</td>
+    <td>
+      <code>O(3<sup>n&minus;1</sup> &middot; n! &middot; (n&minus;1)!)</code>
+      <div class="sub" style="font-size:0.78em; color:var(--muted); margin-top:0.3rem;">
+        optional closed-form derivation
+      </div>
+    </td>
+    <td>
+      The recurrence is <code>T(k) = 6 &middot; C(k,2) &middot; T(k&minus;1) =
+      3k(k&minus;1) &middot; T(k&minus;1)</code>, with <code>T(1) = O(1)</code>.
+      Expanding the product from <code>k = 2</code> to <code>n</code> gives the
+      closed form at left &mdash; algebra you're welcome to skip if the
+      qualitative point above is all you need.
+    </td>
+  </tr>
+  <tr>
+    <td>Space (auxiliary)</td>
+    <td><code>O(n<sup>2</sup>)</code></td>
+    <td>
+      Because the vectors are copied at successive recursion levels, one active
+      recursion path can hold vectors whose sizes are proportional to
+      <code>n + (n&minus;1) + (n&minus;2) + &hellip; + 1 = O(n<sup>2</sup>)</code>,
+      matching the recursion depth of <code>O(n)</code> times <code>O(n)</code> per
+      frame.
+    </td>
+  </tr>
+</table>
+<div class="note">
+  <strong>Note:</strong> this bound is for the worst case, where the search must
+  exhaust every possibility because no solution exists. When a solution
+  <em>does</em> exist, the recursion returns <code>true</code> as soon as it is
+  found and unwinds immediately &mdash; in practice, far fewer than the worst-case
+  number of combinations are ever tried.
+</div>
+
+<h2>5. Reference Implementation</h2>
+<p>
+  The current version of <code>make24_v1.cpp</code> implements the boolean version
+  of the puzzle: it reports only whether 24 is reachable, not how to reach it. There
+  is exactly one base case (<code>size == 1</code>) and exactly one recursive rule
+  (pick two, combine, replace with one, recurse) &mdash; matching the recursive
+  definition and worked example above all the way down.
+</p>
+<pre><code class="language-cpp">//File name: p3_make24/code/make24_v1.cpp
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;cmath&gt;
+const double DELTA = 1e-6;
+const int GOAL = 24;
+bool make24(std::vector&lt;double&gt; numsVec);
+std::vector&lt;double&gt; arithmetic(double num, double num2);
+void print(const std::vector&lt;double&gt;&amp; numsVec);
+
+int main() {
+  // std::vector&lt;double&gt; numsVec = {24}; // true
+  // std::vector&lt;double&gt; numsVec = {1}; // false
+  // std::vector&lt;double&gt; numsVec = {12, 4, 2}; // true, 12 * 4 / 2
+  // std::vector&lt;double&gt; numsVec = {1, 1, 1}; // false
+  // std::vector&lt;double&gt; numsVec = {1, 2, 4}; // false
+  // std::vector&lt;double&gt; numsVec = {1, 2, 3, 4}; // true, 1 * 2 * 3 * 4
+  // std::vector&lt;double&gt; numsVec = {4, 4, 7, 7}; // true
+  std::vector&lt;double&gt; numsVec = {1, 2, 2, 2}; // false
+  std::cout &lt;&lt; std::boolalpha &lt;&lt; make24(numsVec) &lt;&lt; std::endl; // false
+  return 0;
+}
+
+bool make24(std::vector&lt;double&gt; numsVec) {
+  int size = static_cast&lt;int&gt;(numsVec.size());
+  if (size == 1) {
+    return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;
+  }
+  // size &gt;= 2: pick two positions, combine, recurse on the smaller hand
+  for (int i = 0; i &lt; size-1; ++i) {
+    for (int j = i+1; j &lt; size; ++j) {
+      std::vector&lt;double&gt; cloneVec = numsVec; // KEY, cannot put this statement outside the second inner loop
+      std::vector&lt;double&gt; tmpVec = arithmetic(numsVec[i], numsVec[j]);
+      // correct: since j &gt; i, remove j first will not affect the value of i
+      std::swap(cloneVec[j], cloneVec[size-1]);
+      cloneVec.pop_back();
+      // now cloneVec has one fewer element
+      std::swap(cloneVec[i], cloneVec[size-2]);
+      cloneVec.pop_back();
+      for (int k = 0; k &lt; static_cast&lt;int&gt;(tmpVec.size()); k++) {
+        cloneVec.push_back(tmpVec[k]);
+        if (make24(cloneVec)) {
+          return true;
+        }
+        cloneVec.pop_back(); // erase the last element, so that the cloned vector will not grow incrementally
+      }
+    }
+  }
+  return false;
+}
+
+// do +, -, *, / between num and num2
+std::vector&lt;double&gt; arithmetic(double num, double num2) {
+  std::vector&lt;double&gt; result;
+  result.push_back(num + num2);
+  result.push_back(num - num2);
+  result.push_back(num2 - num);
+  result.push_back(num * num2);
+  if (std::fabs(num2) &gt; DELTA) {
+    result.push_back(num / num2);
+  }
+  if (std::fabs(num) &gt; DELTA) {
+    result.push_back(num2 / num);
+  }
+  return result;
+}
+
+void print(const std::vector&lt;double&gt;&amp; numsVec) {
+  // std::cout &lt;&lt; "print vector" &lt;&lt; "\n"; // debug
+  for (int i = 0; i &lt; static_cast&lt;int&gt;(numsVec.size()); ++i) {
+    std::cout &lt;&lt; numsVec[i] &lt;&lt; " ";
+  }
+  std::cout &lt;&lt; std::endl;
+}</code></pre>
+
+<h2>6. Tasks A&ndash;C</h2>
+<p>
+  The recursive core &mdash; pick two, combine, replace with one, recurse &mdash;
+  never changes across the three tasks below. What changes is only
+  <em>what the function hands back</em> once it finds (or fails to find) 24.
+  Each task is submitted and graded separately.
+</p>
+<table>
+  <tr><th>Task</th><th>Signature</th><th>Returns</th><th>Points</th></tr>
+  <tr>
+    <td>A</td>
+    <td><code>bool make24(std::vector&lt;double&gt; numsVec);</code></td>
+    <td><code>true</code>/<code>false</code> &mdash; can this hand make 24 at all?</td>
+    <td>30</td>
+  </tr>
+  <tr>
+    <td>B</td>
+    <td><code>std::string make24(std::vector&lt;double&gt; numsVec);</code></td>
+    <td>one expression that evaluates to 24, or <code>""</code> if none exists</td>
+    <td>35</td>
+  </tr>
+  <tr>
+    <td>C</td>
+    <td><code>std::vector&lt;std::string&gt; make24(std::vector&lt;double&gt; numsVec);</code></td>
+    <td>every distinct expression string the required recursive search generates
+        that evaluates to 24, or an empty vector if none exist</td>
+    <td>35</td>
+  </tr>
+</table>
+<p class="sub" style="color:var(--muted); font-size:0.9em;">
+  Point split shown is a suggested default (100 pts across the three tasks) &mdash;
+  adjust to taste when wiring up the Gradescope assignments.
+</p>
+
+<h3>Task A &mdash; boolean solver</h3>
+<p>
+  This is exactly the reference implementation in Section 5. Every call either
+  returns <code>true</code> (24 is reachable) or <code>false</code> (it isn't) &mdash;
+  no expression is ever constructed or returned.
+</p>
+
+<h3>Task B &mdash; return one expression</h3>
+<p>
+  Instead of a plain <code>double</code>, each element of the working hand now
+  carries its expression text <em>alongside</em> its numeric value:
+</p>
+<pre><code class="language-cpp">struct Expression_Value {
+  std::string expression;
+  double value;
+};</code></pre>
+<p>
+  Combining two elements builds a new <code>Expression_Value</code> whose
+  <code>expression</code> field wraps both operands' text in parentheses
+  (e.g. combining <code>"4"</code> and <code>"(3+(1+2))"</code> with <code>*</code>
+  produces <code>"(4*(3+(1+2)))"</code>) and whose <code>value</code> field is the
+  actual arithmetic result. The base case (<code>size == 1</code>) returns that
+  element's <code>expression</code> string if its <code>value</code> is 24, or
+  <code>""</code> otherwise. The outermost parentheses are stripped once, at the
+  very end, before the result is shown to a user.
+</p>
+
+<h3>Task C &mdash; return every expression</h3>
+<p>
+  Same idea as Task B, but the base case <em>appends</em> to a
+  <code>std::vector&lt;std::string&gt;&amp;</code> passed by reference instead of
+  returning immediately, and the recursive case never short-circuits on the
+  first success &mdash; it keeps exploring every remaining pair and operation.
+  A <code>contains()</code> check before each push prevents the exact same
+  expression string from being recorded twice.
+</p>
+<p>
+  Because the algorithm considers every pair <code>i &lt; j</code>, generates
+  the required arithmetic results for each pair, and follows the specified
+  parenthesization convention, the set of expression strings it can produce
+  for a given hand is <em>well-defined</em> &mdash; not a matter of taste. Task
+  C is graded against that exact set (Section 7), so your implementation needs
+  to follow the same construction convention as the reference: always wrap
+  every binary operation in parentheses, and write each operand's leaf text as
+  the plain integer (e.g. <code>"4"</code>, not <code>"4.0"</code> or
+  <code>" 4"</code>). You may explore those pairs and candidate results in any
+  order you like &mdash; only the final <em>set</em> of strings you collect is
+  checked, not the order you found them in.
+</p>
+<div class="note">
+  <strong>What &ldquo;every distinct expression&rdquo; means here:</strong> Task C
+  is <em>not</em> asking for all mathematically equivalent ways of writing 24.
+  It asks for all distinct expression strings generated by the recursive
+  algorithm and expression-construction rules specified in this project. Two
+  expressions that are mathematically equivalent but structured
+  differently &mdash; for instance, by exploiting commutativity to combine the
+  same operands in a different grouping than the reference's traversal would
+  ever produce &mdash; are different demands: the second is a harder, open-ended
+  problem this project does not ask you to solve. Task C is an exercise in
+  <em>extending</em> the supplied algorithm to collect everything it can
+  produce, not in enumerating every algebraically distinct way to reach 24.
+</div>
+
+<h2>7. How Your Submission Is Graded</h2>
+<div class="note">
+  <strong>Key idea:</strong> for Task B, the grader does <em>not</em> compare
+  your returned expression against one fixed &ldquo;expected&rdquo; string.
+  Different valid traversals of the search space produce different, equally
+  correct expressions for the same hand &mdash; you are not required to
+  reproduce the instructor's exact output. For Task C, individual expressions
+  are validated the same way, but the <em>complete returned set</em> must also
+  match the reference-generated set described below.
+</div>
+<p>
+  Instead, every expression you return is checked against two independent
+  requirements:
+</p>
+<ol>
+  <li>It parses as a valid arithmetic expression &mdash; integers, <code>+ - * /</code>,
+    and parentheses, with <strong>no unary minus</strong> &mdash; and evaluates to 24
+    within a small floating-point tolerance.</li>
+  <li>It uses <strong>exactly</strong> the operands you were given: the same
+    values, the same number of times each. Sorting the integer literals found in
+    your expression and comparing that list to the sorted input hand must give an
+    exact match.</li>
+</ol>
+<p>
+  Requirement 2 exists specifically to rule out shortcuts. A submission that just
+  special-cased <code>return "24";</code> would satisfy requirement 1 for
+  <em>every</em> input, but only satisfies requirement 2 when the input hand
+  actually is <code>{24}</code> itself:
+</p>
+<table>
+  <tr><th>Input hand</th><th>Returned expression</th><th>Result</th><th>Why</th></tr>
+  <tr>
+    <td><code>{24}</code></td>
+    <td><code>"24"</code></td>
+    <td style="color:#1f7a43; font-weight:700;">accepted</td>
+    <td>evaluates to 24; operand multiset <code>{24}</code> matches exactly</td>
+  </tr>
+  <tr>
+    <td><code>{1, 2, 3, 4}</code></td>
+    <td><code>"24"</code></td>
+    <td style="color:#bf360c; font-weight:700;">rejected</td>
+    <td>evaluates to 24, but uses none of the required operands &mdash;
+        <code>{24} &ne; {1,2,3,4}</code></td>
+  </tr>
+  <tr>
+    <td><code>{1, 2, 3, 4}</code></td>
+    <td><code>"4*(3+(1+2))"</code></td>
+    <td style="color:#1f7a43; font-weight:700;">accepted</td>
+    <td>evaluates to 24; uses exactly one 1, one 2, one 3, one 4</td>
+  </tr>
+  <tr>
+    <td><code>{4, 4, 7, 7}</code></td>
+    <td><code>"7*(4-4/7)"</code></td>
+    <td style="color:#1f7a43; font-weight:700;">accepted</td>
+    <td>evaluates to 24; uses exactly two 4s and two 7s</td>
+  </tr>
+  <tr>
+    <td><code>{1, 2, 4}</code> (unsolvable)</td>
+    <td><code>""</code></td>
+    <td style="color:#1f7a43; font-weight:700;">accepted</td>
+    <td>the empty-string &ldquo;no solution&rdquo; claim is checked against a
+        hidden reference solver, not taken on faith &mdash; here it's correct</td>
+  </tr>
+</table>
+<p>
+  For <strong>Task C</strong>, the bar is higher: the grader computes the
+  <em>exact</em> set of expression strings the reference search algorithm
+  produces for that hand (well-defined by the required pair selection,
+  arithmetic results, and expression-construction rules &mdash; see Section 6),
+  strips a single pair of outermost parentheses from every string on both
+  sides (the same normalization the reference's own <code>main()</code> applies
+  before printing), and requires your returned set to match <em>exactly</em>:
+</p>
+<pre><code class="language-cpp">std::set&lt;std::string&gt; expected(reference.begin(), reference.end());
+std::set&lt;std::string&gt; actual(student.begin(), student.end());
+
+if (actual == expected) {
+  // complete and correct
+}</code></pre>
+<p>
+  Comparing as sets (rather than vectors) means you may discover the
+  solutions in any order you like &mdash; only the final collection matters.
+  Your returned vector also may not contain duplicate strings (checked
+  separately by comparing <code>vector::size()</code> to the size of its own
+  string set). This design catches every failure mode that matters:
+</p>
+<table>
+  <tr><th>Symptom</th><th>Detected as</th></tr>
+  <tr><td>missing a valid solution</td><td>returned set is smaller than the expected set</td></tr>
+  <tr><td>an invented or malformed expression</td><td>fails the per-expression validity check, and/or makes the returned set differ from the expected set</td></tr>
+  <tr><td>the same solution returned twice</td><td>vector size &ne; set size</td></tr>
+  <tr><td>solutions found in a different order</td><td>accepted &mdash; order is never checked</td></tr>
+</table>
+<p>
+  This is deliberately stricter than Task B: returning just one correct
+  solution to Task C's function signature will not pass, because Task C's
+  contract is to find <em>all</em> of them &mdash; otherwise Task C would be
+  indistinguishable from Task B.
+</p>
+<div class="warn">
+  <strong>Why no unary minus?</strong> Every numeric literal appearing in a
+  returned expression must correspond directly to one of the original operands
+  &mdash; that's what makes the operand-multiset check in Section 7 unambiguous.
+  Allowing a literal like <code>-3</code> would raise an unanswerable question
+  for the grader: is that a negative operand, or is it <code>3</code> with a
+  unary minus applied? Negative intermediate values must therefore be produced
+  by binary subtraction between sub-expressions, such as <code>(3-4)</code>,
+  <code>(2-(3+4))</code>, or <code>((1+2)-7)</code>, rather than by writing a
+  negative literal such as <code>-1</code>.
+</div>
+
+<h2>8. What's Next</h2>
+<div class="status">
+  Autograders for all three tasks (<code>p3_taskA_autograder.zip</code>,
+  <code>p3_taskB_autograder.zip</code>, <code>p3_taskC_autograder.zip</code>)
+  implement exactly the grading rules described in Section 7: a small
+  grader-side recursive-descent expression parser validates every returned
+  expression for Tasks B and C, and Task C additionally compares your full
+  returned set against a reference-generated expected set (not a single fixed
+  string) to check exhaustiveness. This page is still the
+  <strong>instructor/reference version</strong>. Turning Sections 5&ndash;6 into
+  student-facing skeletons with <code>// TODO</code> stubs (one per task) is the
+  remaining step before this is ready to post.
+</div>
+
+<p style="margin-top:2.6rem; padding-top:1.2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.92rem; font-style:italic;">
+  Acknowledgement: I learned this game from my late high school friend, Wudong
+  Luo, who was a kind person and an avid player of Make 24.
+</p>
+
+<footer>
+  CSCI 235 &mdash; Data Structures and Algorithms &middot; Hunter College, CUNY
+</footer>
+
+</div>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
