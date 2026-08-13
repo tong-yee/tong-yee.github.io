@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CSCI 235 &ndash; P2: Maze &ndash; BFS Step Visualizer</title>
+<style>
+  :root {
+    --wall: #2b2b2b;
+    --open: #f5f5f5;
+    --visited: #a9d6f5;
+    --current: #ff9f43;
+    --newq: #ffe08a;
+    --hit: #38b000;
+    --unexplored: #eeeeee;
+    --ink: #1a1a1a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: var(--ink);
+    margin: 0;
+    padding: 24px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    font-size: 1.3rem;
+    margin: 0 0 4px;
+    text-align: center;
+  }
+  .sub {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  #mainRow {
+    display: flex;
+    gap: 26px;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  #controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  button {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+  }
+  button.primary { background: #1d3557; color: white; border-color: #1d3557; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button.active { background: #1d3557; color: white; border-color: #1d3557; }
+  #stepInfo {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  #grid {
+    display: grid;
+    gap: 3px;
+    margin-bottom: 14px;
+    background: #ddd;
+    padding: 3px;
+    border-radius: 6px;
+  }
+  .cell {
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+    border-radius: 3px;
+    position: relative;
+  }
+  .cell.unexplored {
+    background-image: repeating-linear-gradient(45deg, #ddd, #ddd 4px, #f5f5f5 4px, #f5f5f5 8px);
+  }
+  .cell.missing {
+    background: transparent;
+  }
+  .rowLabel, .colLabel, .corner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #777;
+  }
+  .colLabel { padding: 3px 0; }
+  .rowLabel { padding: 0 3px; }
+  .cell .badge {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: rgba(0,0,0,0.5);
+  }
+  #caption {
+    max-width: 460px;
+    text-align: center;
+    font-size: 1rem;
+    min-height: 3.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+  }
+  #result {
+    font-weight: bold;
+    margin-top: 4px;
+    min-height: 1.4em;
+  }
+  #result.true { color: #2b8a00; }
+  #result.false { color: #c1121f; }
+  #treeWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  #treeLabel {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  #treeSvg {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  #treeSvg text {
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+  }
+  #stepsLogWrap {
+    width: 260px;
+    flex-shrink: 0;
+  }
+  #queueLabel, #stepsLogLabel {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  #queueWrap {
+    margin-bottom: 14px;
+  }
+  #queueRow {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    overflow-x: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 20px 8px 8px;
+    min-height: 62px;
+  }
+  .qSlot {
+    position: relative;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 36px;
+    border: 2px solid #999;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .qSlot .qMarker {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #1d3557;
+    white-space: nowrap;
+  }
+  .qEmpty {
+    color: #999;
+    font-size: 0.8rem;
+    padding: 6px 2px;
+  }
+  #queueCaption {
+    font-size: 0.72rem;
+    color: #777;
+    text-align: center;
+    margin-top: 5px;
+  }
+  #stepsLog {
+    max-height: 340px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    list-style: none;
+    counter-reset: steps;
+  }
+  #stepsLog li {
+    counter-increment: steps;
+  }
+  #stepsLog li::before {
+    content: "(" counter(steps) ") ";
+    font-weight: 600;
+    color: #777;
+  }
+  #stepsLog li.current {
+    font-weight: bold;
+    background: #fff3d6;
+    border-radius: 4px;
+    padding: 1px 4px;
+    margin-left: -4px;
+  }
+  #legend {
+    font-size: 0.75rem;
+    color: #555;
+    margin-top: 14px;
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.5;
+  }
+  .swatch {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin: 0 3px 0 10px;
+  }
+  #hint {
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 18px;
+  }
+  code { background: #eee; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+  .uline { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<h1>P2: Maze &mdash; BFS Reachability Step Visualizer</h1>
+<div class="sub">
+  Traces the BFS loop in <code>reachable()</code> for the two uniform-grid
+  examples in <code>maze.cpp</code>, plus the two ragged (jagged-row)
+  examples from <code>maze_v2_ragged.cpp</code> &mdash; same queue, same
+  up/down/left/right neighbor order. For ragged mazes, each neighbor is
+  bounds-checked against <em>its own row's length</em>, not one shared
+  column count.
+</div>
+
+<div id="controls">
+  <button id="btnMaze1" class="mazeBtn" data-key="1">Example 1 (4&times;4)</button>
+  <button id="btnMaze2" class="mazeBtn" data-key="2">Example 2 (5&times;4)</button>
+  <button id="btnMaze3" class="mazeBtn" data-key="3">Example 3 (ragged, true)</button>
+  <button id="btnMaze4" class="mazeBtn" data-key="4">Example 4 (ragged, false)</button>
+  <span style="width:1px;background:#ccc;"></span>
+  <button id="btnPrev">&larr; Prev</button>
+  <button id="btnNext" class="primary">Next (Space) &rarr;</button>
+  <button id="btnRestart">Restart</button>
+</div>
+
+<div id="stepInfo"></div>
+
+<div id="mainRow">
+  <div id="grid"></div>
+  <div id="treeWrap">
+    <div id="treeLabel">BFS tree (parent &rarr; child, edges appear as each cell is enqueued)</div>
+    <svg id="treeSvg"></svg>
+  </div>
+  <div id="stepsLogWrap">
+    <div id="queueWrap">
+      <div id="queueLabel">Queue (FIFO, drawn left-to-right)</div>
+      <div id="queueRow"></div>
+      <div id="queueCaption">HEAD = next to dequeue &middot; TAIL = most recently enqueued</div>
+    </div>
+    <div id="stepsLogLabel">Step-by-step trace</div>
+    <ol id="stepsLog"></ol>
+  </div>
+</div>
+
+<div id="caption"></div>
+<div id="result"></div>
+
+<div id="legend">
+  <span class="swatch" style="background:var(--current)"></span>current (just dequeued)
+  <span class="swatch" style="background:var(--newq)"></span>just enqueued
+  <span class="swatch" style="background:var(--hit)"></span>target found
+  <span class="swatch" style="background:var(--wall)"></span>wall
+  <span class="swatch cell unexplored" style="width:11px;height:11px;display:inline-block;"></span>never explored
+  <br><span style="display:inline-block; margin-top:6px;">In Examples 3 and 4, a blank cell with no border is not part of the maze at all (that row is simply shorter there) &mdash; different from an unvisited open cell.</span>
+  <br><span style="display:inline-block; margin-top:2px;">Any other visited cell is colored by its BFS layer (distance from start, layer 1 = start itself) — same palette and same small number as the tree below, so a cell's color and its layer badge always agree.</span>
+  <br><span style="display:inline-block; margin-top:2px;">In the tree, node border shows algorithm state instead of layer — thick orange = current, thick amber = just enqueued, thin faded = already processed (dequeued and neighbors checked), thick green = target found. Start and target additionally get a thin navy/red outer ring, separate from that border, so identifying them never hides the state color.</span>
+</div>
+
+<div id="hint">Press <strong>Space</strong> or <strong>&rarr;</strong> to step forward, <strong>&larr;</strong> to step back, <strong>R</strong> to restart, <strong>1</strong> / <strong>2</strong> / <strong>3</strong> / <strong>4</strong> to switch example.</div>
+
+<script>
+// ---------------------------------------------------------------------
+// Examples 1 and 2 come from maze.cpp.
+// Examples 3 and 4 come from maze_v2_ragged.cpp.
+// ---------------------------------------------------------------------
+const EXAMPLES = {
+  1: {
+    label: "Example 1 (4x4)",
+    grid: [
+      [0,0,1,1],
+      [0,0,1,1],
+      [0,0,0,1],
+      [0,0,0,0],
+    ],
+    start: {row:0, col:0},
+    target: {row:3, col:3},
+  },
+  2: {
+    label: "Example 2 (5x4)",
+    grid: [
+      [0,1,1,1],
+      [0,1,1,0],
+      [0,0,1,0],
+      [0,0,0,1],
+      [0,0,1,0],
+    ],
+    start: {row:0, col:0},
+    target: {row:4, col:3},
+  },
+  // maze3/maze4 from maze_v2_ragged.cpp -- rows have DIFFERENT lengths.
+  // A neighbor is only valid if it exists within its OWN row's length, not
+  // some maze-wide numCols -- see the bounds check in computeFrames().
+  3: {
+    label: "Example 3 (ragged, true)",
+    ragged: true,
+    grid: [
+      [0,1],
+      [0,1,1,0],
+      [0,0],
+      [1,0,0],
+      [1,0],
+    ],
+    start: {row:0, col:0},
+    target: {row:4, col:1},
+  },
+  4: {
+    label: "Example 4 (ragged, false)",
+    ragged: true,
+    grid: [
+      [],
+      [0,0],
+      [],
+      [0],
+    ],
+    start: {row:1, col:0},
+    target: {row:3, col:0},
+  },
+};
+
+let currentKey = 1;
+let frames = [];
+let frameIndex = 0;
+
+function toIdx(r, c, numCols) { return r * numCols + c; }
+function toRC(idx, numCols) { return [Math.floor(idx / numCols), idx % numCols]; }
+
+// "a" -> "a"; "a, b" -> "a and b"; "a, b, c" -> "a, b, and c"
+function joinWithAnd(items) {
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return items.slice(0, -1).join(", ") + ", and " + items[items.length - 1];
+}
+
+// Re-run reachable()'s BFS, recording one frame per dequeue -- same queue
+// behavior and up/down/left/right traversal order as the C++ code (both
+// the uniform-grid version, which encodes coordinates as a linear index,
+// and the ragged version, which queues Coordinate objects directly). The
+// visualizer always encodes coordinates internally as bounding-box indices
+// so it can share one rendering path for both.
+function computeFrames(example) {
+  const { grid, start, target } = example;
+  const numRows = grid.length;
+  // numCols is only a bounding-box width for array sizing/rendering -- rows
+  // can be shorter (ragged mazes). Never used as a per-row bounds check.
+  const numCols = Math.max(1, ...grid.map(row => row.length));
+  const frames = [];
+  const visited = new Array(numRows * numCols).fill(false);
+  const sIdx = toIdx(start.row, start.col, numCols);
+  const tIdx = toIdx(target.row, target.col, numCols);
+
+  // BFS layer of each cell = its distance from start, 1-indexed so the
+  // start cell itself is "layer 1", its neighbors are "layer 2", etc.
+  // This is exactly what the queue's FIFO order guarantees: every cell in
+  // layer k is dequeued (and its neighbors placed in layer k+1) before any
+  // cell in layer k+1 is dequeued.
+  const layer = new Array(numRows * numCols).fill(-1);
+  layer[sIdx] = 1;
+
+  // parent[child] = the cell it was discovered from; children[parent] = the
+  // list of cells enqueued from that parent, in up/down/left/right order.
+  // Together these form the BFS tree -- the same information the queue is
+  // building up, just viewed as parent-child edges instead of a flat list.
+  const parent = new Array(numRows * numCols).fill(-1);
+  const children = {};
+
+  // processed[i] = true once cell i has been dequeued AND had its neighbors
+  // checked in a PRIOR step -- i.e. it's fully "closed", not just sitting in
+  // the queue waiting its turn. A cell becomes processed the step AFTER it
+  // was "current", so each node gets one frame as the orange "current"
+  // highlight before fading to gray on the next step.
+  const processed = new Array(numRows * numCols).fill(false);
+
+  // Step 0: initialization, mirrors the two lines right before the while loop.
+  // newlyQueued includes the start cell here (not just visited) so it gets
+  // the same amber "just enqueued" treatment as any other push -- matching
+  // what the caption says just happened: it was pushed onto the queue.
+  visited[sIdx] = true;
+  const queue = [sIdx];
+  frames.push({
+    visited: visited.slice(), processed: processed.slice(), current: null, newlyQueued: [sIdx],
+    note: `Initialize: mark start (${start.row},${start.col}) visited and push it onto the queue.`,
+    stepText: `Put (${start.row}, ${start.col}) to queue.`,
+    phase: "init",
+    queueSnapshot: queue.slice(),
+  });
+
+  let found = false;
+  while (queue.length > 0) {
+    const curr = queue.shift();
+    const [r, c] = toRC(curr, numCols);
+
+    if (curr === tIdx) {
+      frames.push({
+        visited: visited.slice(), processed: processed.slice(), current: curr, newlyQueued: [],
+        note: `Dequeued (${r},${c}) -- it's the target! reachable() returns true immediately.`,
+        stepText: `Dequeue (${r}, ${c}) -- it's the target, so return true.`,
+        phase: "hit",
+        queueSnapshot: queue.slice(),
+      });
+      found = true;
+      break;
+    }
+
+    const newlyQueued = [];
+    const newlyQueuedDirs = [];
+    const dirs = [[-1,0,"up"],[1,0,"down"],[0,-1,"left"],[0,1,"right"]];
+    for (const [dr, dc, name] of dirs) {
+      const nr = r + dr, nc = c + dc;
+      // Bound against the NEIGHBOR row's own length (grid[nr].length), not
+      // a maze-wide numCols -- for left/right that's the current row (nr
+      // === r), for up/down it's the row above/below, exactly mirroring
+      // `maze[curr.row - 1].size()` / `maze[curr.row].size()` in the C++.
+      if (nr >= 0 && nr < numRows && nc >= 0 && nc < grid[nr].length) {
+        const nIdx = toIdx(nr, nc, numCols);
+        if (grid[nr][nc] === 0 && !visited[nIdx]) {
+          visited[nIdx] = true;
+          layer[nIdx] = layer[curr] + 1;
+          parent[nIdx] = curr;
+          (children[curr] = children[curr] || []).push(nIdx);
+          queue.push(nIdx);
+          newlyQueued.push(nIdx);
+          newlyQueuedDirs.push({ name, r: nr, c: nc });
+        }
+      }
+    }
+
+    const note = newlyQueuedDirs.length > 0
+      ? `Dequeue (${r},${c}): check up/down/left/right, enqueue its ` +
+        newlyQueuedDirs.map(d => `<span class="uline">unvisited</span> ${d.name} neighbor (${d.r},${d.c})`).join(", ") + `.`
+      : `Dequeue (${r},${c}): checked up/down/left/right, no new open neighbors -- dead end.`;
+
+    const stepText = newlyQueuedDirs.length > 0
+      ? `Dequeue (${r}, ${c}), enqueue its ` +
+        joinWithAnd(newlyQueuedDirs.map(d => `<span class="uline">unvisited</span> ${d.name} neighbor (${d.r}, ${d.c})`)) + `.`
+      : `Dequeue (${r}, ${c}) -- dead end, no new neighbors to enqueue.`;
+
+    frames.push({
+      visited: visited.slice(), processed: processed.slice(), current: curr, newlyQueued, note, stepText, phase: "step",
+      queueSnapshot: queue.slice(),
+    });
+    processed[curr] = true;
+  }
+
+  if (!found) {
+    const unexploredOpen = [];
+    for (let i = 0; i < numRows * numCols; i++) {
+      const [rr, cc] = toRC(i, numCols);
+      if (grid[rr][cc] === 0 && !visited[i]) unexploredOpen.push(i);
+    }
+    const list = unexploredOpen.map(i => { const [rr,cc]=toRC(i,numCols); return `(${rr},${cc})`; }).join(", ");
+    frames.push({
+      visited: visited.slice(), processed: processed.slice(), current: null, newlyQueued: [],
+      note: `Queue is empty -- every reachable cell has been visited, but the target ` +
+            `(${target.row},${target.col}) was never enqueued` +
+            (list ? ` (unreachable open cells: ${list})` : "") +
+            `. reachable() returns false.`,
+      stepText: `Queue is empty, so return false.`,
+      phase: "empty",
+      queueSnapshot: [],
+    });
+  }
+
+  // Lay out the finished tree once (nodes never move as the animation
+  // reveals them -- only their visibility changes frame to frame).
+  // Classic bottom-up layout: a leaf sits at the next free x-slot; a parent
+  // is centered above the min/max x of its own children.
+  const pos = {};
+  let nextLeafX = 0;
+  let maxDepth = 0;
+  (function place(node, depth) {
+    maxDepth = Math.max(maxDepth, depth);
+    const kids = children[node] || [];
+    if (kids.length === 0) {
+      pos[node] = { x: nextLeafX, depth };
+      nextLeafX += 1;
+    } else {
+      kids.forEach(k => place(k, depth + 1));
+      const xs = kids.map(k => pos[k].x);
+      pos[node] = { x: (Math.min(...xs) + Math.max(...xs)) / 2, depth };
+    }
+  })(sIdx, 0);
+
+  const treeLayout = { pos, parent, children, root: sIdx, leafCount: Math.max(nextLeafX, 1), maxDepth };
+
+  return { frames, found, numRows, numCols, layer, treeLayout };
+}
+
+let built = { frames: [], found: false, numRows: 0, numCols: 0 };
+
+function loadExample(key) {
+  currentKey = key;
+  built = computeFrames(EXAMPLES[key]);
+  frameIndex = 0;
+  document.querySelectorAll(".mazeBtn").forEach(btn => {
+    btn.classList.toggle("active", Number(btn.dataset.key) === key);
+  });
+  const grid = document.getElementById("grid");
+  grid.style.gridTemplateColumns = `26px repeat(${built.numCols}, 54px)`;
+  render();
+}
+
+function render() {
+  const example = EXAMPLES[currentKey];
+  const { grid: mazeGrid, start, target } = example;
+  const { numRows, numCols, frames: fr } = built;
+  const f = fr[frameIndex];
+  const isLast = frameIndex === fr.length - 1;
+  const gridEl = document.getElementById("grid");
+  gridEl.innerHTML = "";
+
+  // Header row: blank corner + one column-index label per column.
+  const corner = document.createElement("div");
+  corner.className = "corner";
+  gridEl.appendChild(corner);
+  for (let c = 0; c < numCols; c++) {
+    const colLabel = document.createElement("div");
+    colLabel.className = "colLabel";
+    colLabel.textContent = c;
+    gridEl.appendChild(colLabel);
+  }
+
+  for (let r = 0; r < numRows; r++) {
+    const rowLabel = document.createElement("div");
+    rowLabel.className = "rowLabel";
+    rowLabel.textContent = r;
+    gridEl.appendChild(rowLabel);
+
+    for (let c = 0; c < numCols; c++) {
+      const i = toIdx(r, c, numCols);
+      const div = document.createElement("div");
+      div.className = "cell";
+      let bg = "var(--open)";
+      let label = "";
+
+      // Ragged mazes: this (row, col) slot is past the end of this row --
+      // there's no cell here at all (not open, not wall). Render it blank
+      // and skip everything else.
+      if (c >= mazeGrid[r].length) {
+        div.classList.add("missing");
+        gridEl.appendChild(div);
+        continue;
+      }
+
+      if (mazeGrid[r][c] === 1) {
+        bg = "var(--wall)";
+      } else if (isLast && !built.found && !f.visited[i]) {
+        div.classList.add("unexplored");
+      } else if (f.current === i && (f.phase === "hit")) {
+        bg = "var(--hit)";
+      } else if (f.current === i) {
+        bg = "var(--current)";
+      } else if (f.newlyQueued.includes(i)) {
+        bg = "var(--newq)";
+      } else if (f.visited[i]) {
+        // Same per-layer palette as the tree, so a cell's color and its
+        // layer badge number both point at the same BFS depth.
+        bg = LAYER_COLORS[(built.layer[i] - 1) % LAYER_COLORS.length];
+      }
+
+      if (!div.classList.contains("unexplored")) div.style.background = bg;
+
+      if (mazeGrid[r][c] === 0 && f.visited[i] && built.layer[i] > 0) {
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = built.layer[i];
+        div.appendChild(badge);
+      }
+
+      if (r === start.row && c === start.col) label = "S";
+      if (r === target.row && c === target.col) label = "T";
+      if (label) {
+        const labelSpan = document.createElement("span");
+        labelSpan.textContent = label;
+        div.appendChild(labelSpan);
+        div.style.outline = (label === "S") ? "3px solid #1d3557" : "3px solid #9d0208";
+        div.style.outlineOffset = "-3px";
+        labelSpan.style.color = (label === "S") ? "#1d3557" : "#9d0208";
+      }
+      gridEl.appendChild(div);
+    }
+  }
+
+  document.getElementById("stepInfo").textContent =
+    `${EXAMPLES[currentKey].label} — Step ${frameIndex + 1} / ${fr.length}`;
+  // f.note may contain a <span class="uline"> to underline "unvisited" --
+  // innerHTML, not textContent, so that markup actually renders.
+  document.getElementById("caption").innerHTML = f.note;
+
+  const resultEl = document.getElementById("result");
+  if (isLast) {
+    resultEl.textContent = `reachable() = ${built.found ? "true" : "false"}`;
+    resultEl.className = built.found ? "true" : "false";
+  } else {
+    resultEl.textContent = "";
+    resultEl.className = "";
+  }
+
+  document.getElementById("btnPrev").disabled = frameIndex === 0;
+  document.getElementById("btnNext").disabled = isLast;
+
+  renderTree(f);
+  renderQueue(f);
+  renderStepsLog();
+}
+
+// Draws the actual BFS queue as a linear left-to-right row of boxes,
+// matching how you'd draw an array-backed queue on a whiteboard: HEAD
+// (front, next to be dequeued) on the left, TAIL (back, most recently
+// enqueued) on the right. Rebuilt fresh every frame from that frame's
+// queueSnapshot -- the exact `queue` array contents right after that
+// step's dequeue+enqueue, same "queue after this step" moment the
+// handout's trace tables describe.
+function renderQueue(f) {
+  const { numCols } = built;
+  const rowEl = document.getElementById("queueRow");
+  rowEl.innerHTML = "";
+  const q = f.queueSnapshot || [];
+
+  if (q.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "qEmpty";
+    empty.textContent = "(empty)";
+    rowEl.appendChild(empty);
+    return;
+  }
+
+  q.forEach((idx, pos) => {
+    const [r, c] = toRC(idx, numCols);
+    const slot = document.createElement("div");
+    slot.className = "qSlot";
+
+    // Same per-layer fill as the grid and tree, so a cell's color means the
+    // same thing in all three views. An amber border singles out anything
+    // enqueued THIS step, matching the grid's "just enqueued" swatch.
+    const layerNum = built.layer[idx];
+    slot.style.background = LAYER_COLORS[(layerNum - 1) % LAYER_COLORS.length];
+    if (f.newlyQueued.includes(idx)) {
+      slot.style.borderColor = "#d9a400";
+      slot.style.borderWidth = "3px";
+    }
+    slot.textContent = `(${r},${c})`;
+
+    const isHead = pos === 0;
+    const isTail = pos === q.length - 1;
+    if (isHead || isTail) {
+      const marker = document.createElement("span");
+      marker.className = "qMarker";
+      marker.textContent = (isHead && isTail) ? "HEAD/TAIL" : isHead ? "HEAD" : "TAIL";
+      slot.appendChild(marker);
+    }
+
+    rowEl.appendChild(slot);
+  });
+}
+
+// Numbered, growing trace of every step executed so far -- e.g.
+// "(1) Put (0, 0) to queue." / "(2) Dequeue (0, 0), enqueue its down
+// neighbor (1, 0) and right neighbor (0, 1)." -- matching how you'd write
+// up a BFS trace by hand.
+function renderStepsLog() {
+  const logEl = document.getElementById("stepsLog");
+  logEl.innerHTML = "";
+  for (let i = 0; i <= frameIndex; i++) {
+    const li = document.createElement("li");
+    // stepText may contain a <span class="uline"> to underline "unvisited"
+    // -- innerHTML, not textContent, so that markup actually renders.
+    li.innerHTML = built.frames[i].stepText;
+    if (i === frameIndex) li.className = "current";
+    logEl.appendChild(li);
+  }
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+const NODE_R = 15;
+const X_SPACING = 46;
+const Y_SPACING = 54;
+const MARGIN = 26;
+
+// One color per BFS layer (depth), cycling if a maze is deep enough to need
+// it. Both the grid and the tree use this same palette, so a cell's color
+// and its layer badge point at the same BFS depth in both views. Hues are
+// spread around the color wheel (blue/green/red/purple/amber/cyan/pink/lime)
+// so no two layers -- especially neighboring ones -- read as similar.
+// Node BORDER (not fill) marks algorithm state: current / just-enqueued /
+// processed, so both pieces of information stay visible at once.
+const LAYER_COLORS = [
+  "#dbeafe", // layer 1 -- blue
+  "#dcfce7", // layer 2 -- green
+  "#fee2e2", // layer 3 -- red
+  "#ede9fe", // layer 4 -- purple
+  "#fef3c7", // layer 5 -- amber
+  "#cffafe", // layer 6 -- cyan
+  "#fce7f3", // layer 7 -- pink
+  "#ecfccb", // layer 8 -- lime
+];
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function renderTree(f) {
+  const example = EXAMPLES[currentKey];
+  const { start, target } = example;
+  const { numCols } = built;
+  const { pos, parent, root, leafCount, maxDepth } = built.treeLayout;
+  const svg = document.getElementById("treeSvg");
+  svg.innerHTML = "";
+
+  const width = MARGIN * 2 + (leafCount - 1) * X_SPACING + NODE_R * 2;
+  const height = MARGIN * 2 + maxDepth * Y_SPACING + NODE_R * 2;
+  svg.setAttribute("width", width);
+  svg.setAttribute("height", height);
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+  const px = (node) => MARGIN + NODE_R + pos[node].x * X_SPACING;
+  const py = (node) => MARGIN + NODE_R + pos[node].depth * Y_SPACING;
+
+  // Edges first (so nodes draw on top), one per visited non-root cell,
+  // appearing the moment both the child (and therefore its parent) are visited.
+  // Endpoints are pulled in by NODE_R so the line stops at each circle's
+  // edge instead of running underneath it -- needed now that processed
+  // nodes are semi-transparent and would otherwise show the line through them.
+  for (let node in pos) {
+    node = Number(node);
+    if (node === root || !f.visited[node]) continue;
+    const par = parent[node];
+    const x1 = px(par), y1 = py(par), x2 = px(node), y2 = py(node);
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const line = svgEl("line", {
+      x1: x1 + ux * NODE_R, y1: y1 + uy * NODE_R,
+      x2: x2 - ux * NODE_R, y2: y2 - uy * NODE_R,
+      stroke: "#bbb", "stroke-width": 1.6,
+    });
+    svg.appendChild(line);
+  }
+
+  // Nodes: only draw ones that are visited at this frame.
+  for (let node in pos) {
+    node = Number(node);
+    if (!f.visited[node]) continue;
+    const [r, c] = toRC(node, numCols);
+    const isHitNow = f.current === node && f.phase === "hit";
+    const isCurrent = f.current === node && !isHitNow;
+    const isNewlyQueued = f.newlyQueued.includes(node);
+    const isProcessed = f.processed && f.processed[node] && !isHitNow && !isCurrent && !isNewlyQueued;
+
+    // Fill = BFS layer color (depth 1, 2, 3, ... cycle through LAYER_COLORS).
+    // "Target found" is the one exception -- it overrides to solid green,
+    // since that's a terminal event worth calling out above the layer scheme.
+    const layerNum = built.layer[node];
+    let fill = isHitNow ? "#38b000" : LAYER_COLORS[(layerNum - 1) % LAYER_COLORS.length];
+    let fillOpacity = 1;
+
+    // Border = algorithm state, kept independent of the fill color so both
+    // "which layer" and "what's happening right now" read at the same time.
+    let stroke = "#555";
+    let strokeWidth = 1.2;
+    if (isHitNow) { stroke = "#1b6b0a"; strokeWidth = 2.5; }
+    else if (isCurrent) { stroke = "#e8590c"; strokeWidth = 3; }
+    else if (isNewlyQueued) { stroke = "#d9a400"; strokeWidth = 2.2; }
+    else if (isProcessed) { stroke = "#aaa"; strokeWidth = 1; fillOpacity = 0.45; }
+
+    const circle = svgEl("circle", {
+      cx: px(node), cy: py(node), r: NODE_R, fill, "fill-opacity": fillOpacity,
+      stroke, "stroke-width": strokeWidth,
+    });
+    svg.appendChild(circle);
+
+    // Start/target identity is drawn as a separate OUTER ring, not by
+    // overwriting the circle's own border -- overwriting it would silently
+    // break the legend's promise that node border = algorithm state (a start
+    // or target node would never show its current/enqueued/processed color).
+    // The grid still carries S/T labels too, so this ring is a bonus cue,
+    // not the only way to identify start/target in the tree.
+    let ringColor = null;
+    if (r === start.row && c === start.col) ringColor = "#1d3557";
+    if (r === target.row && c === target.col) ringColor = "#9d0208";
+    if (ringColor) {
+      svg.appendChild(svgEl("circle", {
+        cx: px(node), cy: py(node), r: NODE_R + 4, fill: "none",
+        stroke: ringColor, "stroke-width": 2,
+      }));
+    }
+
+    const text = svgEl("text", { x: px(node), y: py(node) + 3, "text-anchor": "middle", fill: isProcessed ? "#888" : "#1a1a1a" });
+    text.textContent = `${r},${c}`;
+    svg.appendChild(text);
+  }
+}
+
+function next() { if (frameIndex < built.frames.length - 1) { frameIndex++; render(); } }
+function prev() { if (frameIndex > 0) { frameIndex--; render(); } }
+function restart() { frameIndex = 0; render(); }
+
+document.getElementById("btnNext").addEventListener("click", next);
+document.getElementById("btnPrev").addEventListener("click", prev);
+document.getElementById("btnRestart").addEventListener("click", restart);
+document.querySelectorAll(".mazeBtn").forEach(btn => {
+  btn.addEventListener("click", () => loadExample(Number(btn.dataset.key)));
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" || e.code === "ArrowRight") { e.preventDefault(); next(); }
+  else if (e.code === "ArrowLeft") { e.preventDefault(); prev(); }
+  else if (e.key === "r" || e.key === "R") { restart(); }
+  else if (["1", "2", "3", "4"].includes(e.key)) { loadExample(Number(e.key)); }
+});
+
+loadExample(1);
+</script>
+</body>
+</html>
