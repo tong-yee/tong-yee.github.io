@@ -387,12 +387,19 @@
 
 <h4>What to implement</h4>
 <p>
-  Complete
-  <code>std::list&lt;Coordinate&gt; findPath(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, Coordinate start, Coordinate target)</code>
-  in <code>maze_v3_find_a_path.cpp</code>. Instead of a yes/no answer, return
-  the sequence of coordinates from <code>start</code> to <code>target</code>,
-  inclusive. If no path exists (including any of the invalid-input cases
-  from Tasks A/B), return an empty <code>std::list&lt;Coordinate&gt;</code>.
+  Complete <strong>three</strong> functions in
+  <code>maze_v3_find_a_path.cpp</code>:
+  <code>findPath()</code>, <code>backtrack()</code>, and
+  <code>releaseMemory()</code>. All three are graded directly &mdash; see
+  <a href="#grading">Grading Breakdown</a> for the point split &mdash; not
+  just inferred from whether <code>findPath()</code> happens to work.
+</p>
+<p>
+  <code>std::list&lt;Coordinate&gt; findPath(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, Coordinate start, Coordinate target)</code>:
+  instead of a yes/no answer, return the sequence of coordinates from
+  <code>start</code> to <code>target</code>, inclusive. If no path exists
+  (including any of the invalid-input cases from Tasks A/B), return an
+  empty <code>std::list&lt;Coordinate&gt;</code>.
 </p>
 
 <p>You're given a second struct:</p>
@@ -413,10 +420,26 @@
   cell that discovered them.
 </div>
 
-<h4>Given helper functions &mdash; do not modify</h4>
+<p>
+  <code>std::list&lt;Coordinate&gt; backtrack(const Node* currPtr)</code>:
+  starting from <code>currPtr</code>, follow <code>parent</code> pointers
+  back to the root (the node whose <code>parent</code> is
+  <code>nullptr</code>), pushing each position onto the <em>front</em> of
+  the returned list as you go, so the final order reads
+  <code>start &rarr; target</code> rather than
+  <code>target &rarr; start</code>. Call this once you dequeue the target.
+</p>
+<p>
+  <code>void releaseMemory(std::vector&lt;Node*&gt;&amp; nodePtrVec)</code>:
+  delete every <code>Node*</code> stored in <code>nodePtrVec</code> (every
+  node you allocated while running BFS), and set each pointer back to
+  <code>nullptr</code> after deleting it. <code>backtrack()</code> copies
+  out plain <code>Coordinate</code> values, so it's safe to release every
+  node's memory immediately afterward.
+</p>
+
+<h4>Given helper function &mdash; do not modify</h4>
 <ul class="checklist">
-  <li><code>std::list&lt;Coordinate&gt; backtrack(const Node* currPtr)</code> &mdash; walks parent pointers from a given node back to the root and returns the path in <code>start &rarr; target</code> order. Call this once you dequeue the target.</li>
-  <li><code>void releaseMemory(std::vector&lt;Node*&gt;&amp; nodePtrVec)</code> &mdash; deletes every <code>Node</code> you allocated. <code>backtrack()</code> copies out plain <code>Coordinate</code> values, so it's safe to release every node's memory immediately afterward.</li>
   <li><code>void print(...)</code> &mdash; the display/formatting harness used by <code>main()</code>. You should not need to touch it.</li>
 </ul>
 
@@ -425,7 +448,7 @@
   Every neighbor you discover must be allocated with <code>new Node{...}</code>
   and pushed into <em>both</em> the BFS queue <em>and</em> a
   <code>std::vector&lt;Node*&gt;</code> that tracks everything you've
-  allocated. Whether or not you find the target, call
+  allocated. Whether or not you find the target, call your
   <code>releaseMemory()</code> on that vector exactly once before returning
   &mdash; on the "found" path <em>after</em> calling <code>backtrack()</code>,
   and on the "queue emptied, nothing found" path. Compile and test with
@@ -435,15 +458,20 @@
     -fsanitize=address,undefined \
     -fno-omit-frame-pointer maze_v3_find_a_path.cpp</code></pre>
   Leak detection is normally included in AddressSanitizer on supported
-  systems, though this can be environment-dependent.
+  systems, though this can be environment-dependent. The autograder also
+  runs two small direct checks on <code>backtrack()</code> and
+  <code>releaseMemory()</code> themselves, using inputs it builds itself
+  &mdash; so a <code>findPath()</code> that quietly avoids calling one of
+  them (even if it otherwise returns the right path) won't earn those
+  points.
 </div>
 
 <h4>Key idea &mdash; walkthrough</h4>
 <p>
   Using the same maze and start/target as the Task B walkthrough
   (<code>maze3</code>, <code>(0,0) &rarr; (4,1)</code>), here is how the
-  <code>parent</code> pointers chain together once <code>(4,1)</code> is
-  dequeued:
+  <code>parent</code> pointers should chain together once
+  <code>(4,1)</code> is dequeued:
 </p>
 <pre><code class="language-text">(0,0) &lt;- (1,0) &lt;- (2,0) &lt;- (2,1) &lt;- (3,1) &lt;- (4,1)
   parent of (1,0) is (0,0)
@@ -452,12 +480,12 @@
   parent of (3,1) is (2,1)
   parent of (4,1) is (3,1)</code></pre>
 <p>
-  <code>backtrack()</code> starts at the <code>Node*</code> for
-  <code>(4,1)</code>, pushes each position onto the <em>front</em> of the
+  <code>backtrack()</code> should start at the <code>Node*</code> for
+  <code>(4,1)</code>, push each position onto the <em>front</em> of the
   list as it follows <code>parent</code> pointers (so the final order reads
-  start-to-target, not target-to-start). It copies the start node &mdash;
+  start-to-target, not target-to-start), copy the start node &mdash;
   the node whose <code>parent</code> is <code>nullptr</code> &mdash; and
-  stops when the traversal pointer itself becomes <code>nullptr</code>. The
+  stop when the traversal pointer itself becomes <code>nullptr</code>. The
   resulting path:
 </p>
 <pre><code class="language-text">[start](0,0)-&gt;(1,0)-&gt;(2,0)-&gt;(2,1)-&gt;(3,1)-&gt;(4,1)[end]</code></pre>
@@ -467,6 +495,7 @@
   <li>All the same invalid-input cases as Tasks A/B (empty maze, out-of-bounds or blocked <code>start</code>/<code>target</code>) &mdash; return an empty list, and make sure you haven't allocated anything yet when you hit these checks.</li>
   <li><code>start == target</code> (both open) &mdash; the path is the single-element list containing just that coordinate.</li>
   <li>No leaked or double-freed <code>Node</code>s on <em>either</em> return path (found or not found).</li>
+  <li><code>releaseMemory()</code> must set every pointer in the vector back to <code>nullptr</code> after deleting it, not just delete it &mdash; this is checked directly, separately from whether anything leaked.</li>
 </ul>
 
 <h2 id="grading">Grading Breakdown</h2>
@@ -474,7 +503,7 @@
   <tr><th>Task</th><th>File</th><th>Gradescope assignment</th><th>Points</th></tr>
   <tr><td>A &mdash; fixed-width <code>reachable()</code></td><td><code>maze_v1_fixed_width.cpp</code></td><td>P2: Maze &ndash; Task A</td><td>25</td></tr>
   <tr><td>B &mdash; ragged <code>reachable()</code></td><td><code>maze_v2_ragged.cpp</code></td><td>P2: Maze &ndash; Task B</td><td>35</td></tr>
-  <tr><td>C &mdash; <code>findPath()</code> with memory management</td><td><code>maze_v3_find_a_path.cpp</code></td><td>P2: Maze &ndash; Task C</td><td>40</td></tr>
+  <tr><td>C &mdash; <code>findPath()</code>, <code>backtrack()</code>, <code>releaseMemory()</code></td><td><code>maze_v3_find_a_path.cpp</code></td><td>P2: Maze &ndash; Task C</td><td>40</td></tr>
   <tr><td><strong>Total</strong></td><td></td><td></td><td><strong>100</strong></td></tr>
 </table>
 <p>
@@ -483,10 +512,13 @@
   assignment (<code>maze_v1_fixed_width.cpp</code> to the Task A
   assignment, and so on), not all three together in one submission. Do not
   rename the required files, structs, or functions. You may add tests to
-  <code>main()</code>, but do not remove the provided tests. For Task C,
-  points are reserved specifically for leak-free memory management,
-  checked by compiling your submission with sanitizers enabled. All three
-  assignments are due <strong>October 8, 2026</strong>.
+  <code>main()</code>, but do not remove the provided tests. Task C's 40
+  points break down as 24 for <code>findPath()</code>'s path-finding
+  correctness, 3 for a direct check of <code>backtrack()</code>, 3 for a
+  direct check of <code>releaseMemory()</code>, and 10 reserved
+  specifically for leak-free memory management, checked by compiling your
+  submission with sanitizers enabled. All three assignments are due
+  <strong>October 8, 2026</strong>.
 </p>
 <p>
   Each task's autograder draws its hidden tests from a larger pool of maze
@@ -506,17 +538,15 @@
   <a href="maze_v3_find_a_path.cpp" download>maze_v3_find_a_path.cpp</a>.
   Right-click &rarr; "Save Link As&hellip;" if clicking just opens the raw
   text in your browser instead of downloading it. Each file already
-  compiles as-is (with a stub that returns <code>false</code> / an empty
-  list) and already contains everything shown below plus the full
-  <code>main()</code>, includes, and (for Task C) the given helper
-  functions. The excerpts below are a preview of just the part you need to
-  change, not the complete files.
+  compiles as-is (with stubs that return <code>false</code> / an empty
+  list, or do nothing yet) and already contains everything shown below
+  plus the full <code>main()</code> and includes. The excerpts below are a
+  preview of just the part you need to change, not the complete files.
 </p>
 <p>
   The struct definitions and function prototypes below are fixed &mdash; do
   not change their signatures. Replace each <code>// TODO</code> with your
-  implementation. <code>main()</code>, <code>backtrack()</code>,
-  <code>releaseMemory()</code>, and <code>print()</code> are already
+  implementation. <code>main()</code> and <code>print()</code> are already
   complete and should not need changes.
 </p>
 
@@ -570,8 +600,8 @@ struct Node {
 // - Rows may have different numbers of columns.
 // - A value of 0 represents an accessible cell.
 std::list&lt;Coordinate&gt; findPath(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, Coordinate start, Coordinate target);
-std::list&lt;Coordinate&gt; backtrack(const Node* currPtr);          // given, do not modify
-void releaseMemory(std::vector&lt;Node*&gt;&amp; nodePtrVec);            // given, do not modify
+std::list&lt;Coordinate&gt; backtrack(const Node* currPtr);          // TODO: implement below
+void releaseMemory(std::vector&lt;Node*&gt;&amp; nodePtrVec);            // TODO: implement below
 void print(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, Coordinate start, Coordinate target); // given, do not modify
 
 std::list&lt;Coordinate&gt; findPath(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, Coordinate start, Coordinate target) {
@@ -581,6 +611,21 @@ std::list&lt;Coordinate&gt; findPath(const std::vector&lt;std::vector&lt;int&gt;
   // requirements -- every `new Node` must end up in nodePtrVec and be
   // released via releaseMemory() before you return, on every path.
   return emptyLst;
+}
+
+std::list&lt;Coordinate&gt; backtrack(const Node* currPtr) {
+  std::list&lt;Coordinate&gt; coordLst;
+  // TODO: starting at currPtr, follow parent pointers back to the root
+  // (the node whose parent is nullptr), pushing each position onto the
+  // FRONT of coordLst as you go, so the final order reads
+  // start -> ... -> target rather than target -> ... -> start.
+  return coordLst;
+}
+
+void releaseMemory(std::vector&lt;Node*&gt;&amp; nodePtrVec) {
+  // TODO: delete every Node* stored in nodePtrVec (every node you
+  // allocated with `new Node{...}` while running BFS), and set each
+  // pointer back to nullptr after deleting it.
 }</code></pre>
 
 <footer>
