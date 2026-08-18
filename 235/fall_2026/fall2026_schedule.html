@@ -223,7 +223,7 @@
     <td class="lec-num">1</td>
     <td>Tu, 9/1</td>
     <td>Welcome &amp; OOP Review</td>
-    <td>Course overview; constructors, objects, references, pass-by-reference; inheritance &amp; polymorphism (quick review); Gradescope setup</td>
+    <td>Course overview; constructors, objects, references, pass-by-reference; Gradescope setup</td>
     <td></td>
     <td><span class="badge b-proj">&#35;1 Posted</span></td>
   </tr>
@@ -231,8 +231,8 @@
   <tr>
     <td class="lec-num">2</td>
     <td>Th, 9/3</td>
-    <td>Templates &mdash; Function Templates &amp; Class Templates</td>
-    <td>Why templates exist; function templates (<code>max&lt;T&gt;</code>, swap); class templates; type parameters; template implementations in headers</td>
+    <td>Inheritance &amp; Polymorphism</td>
+    <td>Base/derived classes, the &ldquo;is-a&rdquo; relationship, <code>protected</code> members, overriding; base-class pointers &amp; references, <code>virtual</code> functions, runtime dispatch, virtual destructors; one pure-virtual abstract interface (<code>Shape</code> &rarr; <code>Circle</code>, <code>Rectangle</code>). Forward pointer: this pattern reappears in P2&rsquo;s <code>MazeSolver</code> hierarchy.</td>
     <td></td>
     <td></td>
   </tr>
@@ -240,8 +240,8 @@
   <tr>
     <td class="lec-num">3</td>
     <td>Tu, 9/8</td>
-    <td>MiniVector Interface &amp; Memory Management</td>
-    <td>MiniVector interface design (15 min); stack vs. heap, pointer arithmetic, <code>new</code> / <code>delete</code>, null pointers, memory leaks</td>
+    <td>Templates; MiniVector Interface &amp; Memory Management</td>
+    <td>Why templates exist; function templates (<code>max&lt;T&gt;</code>, swap), class templates; MiniVector interface design; stack vs. heap, pointer arithmetic, <code>new</code> / <code>delete</code>, null pointers, memory leaks &mdash; detailed pointer practice reinforced in Ex&nbsp;1 rather than repeated at length here</td>
     <td><span class="badge b-ex">Ex&nbsp;1 Posted</span>
         <div class="sub">Pointer Practice</div></td>
     <td></td>
@@ -277,14 +277,14 @@
 
   <!-- ═══ PROJECT 2 BANNER ═══ -->
   <tr class="unit-banner">
-    <td colspan="6">&#127744;&nbsp; PROJECT 2 &bull; Maze Solver &nbsp;<span style="font-weight:400; opacity:.85;">(Linked Lists, Stacks, Queues &amp; DFS/BFS)</span>&nbsp; &mdash;&nbsp; Weeks 4&ndash;6</td>
+    <td colspan="6">&#127744;&nbsp; PROJECT 2 &bull; Maze Solver &nbsp;<span style="font-weight:400; opacity:.85;">(Linked Lists, Stacks, Queues, DFS/BFS &amp; Polymorphic Solvers)</span>&nbsp; &mdash;&nbsp; Weeks 4&ndash;6</td>
   </tr>
 
   <tr>
     <td class="lec-num">7</td>
     <td>Tu, 9/22</td>
     <td>Abstract Data Types; Singly Linked List &mdash; Nodes &amp; Traversal</td>
-    <td>Interface vs. implementation, node structure, head pointer, sequential access</td>
+    <td>Interface vs. implementation, node structure, head pointer, sequential access; <code>MazeSolver</code> abstract base class applies Lec&nbsp;2&rsquo;s inheritance/polymorphism (<code>DFSSolver</code>, <code>BFSSolver</code>)</td>
     <td></td>
     <td><a href="projects/p2/p2_maze.html" data-available="2026-09-22" style="text-decoration:none;"><span class="badge b-proj">&#35;2 Posted</span></a></td>
   </tr>
@@ -331,7 +331,7 @@
     <td class="lec-num">12</td>
     <td>Th, 10/8</td>
     <td>BFS; DFS vs. BFS Comparison; Midterm Review</td>
-    <td>Level-order traversal with explicit queue, shortest path, time/space tradeoffs, exam Q&amp;A</td>
+    <td>Level-order traversal with explicit queue, shortest path, time/space tradeoffs; calling <code>solve()</code> through a <code>MazeSolver*</code> without knowing the concrete type; exam Q&amp;A</td>
     <td></td>
     <td><span class="badge b-due">&#35;2 Due</span></td>
   </tr>
@@ -538,7 +538,7 @@
 <footer>
   CSCI 235 &bull; Data Structures &bull; Hunter College, CUNY &bull; Fall 2026
   &nbsp;&mdash;&nbsp;
-  Last updated: July 2026
+  Last updated: August 2026
 </footer>
 
 
