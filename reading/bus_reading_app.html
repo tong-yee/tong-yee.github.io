@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bus & Animals Reading Adventure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bus-yellow:#FFC93C;
+    --bus-yellow-dark:#F2A900;
+    --sky:#DCEEFF;
+    --grass:#FFE9D2;
+    --ink:#2B2B3A;
+    --correct:#1E8E5A;
+    --correct-bg:#E3F6EC;
+    --wrong:#C0392B;
+    --wrong-bg:#FCEAE8;
+    --card:#FFFFFF;
+    --orange:#FF7A29;
+    --orange-dark:#E85D04;
+    --purple:#1E6FD9;
+    --purple-dark:#144F9E;
+    --shadow: 0 8px 0 rgba(0,0,0,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito', system-ui, sans-serif;
+    background: linear-gradient(180deg, var(--sky) 0%, var(--sky) 55%, var(--grass) 55%, var(--grass) 100%);
+    min-height:100vh;
+    color:var(--ink);
+    padding: 20px 14px 60px;
+  }
+  h1,h2,h3, .display{
+    font-family:'Baloo 2', system-ui, sans-serif;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  header h1{
+    font-size: clamp(28px, 6vw, 42px);
+    color: var(--purple-dark);
+    margin: 6px 0 4px;
+  }
+  header p{
+    font-size:18px;
+    margin:0;
+    color:#4b4b5e;
+  }
+  .roadline{
+    height:6px;
+    border-radius:3px;
+    background: repeating-linear-gradient(90deg, var(--ink) 0 24px, transparent 24px 44px);
+    opacity:.25;
+    margin: 14px 0 22px;
+  }
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stars{
+    background:var(--card);
+    border-radius:999px;
+    padding:10px 18px;
+    box-shadow: var(--shadow);
+    font-size:20px;
+    font-weight:800;
+    font-family:'Baloo 2', sans-serif;
+    color:var(--bus-yellow-dark);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  button{
+    font-family:'Baloo 2', sans-serif;
+    cursor:pointer;
+    border:none;
+    border-radius:16px;
+    font-weight:700;
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  button:active{ transform: translateY(4px); box-shadow:none !important; }
+  .btn{
+    padding:12px 20px;
+    font-size:17px;
+    background:var(--orange);
+    color:white;
+    box-shadow: 0 5px 0 var(--orange-dark);
+  }
+  .btn.secondary{
+    background:white;
+    color:var(--purple-dark);
+    box-shadow: 0 5px 0 #cfe3fb;
+    border: 2px solid #dcebfd;
+  }
+  .btn.yellow{
+    background:var(--bus-yellow);
+    color:#5a3c00;
+    box-shadow: 0 5px 0 var(--bus-yellow-dark);
+  }
+  .btn:disabled{ opacity:.5; cursor:default; }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin: 18px 0;
+  }
+  .card{
+    background:var(--card);
+    border-radius:24px;
+    padding:22px 22px 26px;
+    box-shadow: 0 12px 0 rgba(30,111,217,0.10), 0 2px 18px rgba(0,0,0,0.06);
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .bus-strip{
+    font-size:30px;
+    letter-spacing:6px;
+    margin-bottom:6px;
+  }
+  .tag{
+    display:inline-block;
+    background:#E4F0FF;
+    color:var(--purple-dark);
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    padding:4px 12px;
+    border-radius:999px;
+    margin-bottom:10px;
+  }
+  .passage{
+    font-size:19px;
+    line-height:1.6;
+    background:#FFFBF0;
+    border-left:6px solid var(--bus-yellow);
+    padding:14px 16px;
+    border-radius:12px;
+    margin-bottom:16px;
+  }
+  .question{
+    font-size:22px;
+    font-weight:800;
+    font-family:'Baloo 2',sans-serif;
+    color:var(--purple-dark);
+    margin-bottom:14px;
+  }
+  .choices{
+    display:grid;
+    gap:12px;
+  }
+  .choice{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    text-align:left;
+    width:100%;
+    background:#F8F8FC;
+    border:3px solid #ECECF6;
+    border-radius:16px;
+    padding:14px 16px;
+    font-size:18px;
+    font-family:'Nunito',sans-serif;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .choice:not(:disabled):hover{ border-color: var(--orange); }
+  .choice .letter{
+    flex:0 0 auto;
+    width:32px;height:32px;
+    border-radius:50%;
+    background:var(--orange);
+    color:white;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2',sans-serif;
+    font-size:16px;
+  }
+  .choice.correct{ background:var(--correct-bg); border-color:var(--correct); }
+  .choice.correct .letter{ background:var(--correct); }
+  .choice.wrong{ background:var(--wrong-bg); border-color:var(--wrong); }
+  .choice.wrong .letter{ background:var(--wrong); }
+  .explain{
+    margin-top:6px;
+    font-size:15px;
+    font-weight:600;
+    line-height:1.4;
+  }
+  .explain.correct-text{ color:var(--correct); }
+  .explain.wrong-text{ color:var(--wrong); }
+  .feedback{
+    margin-top:16px;
+    font-family:'Baloo 2',sans-serif;
+    font-size:20px;
+    text-align:center;
+    padding:12px;
+    border-radius:14px;
+  }
+  .feedback.good{ background:var(--correct-bg); color:var(--correct); }
+  .feedback.bad{ background:var(--wrong-bg); color:var(--wrong); }
+  .nextrow{
+    display:flex; justify-content:center; margin-top:16px;
+  }
+  details{
+    background:var(--card);
+    border-radius:20px;
+    padding:16px 20px;
+    box-shadow: var(--shadow);
+    margin-top:10px;
+  }
+  summary{
+    font-family:'Baloo 2',sans-serif;
+    font-size:18px;
+    font-weight:700;
+    color:var(--purple-dark);
+    cursor:pointer;
+  }
+  .form-grid{ display:grid; gap:10px; margin-top:14px;}
+  .form-grid label{ font-weight:800; font-size:14px; color:#555; margin-bottom:2px; display:block;}
+  .form-grid textarea, .form-grid input[type=text]{
+    width:100%; padding:10px 12px; border-radius:10px; border:2px solid #ECECF6;
+    font-family:'Nunito',sans-serif; font-size:15px;
+  }
+  .choice-row{ display:flex; align-items:center; gap:8px; }
+  .choice-row input[type=text]{ flex:1; }
+  .note{ font-size:13px; color:#777; margin-top:10px; }
+  footer{ text-align:center; margin-top:30px; font-size:13px; color:#7a7a8c; }
+  .badge-new{
+    display:inline-block; background:var(--bus-yellow); color:#5a3c00; font-family:'Baloo 2',sans-serif;
+    font-weight:700; font-size:12px; padding:2px 10px; border-radius:999px; margin-left:6px;
+  }
+
+  /* ---------- Animated question scenes ---------- */
+  .scene{
+    position:relative;
+    min-height:60px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px 14px;
+    overflow:hidden;
+    margin-bottom:6px;
+    padding:2px 4px;
+  }
+  .scene span{ display:inline-block; font-size:34px; line-height:1; will-change:transform,opacity; }
+  .scene span.large{ font-size:46px; }
+  .scene span.small{ font-size:22px; }
+
+  @keyframes popBounce{ 0%{transform:scale(0); opacity:0;} 60%{transform:scale(1.25); opacity:1;} 100%{transform:scale(1); opacity:1;} }
+  .pop{ animation: popBounce .5s ease-out both; }
+
+  @keyframes dartAcross{ 0%{transform:translateX(-40px); opacity:0;} 12%{opacity:1;} 78%{opacity:1;} 100%{transform:translateX(240px); opacity:0;} }
+  .dart{ animation: dartAcross 2.4s ease-in-out infinite; }
+
+  @keyframes bounceSoft{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+  .bounce-soft{ animation: bounceSoft 1.6s ease-in-out infinite; }
+
+  @keyframes floatHeart{ 0%{transform:translateY(0) scale(.8); opacity:0;} 20%{opacity:1;} 100%{transform:translateY(-42px) scale(1.1); opacity:0;} }
+  .float-heart{ font-size:22px !important; animation: floatHeart 2s ease-in infinite; }
+
+  @keyframes hopMove{ 0%,100%{transform:translateY(0);} 30%{transform:translateY(-14px);} 50%{transform:translateY(0);} }
+  .hop{ animation: hopMove 1s ease-in-out infinite; }
+
+  @keyframes waddleMove{ 0%,100%{transform:translateX(0) rotate(0deg);} 25%{transform:translateX(6px) rotate(8deg);} 75%{transform:translateX(-6px) rotate(-8deg);} }
+  .waddle{ animation: waddleMove 1.1s ease-in-out infinite; }
+
+  @keyframes gallopMove{ 0%{transform:translateX(-8px);} 50%{transform:translateX(10px) scale(1.06);} 100%{transform:translateX(-8px);} }
+  .gallop{ animation: gallopMove .7s ease-in-out infinite; }
+
+  @keyframes wiggleMove{ 0%,100%{transform:rotate(-7deg);} 50%{transform:rotate(7deg);} }
+  .wiggle{ animation: wiggleMove .6s ease-in-out infinite; }
+
+  @keyframes driftIn{ 0%{transform:translateX(-80px); opacity:0;} 30%{opacity:1;} 100%{transform:translateX(0); opacity:1;} }
+  .drift-in{ animation: driftIn 1.4s ease-out both; }
+
+  @keyframes flashBolt{ 0%,100%{opacity:.15; transform:scale(.85);} 50%{opacity:1; transform:scale(1.15);} }
+  .flash{ animation: flashBolt 1.1s ease-in-out infinite; }
+
+  @keyframes shrinkVanish{ 0%{transform:scale(1); opacity:1;} 55%{transform:scale(1); opacity:1;} 100%{transform:scale(0); opacity:0;} }
+  .shrink-vanish{ animation: shrinkVanish 2.2s ease-in infinite; }
+
+  @keyframes pulseSpot{ 0%,100%{transform:scale(1); opacity:.85;} 50%{transform:scale(1.18); opacity:1;} }
+  .pulse-spot{ animation: pulseSpot 1.6s ease-in-out infinite; }
+
+  @keyframes spinSlow{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  .spin-slow{ animation: spinSlow 7s linear infinite; }
+
+  @media (prefers-reduced-motion: reduce){
+    .scene *{ animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div style="font-size:46px;">🚌</div>
+    <h1>Bus &amp; Animals Reading Adventure</h1>
+    <p>Read, listen, and figure out the right answer — one bus stop at a time!</p>
+  </header>
+  <div class="roadline"></div>
+
+  <div class="topbar">
+    <div class="stars">⭐ <span id="starCount">0</span> stars</div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn secondary" id="readBtn" type="button">🔊 Read to Me</button>
+      <button class="btn secondary" id="stopBtn" type="button" style="display:none;">⏹ Stop</button>
+      <button class="btn secondary" id="musicBtn" type="button">🔈 Music: Off</button>
+    </div>
+  </div>
+
+  <div class="card" id="qCard">
+    <div class="scene" id="emojiStrip"></div>
+    <span class="tag" id="qTag">Question 1</span>
+    <div class="passage" id="passageText"></div>
+    <div class="question" id="questionText"></div>
+    <div class="choices" id="choicesBox"></div>
+    <div class="feedback" id="feedbackBox" style="display:none;"></div>
+    <div class="nextrow">
+      <button class="btn" id="nextBtn" type="button" style="display:none;">Next Question ➡️</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn yellow" id="shuffleBtn" type="button">🔀 Shuffle &amp; Restart</button>
+    <button class="btn yellow" id="moreBtn" type="button">✨ More Practice Problems</button>
+  </div>
+
+  <details id="addPanel">
+    <summary>➕ Add Your Own Question</summary>
+    <div class="form-grid">
+      <div>
+        <label>Short passage (a few sentences)</label>
+        <textarea id="inPassage" rows="3" placeholder="Type a short story here..."></textarea>
+      </div>
+      <div>
+        <label>Question</label>
+        <input type="text" id="inQuestion" placeholder="What do you want to ask?">
+      </div>
+      <div>
+        <label>Answer choices &amp; explanations (pick the correct one)</label>
+        <div id="choiceInputs"></div>
+      </div>
+      <div>
+        <label>Picture emojis (optional, e.g. 🚌🐶🐱)</label>
+        <input type="text" id="inEmoji" placeholder="🚌🐶🐱">
+      </div>
+      <div>
+        <button class="btn" id="addQBtn" type="button">Add to Our Deck</button>
+      </div>
+      <p class="note">New questions you add stay only for this browsing session — they'll be gone if you refresh the page. Explanations for each choice help your reader understand not just <em>what</em> the answer is, but <em>why</em>.</p>
+    </div>
+  </details>
+
+  <footer>Made for practice reading, one bus ride at a time. 🚌💛</footer>
+</div>
+
+<script>
+// ---------- Question bank ----------
+const baseQuestions = [
+  {
+    emoji:"🚌🐑🐑🐑🐄🐄🐐",
+    scene:'<span class="pop" style="animation-delay:.0s">🐑</span><span class="pop" style="animation-delay:.15s">🐑</span><span class="pop" style="animation-delay:.3s">🐑</span><span class="pop" style="animation-delay:.45s">🐄</span><span class="pop" style="animation-delay:.6s">🐄</span><span class="pop" style="animation-delay:.75s">🐐</span>',
+    passage:"Mia rode the yellow school bus every morning. Today, the bus stopped by a farm. Mia saw three fluffy sheep, two spotted cows, and one baby goat standing by the fence. She counted six animals in all before the bus drove away.",
+    question:"How many animals did Mia see in total?",
+    choices:["5","6","7","8"],
+    correct:1,
+    explain:[
+      "Not quite! Let's count again: 3 sheep + 2 cows + 1 goat = 6. Five is one too few.",
+      "That's right! 3 sheep + 2 cows + 1 goat = 6 animals altogether.",
+      "Close, but that's one too many. Try recounting the sheep, cows, and goat.",
+      "That's too many. Try adding 3 + 2 + 1 again, slowly."
+    ]
+  },
+  {
+    emoji:"🚌🦌🦌🦌",
+    scene:'<span class="dart">🦌</span>',
+    passage:"The bus bumped down the dirt road. Suddenly, a herd of deer darted across the path. The driver stopped quickly so no one would get hurt. All the kids gasped and pointed out the window.",
+    question:"What does \"darted\" mean in this story?",
+    choices:["Walked very slowly","Moved quickly and suddenly","Sat down and rested","Made a loud noise"],
+    correct:1,
+    explain:[
+      "Not quite — \"darted\" isn't about slow, careful walking. A slow word would be \"strolled.\"",
+      "Yes! \"Darted\" means to move fast, almost like a quick dash — that's why the driver had to stop!",
+      "No — the deer didn't stop to rest. They kept moving fast across the road.",
+      "Not quite — \"darted\" describes movement, not sound."
+    ]
+  },
+  {
+    emoji:"🚌🥪😊",
+    scene:'<span class="bounce-soft">🥪</span><span class="float-heart" style="animation-delay:.3s">💛</span><span class="float-heart" style="animation-delay:1s">💛</span>',
+    passage:"Leo forgot his lunchbox on the kitchen table. When he got on the bus, his stomach growled and he sighed. His friend Ana noticed and offered to share her sandwich. Leo smiled and said, \"Thank you, Ana!\"",
+    question:"How did Leo feel after Ana offered to share her sandwich?",
+    choices:["Angry","Grateful","Bored","Scared"],
+    correct:1,
+    explain:[
+      "No — Leo wasn't upset with Ana. He thanked her instead of getting angry.",
+      "That's right! Leo smiled and said \"thank you\" — that shows he felt grateful, or thankful, for Ana's kindness.",
+      "No — nothing in the story shows Leo was bored. He was hungry and worried about lunch.",
+      "No — there's nothing scary happening in this story."
+    ]
+  },
+  {
+    emoji:"🐇🦆🐴",
+    scene:'<span class="hop">🐇</span><span class="waddle">🦆</span><span class="gallop">🐴</span>',
+    passage:"Every animal on Farmer Joe's bus route is different. Rabbits hop, ducks waddle, and horses gallop. But every single morning, they all wait quietly by the fence for their food. Farmer Joe says patience is something every animal can learn.",
+    question:"What is this passage mostly about?",
+    choices:["How fast different animals can run","Animals on a farm that are different but all wait patiently","A bus that only picks up ducks","Farmer Joe's morning coffee"],
+    correct:1,
+    explain:[
+      "Not quite — the passage isn't really focused on speed or racing.",
+      "Yes! The passage shows different animals, but the main point is that they're all patient together.",
+      "No — the bus route is just how Farmer Joe visits the animals, not something only for ducks.",
+      "No — there's no mention of coffee anywhere in the passage."
+    ]
+  },
+  {
+    emoji:"🚌👦👧👧👧",
+    scene:'<span class="pop" style="animation-delay:0s">🧒</span><span class="pop" style="animation-delay:.4s">👦</span><span class="pop" style="animation-delay:.8s">👧</span><span class="pop" style="animation-delay:1.2s">🧍</span>',
+    passage:"First, the school bus picked up Sam. Next, it stopped for the twins, Jack and Jill. Then it turned onto Elm Street to pick up Priya. Finally, it arrived at school right as the bell rang.",
+    question:"Who did the bus pick up right after Sam?",
+    choices:["Priya","Jack and Jill","The bell","Farmer Joe"],
+    correct:1,
+    explain:[
+      "Not yet — Priya was picked up after Jack and Jill, not right after Sam.",
+      "That's right! The word \"next\" tells us Jack and Jill were picked up right after Sam.",
+      "No — the bell isn't a person the bus can pick up. It just rang when they arrived at school.",
+      "No — Farmer Joe isn't part of this story."
+    ]
+  },
+  {
+    emoji:"🚌🐒🐒🐒🐒🍌",
+    scene:'<span class="pop" style="animation-delay:0s">🐒</span><span class="pop" style="animation-delay:.15s">🐒</span><span class="pop" style="animation-delay:.3s">🐒</span><span class="pop" style="animation-delay:.45s">🐒</span><span class="pop" style="animation-delay:.9s">🐒</span><span class="pop" style="animation-delay:1.05s">🐒</span><span class="pop" style="animation-delay:1.2s">🐒</span><span class="shrink-vanish" style="animation-delay:1.8s">🐒</span><span class="pop" style="animation-delay:2s">🍌</span>',
+    passage:"At the zoo bus stop, 4 monkeys climbed aboard first. Then 3 more monkeys hopped on at the next stop. One monkey decided to stay behind and eat a banana instead.",
+    question:"How many monkeys are riding the bus now?",
+    choices:["6","7","8","5"],
+    correct:0,
+    explain:[
+      "That's right! 4 + 3 = 7 monkeys got on, but 1 stayed behind, so 7 − 1 = 6 are riding.",
+      "Close, but don't forget — one monkey stayed behind to eat a banana, so it isn't riding.",
+      "That's too many — recount: 4 + 3 monkeys got on, then subtract the 1 that stayed behind.",
+      "Not quite — try adding 4 + 3 first, then subtract 1."
+    ]
+  },
+  {
+    emoji:"🚌🛞💨",
+    scene:'<span class="wiggle">🚌</span><span class="small">⛰️</span>',
+    passage:"The old bus engine groaned and wheezed every time it climbed the steep hill. Ms. Patel patted the dashboard and said, \"Just a little further, old friend.\"",
+    question:"What does \"wheezed\" suggest about the bus engine?",
+    choices:["It was working perfectly and quietly","It was making a tired, struggling sound","It was brand new","It was painted a bright color"],
+    correct:1,
+    explain:[
+      "No — \"groaned and wheezed\" shows the engine was struggling, not running smoothly.",
+      "Yes! \"Wheezed\" sounds like heavy, tired breathing — it shows the old engine was working hard to climb the hill.",
+      "No — the passage says it's an \"old\" engine, not a new one.",
+      "No — the passage doesn't mention color at all."
+    ]
+  },
+  {
+    emoji:"🚌⛈️☂️",
+    scene:'<span class="drift-in">🌥️</span><span class="flash" style="animation-delay:.6s">⚡</span><span class="pop" style="animation-delay:1.2s">☂️</span>',
+    passage:"Dark clouds rolled in as the bus doors opened for the last stop. Thunder rumbled in the distance. The bus driver looked at the sky and said, \"Everyone, grab your umbrellas before you go!\"",
+    question:"What will most likely happen next?",
+    choices:["It will start raining soon","The sun will come out","The bus will fly away","All the kids will fall asleep"],
+    correct:0,
+    explain:[
+      "That's right! Dark clouds and thunder are signs that rain is coming soon — that's why the driver reminded everyone about umbrellas.",
+      "Not likely — dark clouds and thunder usually mean rain, not sunshine.",
+      "No — buses can't fly! That's not something that could really happen.",
+      "No — nothing in the story suggests the kids are sleepy."
+    ]
+  },
+  {
+    emoji:"☀️🔲🔲",
+    scene:'<span class="spin-slow">☀️</span><span class="pulse-spot small" style="animation-delay:.3s">🔲</span>',
+    passage:"Dark _5_ on the Sun are called sunspots. They look dark because they are cooler than the rest of the Sun. Large spots may take weeks to fade away, while small ones _6_ in just hours.",
+    question:"Which word best fills in blank 5?",
+    choices:["patches","dust","kits","leaves"],
+    correct:0,
+    explain:[
+      "Yes! A \"patch\" is a small area on a bigger surface — that's exactly what a sunspot is: a dark patch on the Sun.",
+      "Not quite — dust is made of tiny floating particles, not a spot on the Sun's surface.",
+      "Not quite — \"kits\" are sets of tools or baby animals. That doesn't fit a spot on the Sun.",
+      "Not quite — leaves grow on plants, not on the Sun."
+    ]
+  },
+  {
+    emoji:"☀️⏳💨",
+    scene:'<span class="pulse-spot large">🔲</span><span class="shrink-vanish small" style="animation-delay:.6s">🔳</span>',
+    passage:"Dark _5_ on the Sun are called sunspots. They look dark because they are cooler than the rest of the Sun. Large spots may take weeks to fade away, while small ones _6_ in just hours.",
+    question:"Which word best fills in blank 6?",
+    choices:["remember","swim","vanish","use"],
+    correct:2,
+    explain:[
+      "Not quite — \"remember\" means to think of something from the past. It doesn't describe a spot disappearing.",
+      "Not quite — \"swim\" means moving through water. Sunspots don't swim!",
+      "Yes! \"Vanish\" means to disappear. Small sunspots disappear quickly, in just hours.",
+      "Not quite — \"use\" means to make use of something. That doesn't fit here."
+    ]
+  }
+];
+
+// user-added questions (session only, per no-localStorage rule)
+let customQuestions = [];
+
+// ---------- State ----------
+let deck = [];       // shuffled queue of question objects to show
+let current = null;  // current question object
+let answered = false;
+let starCount = 0;
+
+const els = {
+  starCount: document.getElementById('starCount'),
+  emojiStrip: document.getElementById('emojiStrip'),
+  qTag: document.getElementById('qTag'),
+  passageText: document.getElementById('passageText'),
+  questionText: document.getElementById('questionText'),
+  choicesBox: document.getElementById('choicesBox'),
+  feedbackBox: document.getElementById('feedbackBox'),
+  nextBtn: document.getElementById('nextBtn'),
+  readBtn: document.getElementById('readBtn'),
+  stopBtn: document.getElementById('stopBtn'),
+  musicBtn: document.getElementById('musicBtn'),
+  shuffleBtn: document.getElementById('shuffleBtn'),
+  moreBtn: document.getElementById('moreBtn'),
+  addQBtn: document.getElementById('addQBtn'),
+  choiceInputs: document.getElementById('choiceInputs'),
+  inPassage: document.getElementById('inPassage'),
+  inQuestion: document.getElementById('inQuestion'),
+  inEmoji: document.getElementById('inEmoji'),
+};
+
+let qNumber = 0;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function buildDeck(){
+  deck = shuffle([...baseQuestions, ...customQuestions]);
+}
+
+// ---------- Procedural "More Practice Problems" generator ----------
+const animalBank = [
+  {name:"sheep", emoji:"🐑"}, {name:"cows", emoji:"🐄"}, {name:"goats", emoji:"🐐"},
+  {name:"rabbits", emoji:"🐰"}, {name:"chicks", emoji:"🐥"}, {name:"puppies", emoji:"🐶"},
+  {name:"kittens", emoji:"🐱"}, {name:"ducks", emoji:"🦆"}, {name:"monkeys", emoji:"🐒"}
+];
+
+function makeProceduralQuestion(){
+  let a = animalBank[Math.floor(Math.random()*animalBank.length)];
+  let b = animalBank[Math.floor(Math.random()*animalBank.length)];
+  while(b.name === a.name){ b = animalBank[Math.floor(Math.random()*animalBank.length)]; }
+  const c1 = 1 + Math.floor(Math.random()*5);
+  const c2 = 1 + Math.floor(Math.random()*5);
+  const sum = c1 + c2;
+
+  // build 4 unique choice numbers including the sum
+  let pool = new Set([sum]);
+  while(pool.size < 4){
+    const delta = (Math.floor(Math.random()*5) - 2); // -2..2
+    const candidate = sum + delta;
+    if(candidate > 0) pool.add(candidate);
+  }
+  const options = shuffle([...pool]);
+  const correctIndex = options.indexOf(sum);
+
+  const explain = options.map(n => {
+    if(n === sum){
+      return `That's right! ${c1} + ${c2} = ${sum} ${b.name.length? "animals":""}.`.replace("  "," ");
+    }
+    return `Not quite — try adding ${c1} and ${c2} together carefully. It isn't ${n}.`;
+  });
+
+  let sceneHtml = "";
+  let delay = 0;
+  for(let i=0;i<c1;i++){ sceneHtml += `<span class="pop" style="animation-delay:${delay.toFixed(2)}s">${a.emoji}</span>`; delay += 0.15; }
+  delay += 0.2;
+  for(let i=0;i<c2;i++){ sceneHtml += `<span class="pop" style="animation-delay:${delay.toFixed(2)}s">${b.emoji}</span>`; delay += 0.15; }
+
+  return {
+    emoji: `🚌${a.emoji.repeat(Math.min(c1,4))}${b.emoji.repeat(Math.min(c2,4))}`,
+    scene: sceneHtml,
+    passage: `On the way to school, a bus stopped and ${c1} ${a.name} climbed aboard ${a.emoji}. At the very next stop, ${c2} ${b.name} hopped on too ${b.emoji}. Nobody got off.`,
+    question: "How many animals are riding along now?",
+    choices: options.map(String),
+    correct: correctIndex,
+    explain: explain,
+    generated: true
+  };
+}
+
+function fallbackScene(emojiStr){
+  const chars = Array.from(emojiStr || "🚌");
+  return chars.map((ch,i) => `<span class="pop" style="animation-delay:${(i*0.15).toFixed(2)}s">${ch}</span>`).join('');
+}
+
+// ---------- Rendering ----------
+function renderQuestion(q){
+  current = q;
+  answered = false;
+  qNumber++;
+  els.qTag.textContent = q.generated ? `Practice Problem ${qNumber} ✨` : `Question ${qNumber}`;
+  els.emojiStrip.innerHTML = q.scene || fallbackScene(q.emoji);
+  els.passageText.textContent = q.passage;
+  els.questionText.textContent = q.question;
+  els.feedbackBox.style.display = "none";
+  els.feedbackBox.className = "feedback";
+  els.nextBtn.style.display = "none";
+  els.choicesBox.innerHTML = "";
+
+  const letters = ["A","B","C","D"];
+  q.choices.forEach((choiceText, i) => {
+    const btn = document.createElement('button');
+    btn.className = "choice";
+    btn.type = "button";
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span class="choice-body"><span class="choice-main">${choiceText}</span><div class="explain" style="display:none;"></div></span>`;
+    btn.addEventListener('click', () => selectChoice(i, btn));
+    els.choicesBox.appendChild(btn);
+  });
+}
+
+function selectChoice(i, btnEl){
+  if(answered) return;
+  answered = true;
+  const buttons = els.choicesBox.querySelectorAll('.choice');
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    const explainDiv = btn.querySelector('.explain');
+    explainDiv.style.display = "block";
+    explainDiv.textContent = current.explain[idx];
+    if(idx === current.correct){
+      btn.classList.add('correct');
+      explainDiv.classList.add('correct-text');
+    } else if(idx === i){
+      btn.classList.add('wrong');
+      explainDiv.classList.add('wrong-text');
+    }
+  });
+
+  els.feedbackBox.style.display = "block";
+  if(i === current.correct){
+    starCount++;
+    els.starCount.textContent = starCount;
+    els.feedbackBox.classList.add('good');
+    els.feedbackBox.textContent = "🎉 Great job! You got it right!";
+  } else {
+    els.feedbackBox.classList.add('bad');
+    els.feedbackBox.textContent = "💡 Nice try! Read the explanations below to see why.";
+  }
+  els.nextBtn.style.display = "inline-block";
+}
+
+function nextQuestion(){
+  if(deck.length === 0){ buildDeck(); }
+  const q = deck.shift();
+  renderQuestion(q);
+}
+
+// ---------- Background music: "The Wheels on the Bus" (synthesized, no audio file) ----------
+const noteFreq = {
+  REST:0, B3:246.94,
+  C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392.00, A4:440.00, B4:493.88,
+  C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:783.99, A5:880.00
+};
+// A simple best-effort approximation of the traditional tune, looped softly.
+const wheelsMelody = [
+  ["C5",0.4],["C5",0.4],["C5",0.4],["D5",0.4],["C5",0.4],["B4",0.4],
+  ["C5",0.4],["C5",0.4],["C5",0.4],["D5",0.4],["C5",0.4],["C5",0.4],
+  ["C5",0.2],["D5",0.2],["E5",0.2],["F5",0.2],["G5",0.4],["F5",0.2],["E5",0.2],["D5",0.2],
+  ["C5",0.2],["D5",0.2],["E5",0.2],["F5",0.2],["G5",0.8],
+  ["C5",0.4],["C5",0.4],["C5",0.4],["D5",0.4],["C5",0.4],["B4",0.4],
+  ["C5",0.4],["C5",0.4],["C5",0.4],["D5",0.4],["C5",0.4],["C5",0.4],
+  ["E5",0.4],["D5",0.4],["C5",0.4],["B4",0.4],["C5",0.8],
+  ["REST",0.6]
+];
+
+let audioCtx = null;
+let musicGain = null;
+let musicOn = false;
+let musicTimer = null;
+const MUSIC_VOL = 0.06;
+const MUSIC_VOL_DUCKED = 0.012;
+
+function ensureAudio(){
+  if(audioCtx) return true;
+  try{
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = MUSIC_VOL;
+    musicGain.connect(audioCtx.destination);
+    return true;
+  }catch(e){
+    console.warn("Web Audio not available:", e);
+    return false;
+  }
+}
+
+function playNote(freq, startTime, duration){
+  if(!freq) return; // rest
+  const osc = audioCtx.createOscillator();
+  osc.type = 'triangle';
+  osc.frequency.value = freq;
+  const noteGain = audioCtx.createGain();
+  noteGain.gain.setValueAtTime(0.0001, startTime);
+  noteGain.gain.exponentialRampToValueAtTime(1, startTime + 0.02);
+  noteGain.gain.exponentialRampToValueAtTime(0.0001, startTime + Math.max(duration*0.9,0.04));
+  osc.connect(noteGain);
+  noteGain.connect(musicGain);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.05);
+}
+
+function scheduleLoop(){
+  if(!musicOn || !audioCtx) return;
+  let t = audioCtx.currentTime + 0.05;
+  let totalDur = 0;
+  wheelsMelody.forEach(([note,dur]) => {
+    playNote(noteFreq[note]||0, t, dur*0.92);
+    t += dur;
+    totalDur += dur;
+  });
+  musicTimer = setTimeout(scheduleLoop, totalDur*1000);
+}
+
+function toggleMusic(){
+  if(!ensureAudio()){
+    alert("Sorry, this browser can't play background music.");
+    return;
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  musicOn = !musicOn;
+  els.musicBtn.textContent = musicOn ? "🔊 Music: On" : "🔈 Music: Off";
+  if(musicOn){ scheduleLoop(); }
+  else { clearTimeout(musicTimer); }
+}
+
+function duckMusic(low){
+  if(!musicGain || !audioCtx) return;
+  musicGain.gain.setTargetAtTime(low ? MUSIC_VOL_DUCKED : MUSIC_VOL, audioCtx.currentTime, 0.25);
+}
+
+// ---------- Read aloud ----------
+let speaking = false;
+function readAloud(){
+  if(!('speechSynthesis' in window)){
+    alert("Sorry, this browser can't read text aloud. Try Chrome or Safari!");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const letters = ["A","B","C","D"];
+  let text = current.passage + ". " + current.question + ". ";
+  current.choices.forEach((c,i) => { text += `Choice ${letters[i]}: ${c}. `; });
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.92;
+  utter.pitch = 1.05;
+  const voices = window.speechSynthesis.getVoices();
+  const englishVoice = voices.find(v => v.lang && v.lang.startsWith('en'));
+  if(englishVoice) utter.voice = englishVoice;
+
+  speaking = true;
+  els.readBtn.style.display = "none";
+  els.stopBtn.style.display = "inline-block";
+  utter.onstart = () => duckMusic(true);
+  utter.onend = () => { speaking = false; duckMusic(false); els.readBtn.style.display="inline-block"; els.stopBtn.style.display="none"; };
+  utter.onerror = utter.onend;
+  window.speechSynthesis.speak(utter);
+}
+function stopReading(){
+  window.speechSynthesis.cancel();
+  speaking = false;
+  duckMusic(false);
+  els.readBtn.style.display = "inline-block";
+  els.stopBtn.style.display = "none";
+}
+
+// ---------- Add-your-own-question form ----------
+function buildChoiceInputs(){
+  els.choiceInputs.innerHTML = "";
+  const letters = ["A","B","C","D"];
+  letters.forEach((L,i) => {
+    const row = document.createElement('div');
+    row.style.marginBottom = "10px";
+    row.innerHTML = `
+      <div class="choice-row">
+        <input type="radio" name="correctChoice" value="${i}" ${i===0?'checked':''} title="Mark as correct answer">
+        <input type="text" id="choiceText${i}" placeholder="Choice ${L} text">
+      </div>
+      <textarea id="choiceExplain${i}" rows="2" placeholder="Why is Choice ${L} right or wrong? (simple words)" style="margin-top:4px;"></textarea>
+    `;
+    els.choiceInputs.appendChild(row);
+  });
+}
+
+function addCustomQuestion(){
+  const passage = els.inPassage.value.trim();
+  const question = els.inQuestion.value.trim();
+  const emoji = els.inEmoji.value.trim() || "🚌📖";
+  const choices = [];
+  const explain = [];
+  for(let i=0;i<4;i++){
+    const t = document.getElementById(`choiceText${i}`).value.trim();
+    const e = document.getElementById(`choiceExplain${i}`).value.trim();
+    choices.push(t);
+    explain.push(e || "(no explanation given)");
+  }
+  const correctRadio = document.querySelector('input[name="correctChoice"]:checked');
+  const correct = correctRadio ? parseInt(correctRadio.value,10) : 0;
+
+  if(!passage || !question || choices.some(c => !c)){
+    alert("Please fill in the passage, the question, and all four answer choices before adding.");
+    return;
+  }
+
+  const newQ = { emoji, passage, question, choices, correct, explain };
+  customQuestions.push(newQ);
+  deck.push(newQ);
+  deck = shuffle(deck);
+
+  // reset form
+  els.inPassage.value = "";
+  els.inQuestion.value = "";
+  els.inEmoji.value = "";
+  buildChoiceInputs();
+  alert("Added! It's now mixed into the practice deck. 🎉");
+}
+
+// ---------- Wire up buttons ----------
+els.readBtn.addEventListener('click', readAloud);
+els.stopBtn.addEventListener('click', stopReading);
+els.musicBtn.addEventListener('click', toggleMusic);
+els.nextBtn.addEventListener('click', nextQuestion);
+els.shuffleBtn.addEventListener('click', () => { qNumber = 0; buildDeck(); nextQuestion(); });
+els.moreBtn.addEventListener('click', () => { renderQuestion(makeProceduralQuestion()); });
+els.addQBtn.addEventListener('click', addCustomQuestion);
+
+// make sure voices are loaded (some browsers load async)
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+// ---------- Init ----------
+buildChoiceInputs();
+buildDeck();
+nextQuestion();
+</script>
+</body>
+</html>
