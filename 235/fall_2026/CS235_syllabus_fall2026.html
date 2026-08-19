@@ -159,7 +159,7 @@
 <section>
   <h3>Course Description</h3>
   <p>This course is the second in a three-course series and a major stepping-stone in your software development journey. The primary focus is the design and analysis of algorithms and abstract data types. It introduces elementary data structures with related algorithms and their use in problem solving, covering core concepts such as abstraction, algorithm complexity, performance analysis, and the tradeoffs between running time, storage size, clarity, and extensibility that are at the heart of software design.</p>
-  <p>As a sequel to CSCI 135, this course enhances your C++ and Object-Oriented Programming skills by introducing Templates, giving Inheritance and Polymorphism a dedicated lecture and an applied project, and extending your understanding of pointers and dynamic memory allocation.</p>
+  <p>As a sequel to CSCI 135, this course enhances your C++ and object-oriented programming skills by introducing templates, giving inheritance and polymorphism a dedicated lecture and an applied project, and extending your understanding of pointers and dynamic memory allocation.</p>
   <p><strong>Prerequisites:</strong> CSCI 135 and CSCI 150.</p>
 </section>
 
@@ -174,7 +174,7 @@
     <li>Inheritance &amp; Polymorphism</li>
     <li>Templates</li>
     <li>Pointers &amp; Dynamic Memory Management</li>
-    <li>Rule of Three and an introduction to move semantics (Rule of Five)</li>
+    <li>Rule of Three and a brief introduction to the Rule of Five</li>
     <li>Dynamic Arrays</li>
   </ul>
 
@@ -208,7 +208,7 @@
 
   <p><strong>Advanced Topics (time permitting)</strong></p>
   <ul>
-    <li>Graphs (representations, DFS, BFS, Dijkstra&rsquo;s)</li>
+    <li>Graphs (graph representations; DFS/BFS revisited in graph form; Dijkstra&rsquo;s)</li>
   </ul>
 </section>
 
@@ -261,14 +261,14 @@
 <!-- ══════════════ PROGRAMMING PROJECTS ══════════════ -->
 <section>
   <h3>Programming Projects</h3>
-  <p>There will be <strong>five programming projects</strong>, forming the core of the course. Every program must comply with the <em>Programming Guidelines</em> document (posted on the course webpage). <strong>You must read this document</strong> &mdash; it contains guidelines about submission, lateness, plagiarism, grading, and logging into your Linux accounts.</p>
-  <p>Projects are cumulative: concepts and code developed in earlier projects may be reused or extended in later ones. They are designed as an integrated curriculum:</p>
+  <p>There will be <strong>four programming projects</strong> (P1 MiniVector, P2 Maze Solver, P3 Make 24, P4 Expression Evaluator), forming the core of the course. P1 is worth 10% of the course grade and is submitted in two parts: P1A (70% of P1, due Th 9/17) and P1B (30% of P1, due Th 10/1). Every program must comply with the <em>Programming Guidelines</em> document (posted on the course webpage). <strong>You must read this document</strong> &mdash; it contains guidelines about submission, lateness, plagiarism, grading, and logging into your Linux accounts.</p>
+  <p>Projects are cumulative in concepts and skills: ideas developed in earlier projects are reused and extended in later ones. Together, they are designed as an integrated curriculum:</p>
   <ul>
-    <li><strong>Project 1 (Weeks 1&ndash;3):</strong> MiniVector Library &mdash; dynamic array, <code>push_back</code>, <code>pop_back</code>, <code>operator[]</code>, resize, Rule of Three (with an introduction to move semantics where appropriate). Teaches heap memory and amortized growth before introducing nodes.</li>
-    <li><strong>Project 2 (Weeks 4&ndash;6):</strong> Maze Solver &mdash; DFS / BFS pathfinding with explicit stack/queue</li>
-    <li><strong>Project 3 (Weeks 7&ndash;9):</strong> Make 24 Puzzle Solver &mdash; recursive backtracking &amp; combinatorics</li>
-    <li><strong>Project 4 (Weeks 10&ndash;12):</strong> Expression Evaluator &mdash; parsing, operator precedence &amp; expression trees</li>
-    <li><strong>Project 5 (Weeks 13&ndash;15):</strong> Capstone Project (e.g., Autocomplete Engine or Network Routing) &mdash; Trie-based autocomplete or Dijkstra&rsquo;s shortest path</li>
+    <li><strong>P1A &mdash; MiniVector&lt;int&gt; (due Th 9/17, 70% of P1):</strong> Dynamic array for <code>int</code>; <code>push_back</code>, <code>pop_back</code>, <code>operator[]</code>, automatic capacity growth; Rule of Three (deep copy, copy assignment, destructor). Teaches heap memory and amortized growth before introducing nodes.</li>
+    <li><strong>P1B &mdash; MiniVector&lt;T&gt; (due Th 10/1, 30% of P1):</strong> Generalize the working <code>MiniVector&lt;int&gt;</code> into a class template. Motivates templates by asking: <em>why should MiniVector only work with int?</em></li>
+    <li><strong>P2 &mdash; Maze Solver (posted Th 10/1, due Th 10/22):</strong> Recursive DFS and queue-based BFS pathfinding; shortest-path reconstruction using a linked list; <code>DFSSolver</code> and <code>BFSSolver</code> as subclasses of an abstract <code>MazeSolver</code> base class &mdash; applies the polymorphism pattern from Lecture 2.</li>
+    <li><strong>P3 &mdash; Make 24 Puzzle Solver (posted Th 10/29, due Th 11/19):</strong> Recursive backtracking; recursively combine numbers using arithmetic operations; explore candidate solutions; find an expression that evaluates to 24.</li>
+    <li><strong>P4 &mdash; Expression Evaluator (posted Th 11/19, due Th 12/10):</strong> Shunting-Yard algorithm using two stacks; operator precedence and associativity; unary minus; error handling. Applies the stack ADT to expression parsing.</li>
   </ul>
   <p>Programming projects are expected to require substantially more time than programming exercises. Start each project as soon as it is released; the full allotted time is there because you will need it.</p>
   <p>All projects are submitted through <strong>Gradescope</strong> and are auto-graded. Programs must compile and run correctly on the Linux lab machines (Hunter North, rooms 1001B/1001C). Confirm that your code works in the Linux environment <em>before</em> submitting.</p>
@@ -280,9 +280,9 @@
 <!-- ══════════════ PROGRAMMING EXERCISES ══════════════ -->
 <section>
   <h3>Programming Exercises</h3>
-  <p>There will be <strong>ten short programming exercises</strong>, distributed two per project unit. Each exercise is released on one class day and due at <strong>11:59 PM two days later</strong> (typically the next class meeting). Exercises are submitted on <strong>Gradescope</strong> and are fully auto-graded: submit typed code files.</p>
-  <p>Exercises are intended primarily for practice and are generally much shorter than the programming projects. They are designed to scaffold directly into the upcoming project, providing targeted practice with one key concept (e.g., pointer arithmetic, Big Three implementation, DFS tracing, tree traversal). They are short &mdash; expect 1&ndash;2 functions and a set of test cases.</p>
-  <p>No late submissions are accepted for exercises, as solutions are released promptly after the due date to allow you to review and learn from them. The <strong>lowest exercise grade is dropped</strong>; your best 9 out of 10 exercises count toward your final grade.</p>
+  <p>There will be <strong>eleven short programming exercises</strong>, distributed throughout the semester. Each exercise is released on one class day and is typically due before the next class meeting; exact deadlines and times are listed on the course schedule. Exercises are submitted on <strong>Gradescope</strong> and are fully auto-graded: submit typed code files.</p>
+  <p>Exercises are intended primarily for practice and are generally much shorter than the programming projects. They are designed to scaffold directly into the upcoming project, providing targeted practice with one key concept (e.g., virtual functions and polymorphism, pointer manipulation, Big Three implementation, stack and queue operations, tree traversal). They are short &mdash; expect 1&ndash;2 functions and a set of test cases.</p>
+  <p>No late submissions are accepted for exercises, as solutions are released promptly after the due date to allow you to review and learn from them. The <strong>two lowest exercise grades are dropped</strong>; your best 9 out of 11 exercises count toward your final grade.</p>
 </section>
 
 <!-- ══════════════ GRADING ══════════════ -->
@@ -304,17 +304,17 @@
       </tr>
       <tr>
         <td>Programming Projects</td>
-        <td>5 projects &times; 9% each; no drops (3-week intervals)</td>
-        <td>45%</td>
+        <td>Four projects &times; 10% each: P1 MiniVector (P1A 70% + P1B 30%), P2 Maze Solver, P3 Make 24, P4 Expression Evaluator; no drops</td>
+        <td>40%</td>
       </tr>
       <tr>
         <td>Programming Exercises</td>
-        <td>Best 9 of 10 &times; ~1.1% each (lowest dropped; auto-graded)</td>
-        <td>10%</td>
+        <td>Best 9 of 11 (two lowest dropped; auto-graded)</td>
+        <td>15%</td>
       </tr>
       <tr>
         <td>Midterm Exam</td>
-        <td>In class, Week 7 (covers Projects 1 &amp; 2)</td>
+        <td>In class, Week 9, Tu 10/27 (covers P1 MiniVector, P2 Maze Solver, and all course material through DFS/BFS)</td>
         <td>15%</td>
       </tr>
       <tr>
@@ -376,9 +376,9 @@
 <section>
   <h3>Late Work Policy</h3>
   <p><strong>No late submissions are accepted</strong> for any assignment in this course &mdash; projects, exercises, or otherwise. Solutions are released immediately after each deadline so that everyone can review and learn from them promptly.</p>
-  <p>The built-in accommodations below are the only flexibility in this course and are designed to cover unforeseen circumstances. No additional exceptions will be made beyond these allowances, regardless of the reason:</p>
+  <p>The built-in allowances below are intended to cover ordinary unforeseen circumstances. Additional exceptions will not normally be made beyond these allowances, except where required by approved disability accommodations or university policy:</p>
   <ul>
-    <li><strong>Exercises:</strong> the lowest exercise grade is dropped automatically.</li>
+    <li><strong>Exercises:</strong> the two lowest exercise grades are dropped automatically.</li>
     <li><strong>Attendance:</strong> three absences are excused without requiring any explanation or documentation.</li>
   </ul>
   <p>Please budget these allowances wisely across the semester rather than using them early.</p>
@@ -418,7 +418,7 @@
 <!-- ══════════════ ADA COMPLIANCE ══════════════ -->
 <section>
   <h3>ADA Compliance</h3>
-  <p>In compliance with the American Disability Act of 1990 (ADA) and Section 504 of the Rehabilitation Act of 1973, Hunter College is committed to ensuring educational parity and accommodations for all students with documented disabilities and/or medical conditions. Students with documented disabilities (emotional, medical, physical, or learning) are encouraged to consult the <strong>Office of AccessABILITY</strong> (Room E1124) to secure necessary academic accommodations. For further information, call (212)&nbsp;772-4857 / TTY (212)&nbsp;650-3230.</p>
+  <p>In compliance with the Americans with Disabilities Act of 1990 (ADA) and Section 504 of the Rehabilitation Act of 1973, Hunter College is committed to ensuring educational parity and accommodations for all students with documented disabilities and/or medical conditions. Students with documented disabilities (emotional, medical, physical, or learning) are encouraged to consult the <strong>Office of AccessABILITY</strong> (Room E1124) to secure necessary academic accommodations. For further information, call (212)&nbsp;772-4857 / TTY (212)&nbsp;650-3230.</p>
 </section>
 
 <!-- ══════════════ SEXUAL MISCONDUCT ══════════════ -->
@@ -451,7 +451,7 @@
 
 <footer>
   CSCI 235 &bull; Software Design &amp; Analysis II &bull; Hunter College, CUNY &bull; Fall 2026
-  &nbsp;&mdash;&nbsp; Last updated July 2026
+  &nbsp;&mdash;&nbsp; Last updated August 2026
   <br><small style="opacity:.7;">This page was created with the assistance of <a href="https://claude.ai" target="_blank" style="color:inherit;">Claude</a> (Anthropic) via instructor prompts.</small>
 </footer>
 
