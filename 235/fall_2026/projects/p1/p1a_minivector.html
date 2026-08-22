@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1A: MiniVector&lt;int&gt; &mdash; CSCI 235 Fall 2026</title>
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px; line-height: 1.7; color: #1a1a1a;
+    background: #fff; max-width: 880px; margin: 0 auto; padding: 2rem 2rem 4rem;
+  }
+  header { border-bottom: 2px solid #1a1a1a; padding-bottom: .75rem; margin-bottom: 2rem; }
+  header h1 { font-size: 1.6rem; font-weight: bold; }
+  header .meta { font-family: "Courier New", monospace; font-size: .85rem; color: #444; margin-top: .3rem; }
+  h2 { font-size: 1.2rem; font-weight: bold; margin: 2.2rem 0 .5rem;
+       border-bottom: 1px solid #ccc; padding-bottom: .2rem; }
+  h3 { font-size: 1.05rem; font-weight: bold; margin: 1.6rem 0 .3rem; }
+  h4 { font-size: 1rem; font-weight: bold; font-family: "Courier New", monospace;
+       margin: 1.2rem 0 .25rem; }
+  p  { margin: .5rem 0; }
+  ul, ol { margin: .4rem 0 .4rem 1.6rem; }
+  li { margin: .25rem 0; }
+  code { font-family: "Courier New", monospace; font-size: .88em;
+         background: #f3f3f3; padding: .1em .3em; border-radius: 3px; }
+  .week-banner {
+    background: #1a1a1a; color: #fff; padding: .45rem 1rem; border-radius: 4px;
+    font-family: "Courier New", monospace; font-size: .9rem;
+    margin: 2.4rem 0 1.2rem; letter-spacing: .04em;
+  }
+  .task-box { border: 1px solid #bbb; border-radius: 5px;
+              padding: 1rem 1.2rem; margin: 1rem 0 1.6rem; }
+  .task-box h3 { margin-top: 0; }
+  table { border-collapse: collapse; width: 100%; margin: .8rem 0; font-size: .9rem; }
+  th { background: #f0f0f0; text-align: left; padding: .4rem .7rem; border: 1px solid #bbb;
+       font-family: "Courier New", monospace; }
+  td { padding: .35rem .7rem; border: 1px solid #ccc; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .code-wrap { position: relative; margin: .8rem 0; }
+  .copy-btn {
+    position: absolute; top: .4rem; right: .4rem;
+    font-family: "Courier New", monospace; font-size: .75rem;
+    padding: .2rem .55rem; background: #e8e8e8; border: 1px solid #bbb;
+    border-radius: 3px; cursor: pointer; z-index: 10; transition: background .15s;
+  }
+  .copy-btn:hover  { background: #d0d0d0; }
+  .copy-btn.copied { background: #c6ecc6; border-color: #7cb97c; }
+  .code-wrap pre { margin: 0; border-radius: 4px; border: 1px solid #ddd; overflow-x: auto; }
+  .code-wrap pre code.hljs { font-size: .82rem; padding: 1rem; }
+  .note { background: #fffbe6; border-left: 4px solid #e6a817;
+          padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem; }
+  .warn { background: #fff0f0; border-left: 4px solid #c0392b;
+          padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem; }
+  .hint { background: #f0f7ff; border-left: 4px solid #3a7bd5;
+          padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem; }
+  footer { margin-top: 3rem; border-top: 1px solid #ccc; padding-top: .5rem;
+           font-size: .8rem; color: #666; font-family: "Courier New", monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>P1A &mdash; MiniVector&lt;int&gt;</h1>
+  <div class="meta">
+    CSCI 235 &nbsp;|&nbsp; Software Design &amp; Analysis II &nbsp;|&nbsp;
+    Hunter College, CUNY &nbsp;|&nbsp; Fall 2026<br>
+    Posted: Tuesday, September 1 &nbsp;|&nbsp;
+    <strong>Due: Thursday, September 17, 11:59&nbsp;PM</strong>
+    &nbsp;|&nbsp; Submit via Gradescope
+  </div>
+</header>
+
+<h2>Overview</h2>
+
+<p>
+  In this project you build <code>MiniVector</code>, a simplified dynamic array for
+  <code>int</code> values.  You will manage heap memory directly &mdash; allocating,
+  growing, copying, and releasing arrays using raw pointers &mdash; before you are
+  allowed to use <code>std::vector</code>.
+</p>
+<p>
+  The skeleton file <code>p1a_minivector.cpp</code> (at the end of this page) already
+  compiles.  The member functions you must implement start as stubs; the test harness
+  is already complete.  Tests will fail until you fill in the <code>// TODO</code> sections.
+</p>
+<p>Compile and run:</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-bash">g++ -std=c++17 -Wall -Wextra -o minivector p1a_minivector.cpp
+./minivector A    # Task A  (8 tests, 20 pts) — constructor, push_back, operator[], size
+./minivector B    # Task B  (7 tests, 20 pts) — grow(): automatic capacity doubling
+./minivector C    # Task C  (7 tests, 15 pts) — pop_back and at() with error checking
+./minivector D    # Task D  (7 tests, 15 pts) — Rule of Three</code></pre>
+</div>
+
+<p>
+  Complete tasks in order A &rarr; D.  Task B extends Task A (you add one line to
+  <code>push_back</code>), so Task A tests should still pass after Task B.
+</p>
+
+<div class="note">
+  <strong>Run under Valgrind before you submit:</strong>
+  <code>valgrind --leak-check=full ./minivector D</code>.
+  A correct Rule of Three releases all heap memory; Valgrind should report
+  &ldquo;no leaks are possible.&rdquo;
+</div>
+
+<!-- ================================================================ -->
+<div class="week-banner">Suggested checkpoint &mdash; Tasks A &amp; B by 9/10/2026</div>
+
+<!-- Task A -->
+<div class="task-box">
+<h3>Task A &mdash; Constructor, <code>push_back</code>, <code>operator[]</code>, <code>size</code> / <code>capacity</code> / <code>empty</code> &nbsp;<span style="font-weight:400;font-size:.9rem">(20 pts)</span></h3>
+
+<p>
+  Implement the <strong>default constructor</strong> so it allocates a heap array of two
+  <code>int</code> slots and sets <code>size_&nbsp;=&nbsp;0</code>, <code>capacity_&nbsp;=&nbsp;2</code>.
+</p>
+<p>
+  Implement <strong><code>push_back(int val)</code></strong> so it stores <code>val</code>
+  at <code>data_[size_]</code> and increments <code>size_</code>.
+  For Task A you may assume the caller never pushes more than two elements,
+  so the array will never be full.  (Task B adds the grow call.)
+</p>
+<p>
+  Implement <strong><code>operator[](size_t idx)</code></strong> (both the non-const and
+  const overloads) to return <code>data_[idx]</code>.  No bounds check is required here
+  &mdash; that is <code>at()</code>'s job in Task C.
+</p>
+<p>
+  <code>size()</code>, <code>capacity()</code>, and <code>empty()</code> are already
+  provided in the class definition; you do not need to implement them.
+</p>
+
+<div class="hint">
+<strong>Memory layout after two push_back calls:</strong>
+<pre style="margin:.5rem 0;font-size:.85rem;line-height:1.5;background:none;border:none;padding:0">MiniVector v;         // data_ -> [ _ ][ _ ]   size_=0  capacity_=2
+v.push_back(10);      // data_ -> [10 ][ _ ]   size_=1  capacity_=2
+v.push_back(20);      // data_ -> [10 ][20 ]   size_=2  capacity_=2
+                      // now full — push_back(30) would overflow without grow()</pre>
+</div>
+
+<h4>Unit tests (Task A &mdash; 8 tests)</h4>
+<table>
+  <tr><th>#</th><th>Expression</th><th>Expected</th><th>What it checks</th></tr>
+  <tr><td>1</td><td><code>v.size()</code> (fresh)</td><td><code>0</code></td><td>constructor sets size_ = 0</td></tr>
+  <tr><td>2</td><td><code>v.capacity()</code> (fresh)</td><td><code>2</code></td><td>constructor allocates 2 slots</td></tr>
+  <tr><td>3</td><td><code>v.empty()</code> (fresh)</td><td><code>true</code></td><td>empty() == (size_ == 0)</td></tr>
+  <tr><td>4</td><td><code>v.size()</code> after push_back(10)</td><td><code>1</code></td><td>size_ incremented</td></tr>
+  <tr><td>5</td><td><code>v.empty()</code> after push</td><td><code>false</code></td><td>no longer empty</td></tr>
+  <tr><td>6</td><td><code>v[0]</code></td><td><code>10</code></td><td>operator[] returns correct element</td></tr>
+  <tr><td>7</td><td><code>v.size()</code> after two pushes</td><td><code>2</code></td><td>size_ tracks count</td></tr>
+  <tr><td>8</td><td><code>v[1]</code></td><td><code>20</code></td><td>second element stored correctly</td></tr>
+</table>
+</div>
+
+<!-- Task B -->
+<div class="task-box">
+<h3>Task B &mdash; <code>grow()</code>: automatic capacity doubling &nbsp;<span style="font-weight:400;font-size:.9rem">(20 pts)</span></h3>
+
+<p>
+  Implement the private helper <code>grow()</code>.  It is called by <code>push_back</code>
+  whenever the array is full (<code>size_ == capacity_</code>).  <code>grow()</code> must:
+</p>
+<ol>
+  <li>Allocate a new array with <code>new_cap = capacity_ * 2</code> slots.</li>
+  <li>Copy all <code>size_</code> existing elements into the new array.</li>
+  <li>Release the old array with <code>delete[] data_</code>.</li>
+  <li>Update <code>data_</code> and <code>capacity_</code>.</li>
+</ol>
+<p>
+  Then add one line to <code>push_back</code>:
+  <em>before</em> storing <code>val</code>, check whether <code>size_ == capacity_</code>
+  and call <code>grow()</code> if so.
+</p>
+
+<div class="hint">
+<strong>Capacity doubling trace (pushing 1, 2, 3, 4, 5):</strong>
+<pre style="margin:.5rem 0;font-size:.85rem;line-height:1.5;background:none;border:none;padding:0">push_back(1)  size_=1  cap_=2     (room; no grow)
+push_back(2)  size_=2  cap_=2     (room; no grow)
+push_back(3)  FULL -> grow()      cap_ 2 -> 4
+              size_=3  cap_=4     (stored after grow)
+push_back(4)  size_=4  cap_=4     (room; no grow)
+push_back(5)  FULL -> grow()      cap_ 4 -> 8
+              size_=5  cap_=8</pre>
+</div>
+
+<div class="note">
+  <strong>Why double?</strong>  Each element is moved at most O(log n) times across all
+  grow calls, giving <strong>amortized O(1)</strong> cost per <code>push_back</code>.
+  Doubling is the same strategy used by <code>std::vector</code>.
+</div>
+
+<h4>Unit tests (Task B &mdash; 7 tests)</h4>
+<table>
+  <tr><th>#</th><th>Expression / scenario</th><th>Expected</th><th>What it checks</th></tr>
+  <tr><td>1</td><td><code>v.size()</code> after 9 push_backs</td><td><code>9</code></td><td>all elements stored</td></tr>
+  <tr><td>2</td><td><code>v.capacity() &gt;= 9</code></td><td><code>true</code></td><td>capacity grew enough</td></tr>
+  <tr><td>3</td><td><code>v[0]</code></td><td><code>10</code></td><td>first element preserved across grows</td></tr>
+  <tr><td>4</td><td><code>v[4]</code></td><td><code>50</code></td><td>element at index 4 correct</td></tr>
+  <tr><td>5</td><td><code>v[8]</code></td><td><code>90</code></td><td>last element (index 8) correct</td></tr>
+  <tr><td>6</td><td><code>v.capacity()</code> after 9 pushes</td><td><code>16</code></td><td>2→4→8→16: three doublings</td></tr>
+  <tr><td>7</td><td><code>v[3]</code> after <code>v[3]=999</code></td><td><code>999</code></td><td>operator[] returns a writable reference</td></tr>
+</table>
+</div>
+
+<!-- ================================================================ -->
+<div class="week-banner">Suggested checkpoint &mdash; Tasks C &amp; D by 9/17/2026 (due date)</div>
+
+<!-- Task C -->
+<div class="task-box">
+<h3>Task C &mdash; <code>pop_back</code> and <code>at()</code> &nbsp;<span style="font-weight:400;font-size:.9rem">(15 pts)</span></h3>
+
+<p>
+  Implement <strong><code>pop_back()</code></strong>, which removes the last element.
+  Because the elements before it are untouched, you only need to decrement <code>size_</code>.
+  If the vector is empty, throw <code>std::runtime_error("pop_back on empty MiniVector")</code>.
+</p>
+<p>
+  Implement <strong><code>at(size_t idx)</code></strong> (both overloads), which works like
+  <code>operator[]</code> but adds a bounds check.  If <code>idx &gt;= size_</code>,
+  throw <code>std::out_of_range("index out of range")</code>.
+</p>
+
+<div class="hint">
+<strong>pop_back trace:</strong>
+<pre style="margin:.5rem 0;font-size:.85rem;line-height:1.5;background:none;border:none;padding:0">v = [5][10][15]   size_=3  cap_=4
+v.pop_back()   -> size_=2       (15 is logically gone; data_[2] still holds 15 but is inaccessible)
+v[0] == 5      (unchanged)
+v.at(1) == 10  (ok — idx 1 < size_ 2)
+v.at(2)        (throws: idx 2 >= size_ 2)</pre>
+</div>
+
+<h4>What throws</h4>
+<ul>
+  <li><code>pop_back()</code>: <code>std::runtime_error("pop_back on empty MiniVector")</code> when <code>size_ == 0</code>.</li>
+  <li><code>at()</code>: <code>std::out_of_range("index out of range")</code> when <code>idx &gt;= size_</code>.</li>
+</ul>
+
+<h4>Unit tests (Task C &mdash; 7 tests)</h4>
+<table>
+  <tr><th>#</th><th>Expression / scenario</th><th>Expected</th><th>What it checks</th></tr>
+  <tr><td>1</td><td><code>v.size()</code> before pop (3 elements)</td><td><code>3</code></td><td>precondition</td></tr>
+  <tr><td>2</td><td><code>v.size()</code> after one pop</td><td><code>2</code></td><td>size_ decremented</td></tr>
+  <tr><td>3</td><td><code>v[0]</code> after pop</td><td><code>5</code></td><td>earlier elements untouched</td></tr>
+  <tr><td>4</td><td><code>v.at(1)</code></td><td><code>10</code></td><td>valid at() access</td></tr>
+  <tr><td>5</td><td><code>v.at(2)</code> (out of range)</td><td>throws <code>out_of_range</code></td><td>bounds check</td></tr>
+  <tr><td>6</td><td><code>v.pop_back()</code> on empty</td><td>throws <code>runtime_error</code></td><td>empty guard</td></tr>
+  <tr><td>7</td><td><code>v.at(0)</code> on empty</td><td>throws <code>out_of_range</code></td><td>at() on size_=0</td></tr>
+</table>
+</div>
+
+<!-- Task D -->
+<div class="task-box">
+<h3>Task D &mdash; Rule of Three: destructor, copy constructor, copy assignment &nbsp;<span style="font-weight:400;font-size:.9rem">(15 pts)</span></h3>
+
+<p>
+  Your <code>MiniVector</code> allocates memory in the constructor and in <code>grow()</code>.
+  This means you must define three special member functions &mdash; the <strong>Rule of Three</strong>
+  &mdash; so that copies are correct and memory is released exactly once.
+</p>
+
+<h4>Destructor: <code>~MiniVector()</code></h4>
+<p>
+  Release the heap-allocated array: <code>delete[] data_;</code>.
+  Without this, every <code>MiniVector</code> leaks memory when it goes out of scope.
+</p>
+
+<h4>Copy constructor: <code>MiniVector(const MiniVector&amp; other)</code></h4>
+<p>
+  Create an independent copy: allocate a brand-new array of the same capacity,
+  then copy every element from <code>other</code>.  After construction, modifying
+  one vector must not affect the other.
+</p>
+
+<h4>Copy assignment: <code>MiniVector&amp; operator=(const MiniVector&amp; other)</code></h4>
+<p>
+  First guard against self-assignment: <code>if (this == &amp;other) return *this;</code>.
+  Then release the current array with <code>delete[] data_</code>, allocate a new array
+  of <code>other.capacity_</code>, and copy all elements.  Return <code>*this</code>.
+</p>
+
+<div class="warn">
+  <strong>Why self-assignment matters.</strong>
+  In <code>v&nbsp;=&nbsp;v</code>, <code>this</code> and <code>&amp;other</code> point to
+  the same object.  If you <code>delete[] data_</code> first, you then copy from already-freed
+  memory &mdash; undefined behavior.  Always guard first.
+</div>
+
+<div class="hint">
+<strong>Deep copy vs. shallow copy:</strong>
+<pre style="margin:.5rem 0;font-size:.85rem;line-height:1.5;background:none;border:none;padding:0">// Shallow copy (WRONG — both point to the same array):
+MiniVector b;
+b.data_     = a.data_;   // both a and b now share one array!
+b.size_     = a.size_;
+b.capacity_ = a.capacity_;
+
+// Deep copy (CORRECT — b gets its own independent array):
+b.capacity_ = a.capacity_;
+b.size_     = a.size_;
+b.data_     = new int[b.capacity_];
+for (size_t i = 0; i &lt; b.size_; i++) b.data_[i] = a.data_[i];</pre>
+</div>
+
+<h4>Unit tests (Task D &mdash; 7 tests)</h4>
+<table>
+  <tr><th>#</th><th>Expression / scenario</th><th>Expected</th><th>What it checks</th></tr>
+  <tr><td>1</td><td><code>b.size()</code> after <code>MiniVector b(a)</code></td><td><code>3</code></td><td>copy has same size</td></tr>
+  <tr><td>2</td><td><code>b[0]</code></td><td><code>1</code></td><td>first element copied</td></tr>
+  <tr><td>3</td><td><code>b[2]</code></td><td><code>3</code></td><td>last element copied</td></tr>
+  <tr><td>4</td><td><code>b[0]</code> after <code>a[0]=999</code></td><td><code>1</code></td><td>deep copy — b independent of a</td></tr>
+  <tr><td>5</td><td><code>c.size()</code> after <code>c = a</code></td><td><code>3</code></td><td>assignment copies size</td></tr>
+  <tr><td>6</td><td><code>c[0]</code> after assignment</td><td><code>999</code></td><td>assignment copies elements</td></tr>
+  <tr><td>7</td><td><code>c[0]</code> after <code>c = c</code></td><td><code>999</code></td><td>self-assignment does not crash</td></tr>
+</table>
+</div>
+
+<!-- Concept Reference -->
+<h2>Concept Reference</h2>
+
+<h3>The three private members</h3>
+<p>
+  Every <code>MiniVector</code> object owns exactly three things:
+</p>
+<table>
+  <tr><th>Member</th><th>Type</th><th>Meaning</th></tr>
+  <tr><td><code>data_</code></td><td><code>int*</code></td><td>pointer to the first element of the heap-allocated array</td></tr>
+  <tr><td><code>size_</code></td><td><code>size_t</code></td><td>number of elements currently stored (logical size)</td></tr>
+  <tr><td><code>capacity_</code></td><td><code>size_t</code></td><td>total slots allocated (physical size); always &ge; size_</td></tr>
+</table>
+
+<h3>Heap allocation in C++</h3>
+<p>
+  To allocate an array of <em>n</em> integers on the heap:
+  <code>int* p = new int[n];</code>.
+  To release it: <code>delete[] p;</code>.
+  Every <code>new[]</code> must be paired with exactly one <code>delete[]</code>.
+</p>
+
+<h3>Amortized O(1) push_back</h3>
+<p>
+  Most <code>push_back</code> calls simply store one value: O(1).
+  Occasionally <code>grow()</code> is called, which copies all elements: O(n).
+  But because capacity doubles each time, grow is called at most O(log n) times
+  across n pushes, so the total copy work is O(n) &mdash; amortized O(1) per push.
+</p>
+
+<h2>What Is Provided</h2>
+<p>
+  The following are already implemented and must not be modified:
+</p>
+<ul>
+  <li><code>size()</code>, <code>capacity()</code>, <code>empty()</code> &mdash; inline in the class definition.</li>
+  <li>The test harness: <code>chk()</code>, <code>chk_throw()</code>, <code>print_result()</code>, and <code>main()</code>.</li>
+</ul>
+
+<h2>Submission</h2>
+<p>
+  Submit a single file named <strong><code>p1a_minivector.cpp</code></strong> to Gradescope.
+  The autograder compiles your file and runs all four task groups.
+  Make sure your file compiles without errors on the Linux lab machines
+  (Hunter North 1001B/C) using <code>g++ -std=c++17</code>.
+</p>
+
+<div class="warn">
+  <strong>Academic integrity.</strong>
+  You may use AI tools (ChatGPT, Copilot, Claude) to understand concepts and debug.
+  Submitting AI-generated code as your own original work is a violation of the
+  Hunter College Academic Integrity Policy.
+</div>
+
+<!-- Skeleton -->
+<h2>Skeleton: <code>p1a_minivector.cpp</code></h2>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// ============================================================
+// CSCI 235 — Software Design & Analysis II   Fall 2026
+// Project 1A: MiniVector&lt;int&gt;
+// Due: Thursday, September 17, 2026, 11:59 PM
+// ============================================================
+// Implement the member functions below by completing the TODO
+// sections.  Do not modify the class interface, the test
+// harness helpers, or the task blocks in main().
+//
+// Compile and run:
+//   g++ -std=c++17 -Wall -Wextra -o minivector p1a_minivector.cpp
+//   ./minivector A    # Task A (8 tests,  20 pts)
+//   ./minivector B    # Task B (7 tests,  20 pts)
+//   ./minivector C    # Task C (7 tests,  15 pts)
+//   ./minivector D    # Task D (7 tests,  15 pts)
+// ============================================================
+
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+#include &lt;string&gt;
+
+// ============================================================
+// MiniVector — a simplified dynamic array for int
+// ============================================================
+class MiniVector {
+private:
+    int*   data_;      // pointer to the heap-allocated storage array
+    size_t size_;      // number of elements currently stored
+    size_t capacity_;  // total number of slots allocated
+
+    void grow();  // TODO (Task B)
+
+public:
+    MiniVector();                              // TODO (Task A)
+    ~MiniVector();                             // TODO (Task D)
+    MiniVector(const MiniVector& other);       // TODO (Task D)
+    MiniVector& operator=(const MiniVector&);  // TODO (Task D)
+
+    void push_back(int val);   // TODO (Task A/B)
+    void pop_back();           // TODO (Task C)
+    int& operator[](size_t idx);              // TODO (Task A)
+    const int& operator[](size_t idx) const;  // TODO (Task A)
+    int& at(size_t idx);              // TODO (Task C)
+    const int& at(size_t idx) const;  // TODO (Task C)
+
+    size_t size()     const { return size_; }
+    size_t capacity() const { return capacity_; }
+    bool   empty()    const { return size_ == 0; }
+};
+
+// ============================================================
+// Implement the member functions below by completing the TODO sections.
+// ============================================================
+
+MiniVector::MiniVector()
+    : data_(nullptr), size_(0), capacity_(0) {
+    // TODO (Task A): data_ = new int[2];  capacity_ = 2;
+}
+
+MiniVector::~MiniVector() {
+    // TODO (Task D): delete[] data_;
+}
+
+MiniVector::MiniVector(const MiniVector& other)
+    : data_(nullptr), size_(0), capacity_(0) {
+    // TODO (Task D): allocate and copy
+}
+
+MiniVector& MiniVector::operator=(const MiniVector& other) {
+    // TODO (Task D): guard, release, copy
+    return *this;
+}
+
+void MiniVector::grow() {
+    // TODO (Task B): new_cap = capacity_*2; allocate; copy; delete[]; update
+}
+
+void MiniVector::push_back(int val) {
+    // TODO (Task B): if (size_ == capacity_) grow();
+    // TODO (Task A): data_[size_++] = val;
+}
+
+void MiniVector::pop_back() {
+    // TODO (Task C): throw or --size_
+}
+
+int& MiniVector::operator[](size_t idx)             { return data_[idx]; }
+const int& MiniVector::operator[](size_t idx) const { return data_[idx]; }
+
+int& MiniVector::at(size_t idx) {
+    // TODO (Task C): bounds check, then return data_[idx]
+    return data_[idx];
+}
+const int& MiniVector::at(size_t idx) const {
+    // TODO (Task C): bounds check, then return data_[idx]
+    return data_[idx];
+}
+
+// ============================================================
+// Test harness — do not modify below this line
+// ============================================================
+
+static int score = 0, total = 0;
+
+template &lt;typename T&gt;
+void chk(const std::string& label, T got, T expected) {
+    total++;
+    if (got == expected) { std::cout &lt;&lt; "  [PASS] " &lt;&lt; label &lt;&lt; "\n"; score++; }
+    else std::cout &lt;&lt; "  [FAIL] " &lt;&lt; label &lt;&lt; "  expected=" &lt;&lt; expected &lt;&lt; "  got=" &lt;&lt; got &lt;&lt; "\n";
+}
+
+void chk_throw(const std::string& label, bool threw) {
+    total++;
+    if (threw) { std::cout &lt;&lt; "  [PASS] " &lt;&lt; label &lt;&lt; " (threw as expected)\n"; score++; }
+    else         std::cout &lt;&lt; "  [FAIL] " &lt;&lt; label &lt;&lt; " (no exception thrown)\n";
+}
+
+void print_result(const std::string& task, int pts) {
+    if (score == total)
+        std::cout &lt;&lt; "\n" &lt;&lt; task &lt;&lt; ": " &lt;&lt; score &lt;&lt; "/" &lt;&lt; total &lt;&lt; " passed — " &lt;&lt; pts &lt;&lt; "/" &lt;&lt; pts &lt;&lt; " points\n";
+    else
+        std::cout &lt;&lt; "\n" &lt;&lt; task &lt;&lt; ": " &lt;&lt; score &lt;&lt; "/" &lt;&lt; total &lt;&lt; " passed — partial credit may apply\n";
+    score = 0; total = 0;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) { std::cerr &lt;&lt; "Usage: " &lt;&lt; argv[0] &lt;&lt; " [A|B|C|D]\n"; return 1; }
+    std::string opt = argv[1];
+
+    if (opt == "A") {
+        MiniVector v;
+        chk&lt;size_t&gt;("initial size",         v.size(),     0);
+        chk&lt;size_t&gt;("initial capacity",     v.capacity(), 2);
+        chk&lt;bool&gt;  ("initially empty",      v.empty(),    true);
+        v.push_back(10);
+        chk&lt;size_t&gt;("size after 1 push",    v.size(),     1);
+        chk&lt;bool&gt;  ("not empty after push", v.empty(),    false);
+        chk&lt;int&gt;   ("v[0] == 10",           v[0],         10);
+        v.push_back(20);
+        chk&lt;size_t&gt;("size after 2 pushes",  v.size(),     2);
+        chk&lt;int&gt;   ("v[1] == 20",           v[1],         20);
+        print_result("Task A", 20);
+    }
+    if (opt == "B") {
+        MiniVector v;
+        for (int i = 1; i &lt;= 9; i++) v.push_back(i * 10);
+        chk&lt;size_t&gt;("size after 9 pushes",  v.size(),       9);
+        chk&lt;bool&gt;  ("capacity &gt;= 9",        v.capacity() &gt;= 9, true);
+        chk&lt;int&gt;   ("v[0] == 10",           v[0],           10);
+        chk&lt;int&gt;   ("v[4] == 50",           v[4],           50);
+        chk&lt;int&gt;   ("v[8] == 90",           v[8],           90);
+        chk&lt;size_t&gt;("capacity == 16",       v.capacity(), 16);
+        v[3] = 999;
+        chk&lt;int&gt;   ("v[3] after modify",    v[3],           999);
+        print_result("Task B", 20);
+    }
+    if (opt == "C") {
+        MiniVector v;
+        v.push_back(5); v.push_back(10); v.push_back(15);
+        chk&lt;size_t&gt;("size before pop",          v.size(), 3);
+        v.pop_back();
+        chk&lt;size_t&gt;("size after one pop",       v.size(), 2);
+        chk&lt;int&gt;   ("v[0] unchanged",           v[0],     5);
+        chk&lt;int&gt;   ("at(1) == 10",              v.at(1),  10);
+        bool t1 = false;
+        try { v.at(2); } catch (const std::out_of_range&) { t1 = true; }
+        chk_throw("at(2) throws out_of_range", t1);
+        v.pop_back(); v.pop_back();
+        bool t2 = false;
+        try { v.pop_back(); } catch (const std::runtime_error&) { t2 = true; }
+        chk_throw("pop_back on empty throws runtime_error", t2);
+        bool t3 = false;
+        try { v.at(0); } catch (const std::out_of_range&) { t3 = true; }
+        chk_throw("at(0) on empty throws out_of_range", t3);
+        print_result("Task C", 15);
+    }
+    if (opt == "D") {
+        MiniVector a;
+        a.push_back(1); a.push_back(2); a.push_back(3);
+        MiniVector b(a);
+        chk&lt;size_t&gt;("copy: b.size() == 3",          b.size(), 3);
+        chk&lt;int&gt;   ("copy: b[0] == 1",              b[0],     1);
+        chk&lt;int&gt;   ("copy: b[2] == 3",              b[2],     3);
+        a[0] = 999;
+        chk&lt;int&gt;   ("deep copy: b[0] still 1",      b[0],     1);
+        MiniVector c; c.push_back(7); c = a;
+        chk&lt;size_t&gt;("assign: c.size() == 3",        c.size(), 3);
+        chk&lt;int&gt;   ("assign: c[0] == 999",          c[0],     999);
+        c = c;
+        chk&lt;int&gt;   ("self-assign safe: c[0]==999",  c[0],     999);
+        print_result("Task D", 15);
+    }
+    return 0;
+}</code></pre>
+</div>
+
+<footer>
+  CSCI 235 &mdash; Hunter College, CUNY &mdash; Fall 2026 &mdash;
+  Tong Yi &nbsp;|&nbsp; Last updated: August 2026
+</footer>
+
+<script>
+hljs.highlightAll();
+function copyCode(btn) {
+    var pre = btn.nextElementSibling;
+    navigator.clipboard.writeText(pre.innerText).then(function() {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    });
+}
+</script>
+</body>
+</html>
