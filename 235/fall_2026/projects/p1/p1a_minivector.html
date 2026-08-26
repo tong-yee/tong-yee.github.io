@@ -84,14 +84,16 @@
   allowed to use <code>std::vector</code>.
 </p>
 <p>
-  The skeleton file <code>p1a_minivector.cpp</code> (at the end of this page) already
-  compiles.  The member functions you must implement start as stubs; the test harness
-  is already complete.  Tests will fail until you fill in the <code>// TODO</code> sections.
+  You are given two files: <code>MiniVector.hpp</code> declares the <code>MiniVector</code>
+  class interface (do not modify it), and <code>MiniVectorTest.cpp</code> contains the
+  complete test harness (do not modify it either).  You write all your implementations
+  in a new file called <code>MiniVector.cpp</code>.
+  Tests will fail until you fill in the <code>// TODO</code> sections.
 </p>
-<p>Compile and run:</p>
+<p>Compile and run (all three files in the same folder):</p>
 <div class="code-wrap">
   <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code class="language-bash">g++ -std=c++17 -Wall -Wextra -o minivector p1a_minivector.cpp
+<pre><code class="language-bash">g++ -std=c++17 -Wall -Wextra -o minivector MiniVector.cpp MiniVectorTest.cpp
 ./minivector A    # Task A  (8 tests, 20 pts) — constructor, push_back, operator[], size
 ./minivector B    # Task B  (7 tests, 20 pts) — grow(): automatic capacity doubling
 ./minivector C    # Task C  (7 tests, 15 pts) — pop_back and at() with error checking
@@ -355,14 +357,17 @@ for (size_t i = 0; i &lt; b.size_; i++) b.data_[i] = a.data_[i];</pre>
   The following are already implemented and must not be modified:
 </p>
 <ul>
-  <li><code>size()</code>, <code>capacity()</code>, <code>empty()</code> &mdash; inline in the class definition.</li>
-  <li>The test harness: <code>chk()</code>, <code>chk_throw()</code>, <code>print_result()</code>, and <code>main()</code>.</li>
+  <li><code>MiniVector.hpp</code> &mdash; class declaration (provided; do not modify).</li>
+  <li><code>size()</code>, <code>capacity()</code>, <code>empty()</code> &mdash; inline in <code>MiniVector.hpp</code>; already implemented.</li>
+  <li><code>MiniVectorTest.cpp</code> &mdash; test harness (<code>chk()</code>, <code>chk_throw()</code>, <code>print_result()</code>, <code>main()</code>); provided, do not modify.</li>
 </ul>
 
 <h2>Submission</h2>
 <p>
-  Submit a single file named <strong><code>p1a_minivector.cpp</code></strong> to Gradescope.
-  The autograder compiles your file and runs all four task groups.
+  Submit a single file named <strong><code>MiniVector.cpp</code></strong> to Gradescope.
+  The autograder already has <code>MiniVector.hpp</code> and <code>MiniVectorTest.cpp</code>;
+  you do not need to submit them.
+  The autograder compiles your file together with the provided files and runs all four task groups.
   Make sure your file compiles without errors on the Linux lab machines
   (Hunter North 1001B/C) using <code>g++ -std=c++17</code>.
 </p>
@@ -375,138 +380,119 @@ for (size_t i = 0; i &lt; b.size_; i++) b.data_[i] = a.data_[i];</pre>
 </div>
 
 <!-- Skeleton -->
-<h2>Skeleton: <code>p1a_minivector.cpp</code></h2>
+<h2>Provided Files</h2>
+<p>
+  Download all three files and keep them in the same folder.
+  Do not modify <code>MiniVector.hpp</code> or <code>MiniVectorTest.cpp</code>.
+  You write only <code>MiniVector.cpp</code>.
+</p>
+
+<h3><code>MiniVector.hpp</code> &mdash; class interface (provided, do not modify)</h3>
 <div class="code-wrap">
   <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code class="language-cpp">// ============================================================
-// CSCI 235 — Software Design & Analysis II   Fall 2026
-// Project 1A: MiniVector&lt;int&gt;
-// Due: Thursday, September 17, 2026, 11:59 PM
-// ============================================================
-// Implement the member functions below by completing the TODO
-// sections.  Do not modify the class interface, the test
-// harness helpers, or the task blocks in main().
-//
-// Compile and run:
-//   g++ -std=c++17 -Wall -Wextra -o minivector p1a_minivector.cpp
-//   ./minivector A    # Task A (8 tests,  20 pts)
-//   ./minivector B    # Task B (7 tests,  20 pts)
-//   ./minivector C    # Task C (7 tests,  15 pts)
-//   ./minivector D    # Task D (7 tests,  15 pts)
-// ============================================================
-
-#include &lt;iostream&gt;
-#include &lt;stdexcept&gt;
-#include &lt;string&gt;
+<pre><code class="language-cpp">#ifndef MINIVECTOR_HPP
+#define MINIVECTOR_HPP
 
 // ============================================================
-// MiniVector — a simplified dynamic array for int
+// CSCI 235 &mdash; Software Design &amp; Analysis II   Fall 2026
+// Project 1A: MiniVector&lt;int&gt; &mdash; class interface
+// PROVIDED: do not modify this file.
 // ============================================================
+
+#include &lt;cstddef&gt;      // size_t
+#include &lt;stdexcept&gt;    // std::out_of_range, std::runtime_error
+
 class MiniVector {
-private:
-    int*   data_;      // pointer to the heap-allocated storage array
-    size_t size_;      // number of elements currently stored
-    size_t capacity_;  // total number of slots allocated
-
-    void grow();  // TODO (Task B)
-
 public:
-    MiniVector();                              // TODO (Task A)
-    ~MiniVector();                             // TODO (Task D)
-    MiniVector(const MiniVector& other);       // TODO (Task D)
-    MiniVector& operator=(const MiniVector&);  // TODO (Task D)
+    // --- Constructors / Destructor ---
+    MiniVector();                              // default constructor
+    ~MiniVector();                             // destructor
+    MiniVector(const MiniVector&amp; other);       // copy constructor
+    MiniVector&amp; operator=(const MiniVector&amp; other); // copy assignment
 
-    void push_back(int val);   // TODO (Task A/B)
-    void pop_back();           // TODO (Task C)
-    int& operator[](size_t idx);              // TODO (Task A)
-    const int& operator[](size_t idx) const;  // TODO (Task A)
-    int& at(size_t idx);              // TODO (Task C)
-    const int& at(size_t idx) const;  // TODO (Task C)
-
+    // --- Capacity ---
     size_t size()     const { return size_; }
     size_t capacity() const { return capacity_; }
     bool   empty()    const { return size_ == 0; }
+
+    // --- Modifiers ---
+    void push_back(int val);
+    void pop_back();
+
+    // --- Element access ---
+    int&amp;       operator[](size_t idx);
+    const int&amp; operator[](size_t idx) const;
+    int&amp;       at(size_t idx);
+    const int&amp; at(size_t idx) const;
+
+private:
+    int*   data_;       // pointer to heap-allocated array
+    size_t size_;       // number of elements stored
+    size_t capacity_;   // allocated capacity
+
+    void grow();        // double capacity (called by push_back)
 };
 
-// ============================================================
-// Implement the member functions below by completing the TODO sections.
-// ============================================================
+#endif // MINIVECTOR_HPP</code></pre>
+</div>
 
-MiniVector::MiniVector()
-    : data_(nullptr), size_(0), capacity_(0) {
-    // TODO (Task A): data_ = new int[2];  capacity_ = 2;
-}
-
-MiniVector::~MiniVector() {
-    // TODO (Task D): delete[] data_;
-}
-
-MiniVector::MiniVector(const MiniVector& other)
-    : data_(nullptr), size_(0), capacity_(0) {
-    // TODO (Task D): allocate and copy
-}
-
-MiniVector& MiniVector::operator=(const MiniVector& other) {
-    // TODO (Task D): guard, release, copy
-    return *this;
-}
-
-void MiniVector::grow() {
-    // TODO (Task B): new_cap = capacity_*2; allocate; copy; delete[]; update
-}
-
-void MiniVector::push_back(int val) {
-    // TODO (Task B): if (size_ == capacity_) grow();
-    // TODO (Task A): data_[size_++] = val;
-}
-
-void MiniVector::pop_back() {
-    // TODO (Task C): throw or --size_
-}
-
-int& MiniVector::operator[](size_t idx)             { return data_[idx]; }
-const int& MiniVector::operator[](size_t idx) const { return data_[idx]; }
-
-int& MiniVector::at(size_t idx) {
-    // TODO (Task C): bounds check, then return data_[idx]
-    return data_[idx];
-}
-const int& MiniVector::at(size_t idx) const {
-    // TODO (Task C): bounds check, then return data_[idx]
-    return data_[idx];
-}
-
-// ============================================================
-// Test harness — do not modify below this line
+<h3><code>MiniVectorTest.cpp</code> &mdash; test harness (provided, do not modify)</h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// ============================================================
+// CSCI 235 &mdash; Software Design &amp; Analysis II   Fall 2026
+// Project 1A: MiniVector&lt;int&gt; &mdash; Test Harness
+// PROVIDED: do not modify this file.
 // ============================================================
 
-static int score = 0, total = 0;
+#include "MiniVector.hpp"
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+static int score = 0;
+static int total = 0;
 
 template &lt;typename T&gt;
-void chk(const std::string& label, T got, T expected) {
+void chk(const std::string&amp; label, T got, T expected) {
     total++;
-    if (got == expected) { std::cout &lt;&lt; "  [PASS] " &lt;&lt; label &lt;&lt; "\n"; score++; }
-    else std::cout &lt;&lt; "  [FAIL] " &lt;&lt; label &lt;&lt; "  expected=" &lt;&lt; expected &lt;&lt; "  got=" &lt;&lt; got &lt;&lt; "\n";
+    if (got == expected) {
+        std::cout &lt;&lt; "  [PASS] " &lt;&lt; label &lt;&lt; "\n";
+        score++;
+    } else {
+        std::cout &lt;&lt; "  [FAIL] " &lt;&lt; label
+                  &lt;&lt; "  expected=" &lt;&lt; expected
+                  &lt;&lt; "  got=" &lt;&lt; got &lt;&lt; "\n";
+    }
 }
 
-void chk_throw(const std::string& label, bool threw) {
+void chk_throw(const std::string&amp; label, bool threw) {
     total++;
-    if (threw) { std::cout &lt;&lt; "  [PASS] " &lt;&lt; label &lt;&lt; " (threw as expected)\n"; score++; }
-    else         std::cout &lt;&lt; "  [FAIL] " &lt;&lt; label &lt;&lt; " (no exception thrown)\n";
+    if (threw) {
+        std::cout &lt;&lt; "  [PASS] " &lt;&lt; label &lt;&lt; " (threw as expected)\n";
+        score++;
+    } else {
+        std::cout &lt;&lt; "  [FAIL] " &lt;&lt; label &lt;&lt; " (no exception thrown)\n";
+    }
 }
 
-void print_result(const std::string& task, int pts) {
+void print_result(const std::string&amp; task, int pts) {
     if (score == total)
-        std::cout &lt;&lt; "\n" &lt;&lt; task &lt;&lt; ": " &lt;&lt; score &lt;&lt; "/" &lt;&lt; total &lt;&lt; " passed — " &lt;&lt; pts &lt;&lt; "/" &lt;&lt; pts &lt;&lt; " points\n";
+        std::cout &lt;&lt; "\n" &lt;&lt; task &lt;&lt; ": " &lt;&lt; score &lt;&lt; "/" &lt;&lt; total
+                  &lt;&lt; " tests passed &mdash; " &lt;&lt; pts &lt;&lt; "/" &lt;&lt; pts &lt;&lt; " points\n";
     else
-        std::cout &lt;&lt; "\n" &lt;&lt; task &lt;&lt; ": " &lt;&lt; score &lt;&lt; "/" &lt;&lt; total &lt;&lt; " passed — partial credit may apply\n";
+        std::cout &lt;&lt; "\n" &lt;&lt; task &lt;&lt; ": " &lt;&lt; score &lt;&lt; "/" &lt;&lt; total
+                  &lt;&lt; " tests passed &mdash; partial credit may apply\n";
     score = 0; total = 0;
 }
 
 int main(int argc, char* argv[]) {
-    if (argc &lt; 2) { std::cerr &lt;&lt; "Usage: " &lt;&lt; argv[0] &lt;&lt; " [A|B|C|D]\n"; return 1; }
+    if (argc &lt; 2) {
+        std::cerr &lt;&lt; "Usage: " &lt;&lt; argv[0] &lt;&lt; " [A|B|C|D]\n";
+        return 1;
+    }
     std::string opt = argv[1];
 
+    // &mdash; Task A: constructor, push_back (no grow), operator[], size/capacity/empty
     if (opt == "A") {
         MiniVector v;
         chk&lt;size_t&gt;("initial size",         v.size(),     0);
@@ -521,56 +507,150 @@ int main(int argc, char* argv[]) {
         chk&lt;int&gt;   ("v[1] == 20",           v[1],         20);
         print_result("Task A", 20);
     }
+
+    // &mdash; Task B: grow() &mdash; automatic capacity doubling
     if (opt == "B") {
         MiniVector v;
         for (int i = 1; i &lt;= 9; i++) v.push_back(i * 10);
-        chk&lt;size_t&gt;("size after 9 pushes",  v.size(),       9);
+        chk&lt;size_t&gt;("size after 9 pushes",  v.size(),      9);
         chk&lt;bool&gt;  ("capacity &gt;= 9",        v.capacity() &gt;= 9, true);
-        chk&lt;int&gt;   ("v[0] == 10",           v[0],           10);
-        chk&lt;int&gt;   ("v[4] == 50",           v[4],           50);
-        chk&lt;int&gt;   ("v[8] == 90",           v[8],           90);
+        chk&lt;int&gt;   ("v[0] == 10",           v[0],          10);
+        chk&lt;int&gt;   ("v[4] == 50",           v[4],          50);
+        chk&lt;int&gt;   ("v[8] == 90",           v[8],          90);
         chk&lt;size_t&gt;("capacity == 16",       v.capacity(), 16);
         v[3] = 999;
-        chk&lt;int&gt;   ("v[3] after modify",    v[3],           999);
+        chk&lt;int&gt;   ("v[3] after modify",    v[3],          999);
         print_result("Task B", 20);
     }
+
+    // &mdash; Task C: pop_back (with throw), at() (with bounds check)
     if (opt == "C") {
         MiniVector v;
         v.push_back(5); v.push_back(10); v.push_back(15);
-        chk&lt;size_t&gt;("size before pop",          v.size(), 3);
+        chk&lt;size_t&gt;("size before pop",           v.size(), 3);
         v.pop_back();
-        chk&lt;size_t&gt;("size after one pop",       v.size(), 2);
-        chk&lt;int&gt;   ("v[0] unchanged",           v[0],     5);
-        chk&lt;int&gt;   ("at(1) == 10",              v.at(1),  10);
-        bool t1 = false;
-        try { v.at(2); } catch (const std::out_of_range&) { t1 = true; }
-        chk_throw("at(2) throws out_of_range", t1);
+        chk&lt;size_t&gt;("size after one pop",        v.size(), 2);
+        chk&lt;int&gt;   ("v[0] unchanged after pop",  v[0],     5);
+        chk&lt;int&gt;   ("at(1) == 10",               v.at(1),  10);
+        bool threw1 = false;
+        try { v.at(2); } catch (const std::out_of_range&amp;) { threw1 = true; }
+        chk_throw("at(2) throws out_of_range", threw1);
         v.pop_back(); v.pop_back();
-        bool t2 = false;
-        try { v.pop_back(); } catch (const std::runtime_error&) { t2 = true; }
-        chk_throw("pop_back on empty throws runtime_error", t2);
-        bool t3 = false;
-        try { v.at(0); } catch (const std::out_of_range&) { t3 = true; }
-        chk_throw("at(0) on empty throws out_of_range", t3);
+        bool threw2 = false;
+        try { v.pop_back(); } catch (const std::runtime_error&amp;) { threw2 = true; }
+        chk_throw("pop_back on empty throws runtime_error", threw2);
+        bool threw3 = false;
+        try { v.at(0); } catch (const std::out_of_range&amp;) { threw3 = true; }
+        chk_throw("at(0) on empty throws out_of_range", threw3);
         print_result("Task C", 15);
     }
+
+    // &mdash; Task D: destructor, copy constructor, copy assignment
     if (opt == "D") {
         MiniVector a;
         a.push_back(1); a.push_back(2); a.push_back(3);
         MiniVector b(a);
-        chk&lt;size_t&gt;("copy: b.size() == 3",          b.size(), 3);
-        chk&lt;int&gt;   ("copy: b[0] == 1",              b[0],     1);
-        chk&lt;int&gt;   ("copy: b[2] == 3",              b[2],     3);
+        chk&lt;size_t&gt;("copy: b.size() == 3",           b.size(), 3);
+        chk&lt;int&gt;   ("copy: b[0] == 1",               b[0],     1);
+        chk&lt;int&gt;   ("copy: b[2] == 3",               b[2],     3);
         a[0] = 999;
-        chk&lt;int&gt;   ("deep copy: b[0] still 1",      b[0],     1);
+        chk&lt;int&gt;   ("deep copy: b[0] still 1",       b[0],     1);
         MiniVector c; c.push_back(7); c = a;
-        chk&lt;size_t&gt;("assign: c.size() == 3",        c.size(), 3);
-        chk&lt;int&gt;   ("assign: c[0] == 999",          c[0],     999);
+        chk&lt;size_t&gt;("assign: c.size() == 3",         c.size(), 3);
+        chk&lt;int&gt;   ("assign: c[0] == 999",           c[0],     999);
         c = c;
-        chk&lt;int&gt;   ("self-assign safe: c[0]==999",  c[0],     999);
+        chk&lt;int&gt;   ("self-assign safe: c[0] == 999", c[0],     999);
         print_result("Task D", 15);
     }
     return 0;
+}</code></pre>
+</div>
+
+<h3><code>MiniVector.cpp</code> &mdash; your submission (starter file)</h3>
+<p>Create this file yourself, or use the starter below as a template.</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// ============================================================
+// CSCI 235 &mdash; Software Design &amp; Analysis II   Fall 2026
+// Project 1A: MiniVector&lt;int&gt;
+// Due: Thursday, September 17, 2026, 11:59 PM
+// ============================================================
+// Implement the member functions below by completing the TODO sections.
+// Do not modify MiniVector.hpp or MiniVectorTest.cpp.
+//
+// Compile (all three files in the same folder):
+//   g++ -std=c++17 -Wall -Wextra -o minivector MiniVector.cpp MiniVectorTest.cpp
+//   ./minivector A    # Task A (8 tests,  20 pts)
+//   ./minivector B    # Task B (7 tests,  20 pts)
+//   ./minivector C    # Task C (7 tests,  15 pts)
+//   ./minivector D    # Task D (7 tests,  15 pts)
+// ============================================================
+
+#include "MiniVector.hpp"
+
+// TODO (Task A): Default constructor
+MiniVector::MiniVector()
+    : data_(nullptr), size_(0), capacity_(0) {
+    // Allocate capacity_ = 2 slots; set size_ = 0.
+    // Hint: data_ = new int[2];  capacity_ = 2;
+}
+
+// TODO (Task D): Destructor
+MiniVector::~MiniVector() {
+    // Release the array allocated in the constructor (and grown in grow()).
+    // Hint: delete[] data_;
+}
+
+// TODO (Task D): Copy constructor
+MiniVector::MiniVector(const MiniVector&amp; other)
+    : data_(nullptr), size_(0), capacity_(0) {
+    // 1. Set size_ and capacity_ from other.
+    // 2. Allocate a new array of size capacity_.
+    // 3. Copy all elements from other.data_ to data_.
+}
+
+// TODO (Task D): Copy assignment operator
+MiniVector&amp; MiniVector::operator=(const MiniVector&amp; other) {
+    // 1. Guard: if (this == &amp;other) return *this;
+    // 2. delete[] data_;
+    // 3. Copy size_, capacity_, allocate new array, copy elements.
+    // 4. return *this;
+    return *this;  // placeholder &mdash; replace with full implementation
+}
+
+// TODO (Task B): grow()
+void MiniVector::grow() {
+    // 1. size_t new_cap = capacity_ * 2;
+    // 2. int* new_data = new int[new_cap];
+    // 3. Copy: for (size_t i = 0; i &lt; size_; i++) new_data[i] = data_[i];
+    // 4. delete[] data_;
+    // 5. data_ = new_data;  capacity_ = new_cap;
+}
+
+// TODO (Task A/B): push_back
+void MiniVector::push_back(int val) {
+    // Task B: if (size_ == capacity_) grow();
+    // Task A: data_[size_++] = val;
+}
+
+// TODO (Task C): pop_back
+void MiniVector::pop_back() {
+    // if (empty()) throw std::runtime_error("pop_back on empty MiniVector");
+    // --size_;
+}
+
+// operator[] &mdash; correct once data_ is allocated; do not modify.
+int&amp; MiniVector::operator[](size_t idx)             { return data_[idx]; }
+const int&amp; MiniVector::operator[](size_t idx) const { return data_[idx]; }
+
+// TODO (Task C): at() &mdash; add bounds check before returning data_[idx].
+int&amp; MiniVector::at(size_t idx) {
+    // if (idx &gt;= size_) throw std::out_of_range("index out of range");
+    return data_[idx];  // placeholder
+}
+const int&amp; MiniVector::at(size_t idx) const {
+    // if (idx &gt;= size_) throw std::out_of_range("index out of range");
+    return data_[idx];  // placeholder
 }</code></pre>
 </div>
 
