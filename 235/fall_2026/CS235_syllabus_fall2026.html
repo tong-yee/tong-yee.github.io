@@ -243,7 +243,7 @@
   <p><strong>Other Useful Resources:</strong></p>
   <ul>
     <li><a href="http://opendatastructures.org/" target="_blank">Open Data Structures in C++</a> (free online)</li>
-    <li><a href="http://www.compsci.hunter.cuny.edu/~sweiss/course_materials/csci235/csci235_lecture_notes.php" target="_blank">Prof. Stewart Weiss&rsquo; lecture notes</a></li>
+    <li><a href="https://www.cs.hunter.cuny.edu/~sweiss/course_materials/csci235/" target="_blank">Prof. Stewart Weiss&rsquo; lecture notes</a></li>
     <li><a href="https://learn.microsoft.com/en-us/windows/wsl/tutorials/linux" target="_blank">Linux on Windows (WSL) tutorial</a> — Microsoft Learn (official)</li>
     <li><em>Introduction to Algorithms</em>, 3rd Edition, Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein (reference)</li>
     <li><em>Effective Modern C++</em>, Scott Meyers (supplementary)</li>
@@ -412,8 +412,28 @@
   <h3>Academic Integrity</h3>
   <p>Hunter College regards acts of academic dishonesty (e.g., plagiarism, cheating on examinations, obtaining unfair advantage, and falsification of records and official documents) as serious offenses against the values of intellectual honesty. The College is committed to enforcing the CUNY Policy on Academic Integrity and will pursue cases of academic dishonesty according to the Hunter College Academic Integrity Procedures.</p>
   <p>In this course, special attention is given to <strong>contract cheating</strong> (having work completed on your behalf and submitting it for credit). All submitted projects are checked with screening software for authenticity and originality.</p>
-  <p>You are encouraged to discuss ideas with others and consult available resources and examples to inform your work. However, <strong>you must write all your code yourself</strong>. You may not give code to, or receive code from, anyone else. If you are unsure whether something is permitted, ask before doing it.</p>
-  <p><strong>On Generative AI:</strong> You may use AI tools as a starting point or learning aid, but you must cite any AI-generated code and take full responsibility for understanding, testing, and debugging it. AI may help explain concepts, but it cannot replace understanding &mdash; you should be able to explain every line of code you submit. AI-generated code that is submitted without understanding is an integrity risk and will not reflect the skills expected of you in future coursework.</p>
+  <p>You are encouraged to discuss ideas with others and consult available resources and examples to inform your work. However, you must write all submitted code yourself. You may not give code to, or receive code from, anyone else. Use of generative AI is governed by the policy below. If you are unsure whether something is permitted, ask before doing it.</p>
+</section>
+
+<!-- ══════════════ USE OF GENERATIVE AI ══════════════ -->
+<section>
+  <h3>Use of Generative AI</h3>
+  <p>Generative AI tools &mdash; including ChatGPT, Claude, GitHub Copilot, and other AI-based code-generation tools &mdash; may be used as learning aids in this course. You may use them to ask questions about course concepts, C++ language features, or compiler and runtime error messages, provided that you do not supply your project or exercise code.</p>
+
+  <p><strong>Unless explicitly permitted for a particular assignment, the following are not allowed:</strong></p>
+  <ul>
+    <li>Providing your project or exercise code, or substantial portions of it, to a generative AI system for debugging, correction, completion, or rewriting.</li>
+    <li>Providing the assignment specification or project description to a generative AI system.</li>
+    <li>Using generative AI to generate code or solutions that you submit for programming projects or exercises.</li>
+  </ul>
+
+  <p><strong>Error messages:</strong> You may provide an AI system with a compiler or runtime error message and ask what the message means or what general kinds of problems can cause it &mdash; without providing your assignment code. For example, asking <em>&ldquo;What does <code>double free or corruption</code> mean in C++?&rdquo;</em> or <em>&ldquo;What can cause a segmentation fault?&rdquo;</em> is permitted. Pasting your implementation and asking <em>&ldquo;Why does this crash?&rdquo;</em> is not.</p>
+
+  <p>The &ldquo;substantial portions&rdquo; restriction applies even if you submit functions one at a time. Submitting your constructor, then your <code>push_back</code>, then your copy constructor separately to obtain corrected versions is not permitted.</p>
+
+  <p>Citing an AI tool does not make AI-generated project code acceptable. The relevant requirement is instructor authorization, not attribution.</p>
+
+  <p>You are responsible for understanding and being able to explain all work that you submit. Specific assignments may provide additional instructions regarding permitted or prohibited uses of AI. Generative AI tools may not be used during examinations. Use of AI that is not authorized by the instructor is subject to the CUNY Policy on Academic Integrity.</p>
 </section>
 
 <!-- ══════════════ ADA COMPLIANCE ══════════════ -->
@@ -428,8 +448,8 @@
   <p>In compliance with the CUNY Policy on Sexual Misconduct, Hunter College reaffirms the prohibition of any sexual misconduct, including sexual violence, sexual harassment, and gender-based harassment or retaliation against students, employees, or visitors, as well as certain intimate relationships. Students who have experienced any form of sexual violence on or off campus (including CUNY-sponsored trips and events) are entitled to the rights outlined in the Bill of Rights for Hunter College.</p>
   <ul>
     <li><strong>Sexual Violence:</strong> Students are strongly encouraged to immediately report the incident by calling 911, contacting NYPD Special Victims Division Hotline (646-610-7272) or their local police precinct, or contacting the College&rsquo;s Public Safety Office (212-772-4444).</li>
-    <li><strong>All Other Forms of Sexual Misconduct:</strong> Students are also encouraged to contact the Director of the Office of Student Conduct: <a href="https://www.hunter.cuny.edu/students/student-affairs/office-of-student-conduct/contact/" target="_blank">https://www.hunter.cuny.edu/students/student-affairs/office-of-student-conduct/contact/</a>.<br>
-      CUNY Policy on Sexual Misconduct Link: <a href="http://www.cuny.edu/about/administration/offices/la/Policy-on-Sexual-Misconduct-12-1-14-with-links.pdf" target="_blank">http://www.cuny.edu/about/administration/offices/la/Policy-on-Sexual-Misconduct-12-1-14-with-links.pdf</a></li>
+    <li><strong>All Other Forms of Sexual Misconduct:</strong> Students are also encouraged to contact the Director of the Office of Student Conduct: <a href="https://www.hunter.cuny.edu/students/student-affairs/office-of-student-conduct/" target="_blank">https://www.hunter.cuny.edu/students/student-affairs/office-of-student-conduct/</a>.<br>
+      CUNY Policy on Sexual Misconduct Link: <a href="https://policy.cuny.edu/general-policy/article-vii/" target="_blank">https://policy.cuny.edu/general-policy/article-vii/</a></li>
   </ul>
 </section>
 
@@ -453,7 +473,7 @@
   <p><strong>Skills (Behavioral):</strong> Implement dynamic memory management in C++ using raw pointers, the Rule of Three, and RAII; design and code recursive and iterative algorithms for searching, sorting, and tree traversal; apply inheritance and polymorphism to build extensible class hierarchies; and use debugging tools (Valgrind, <code>g++</code> warnings) to identify and correct memory and logic errors.</p>
   <p><strong>Attitudes and Values (Affective):</strong> Appreciate the trade-offs among running time, memory usage, code clarity, and extensibility; and develop professional habits of early project starts, incremental testing, and thorough self-review before submission.</p>
   <p><strong>Abilities:</strong> Analyze an unfamiliar problem, select an appropriate data structure, implement a correct and efficient solution in C++, measure its empirical and theoretical performance, and communicate the design decisions clearly in code and documentation.</p>
-  <p>This course also satisfies departmental learning goals as set forth by the Hunter College Computer Science department. For the full list of departmental learning goals, see <a href="https://www.hunter.cuny.edu/csci/for-students/learning-goals-for-hunter-college-students" target="_blank">https://www.hunter.cuny.edu/csci/for-students/learning-goals-for-hunter-college-students</a>. Specifically, this course supports goals in mathematical foundations (Big-O analysis), systems knowledge (C++ on Linux), programming proficiency (four substantial projects), and software design (data structures and algorithms).</p>
+  <p>This course also satisfies departmental learning goals as set forth by the Hunter College Computer Science department. For the full list of departmental learning goals, see <a href="https://www.hunter.cuny.edu/artsci/computer-science/undergraduate/" target="_blank">https://www.hunter.cuny.edu/artsci/computer-science/undergraduate/</a>. Specifically, this course supports goals in mathematical foundations (Big-O analysis), systems knowledge (C++ on Linux), programming proficiency (four substantial projects), and software design (data structures and algorithms).</p>
 </section>
 
 <!-- ══════════════ CELL PHONES ══════════════ -->
