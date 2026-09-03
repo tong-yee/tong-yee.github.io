@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 1: Shape, Triangle, and Square</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  h3 .task-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: .15rem .5rem;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: .5rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+
+  /* hierarchy diagram */
+  .hierarchy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1.6rem 0 1.8rem;
+    user-select: none;
+  }
+  .h-box {
+    padding: .55rem 1.4rem;
+    border-radius: 8px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .95rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .h-super {
+    background: var(--ice);
+    border: 1.5px solid #7ea1e0;
+    color: var(--navy);
+  }
+  .h-row {
+    display: flex;
+    gap: 3.2rem;
+    margin-top: .15rem;
+  }
+  .h-sub {
+    background: var(--tan);
+    border: 1.5px solid var(--tan-border);
+    color: #6b4508;
+  }
+  .h-links {
+    display: flex;
+    gap: 3.2rem;
+    margin-top: -1px;
+  }
+  .h-links svg { display: block; }
+  .h-label {
+    text-align: center;
+    font-size: .78rem;
+    color: var(--muted);
+    margin-top: 2.2rem;
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 1 &mdash; Shape, Triangle, and Square</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Due: see Gradescope</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#hierarchy">The Inheritance Hierarchy</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#shape">1. The <code>Shape</code> Class (provided)</a></li>
+    <li><a href="#triangle">2. Implement <code>Triangle</code></a></li>
+    <li><a href="#square">3. Implement <code>Square</code></a></li>
+    <li><a href="#test">4. Complete <code>ShapeTriangleSquareTest.cpp</code></a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>In this exercise, you will practice:</p>
+<ul>
+  <li>deriving subclasses from a superclass;</li>
+  <li>calling a superclass constructor from a subclass constructor;</li>
+  <li>inheriting methods whose behavior is shared by subclasses;</li>
+  <li>overriding a virtual method when subclasses need different behavior;</li>
+  <li>using a superclass pointer to work with objects of different subclasses;</li>
+  <li>using runtime polymorphism.</li>
+</ul>
+
+<h2 id="hierarchy">The Inheritance Hierarchy</h2>
+<p>You will work with the following inheritance hierarchy:</p>
+<div class="hierarchy">
+  <div class="h-box h-super">Shape</div>
+  <div class="h-links">
+    <svg width="120" height="34"><line x1="60" y1="0" x2="10" y2="34" stroke="#7ea1e0" stroke-width="2"/></svg>
+    <svg width="120" height="34"><line x1="60" y1="0" x2="110" y2="34" stroke="#7ea1e0" stroke-width="2"/></svg>
+  </div>
+  <div class="h-row">
+    <div class="h-box h-sub">Triangle</div>
+    <div class="h-box h-sub">Square</div>
+  </div>
+  <div class="h-label">is-a &nbsp;&mdash;&nbsp; every <code>Triangle</code> is a <code>Shape</code>; every <code>Square</code> is a <code>Shape</code></div>
+</div>
+<p>
+  A <code>Triangle</code> in this exercise is an <strong>equilateral</strong> triangle: all three edges have the
+  same length. A <code>Square</code> has four edges of the same length.
+</p>
+
+<h2 id="files">Files</h2>
+<p>The following files are provided:</p>
+<p>
+  <span class="filecard given">Shape.hpp</span>
+  <span class="filecard given">Shape.cpp</span>
+  <span class="filecard given">ShapeTriangleSquareTest.cpp&nbsp;(skeleton)</span>
+</p>
+<p>You will create and submit:</p>
+<p>
+  <span class="filecard submit">Triangle.hpp</span>
+  <span class="filecard submit">Triangle.cpp</span>
+  <span class="filecard submit">Square.hpp</span>
+  <span class="filecard submit">Square.cpp</span>
+  <span class="filecard submit">ShapeTriangleSquareTest.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Important</span>
+  Do not modify <code>Shape.hpp</code> or <code>Shape.cpp</code>. Gradescope compiles your submission against
+  the original versions of these two files.
+</div>
+
+<h2 id="shape">1. The <code>Shape</code> Class (provided)</h2>
+<p>A <code>Shape</code> stores:</p>
+<ul>
+  <li>the number of edges;</li>
+  <li>the length of each edge.</li>
+</ul>
+<p>
+  Both data members are private. Derived classes access them through the public methods
+  <code>numEdges()</code> and <code>edgeLength()</code>.
+</p>
+<p>
+  The <code>perimeter()</code> method behaves the same for both a triangle and a square:
+</p>
+<pre><code class="language-cpp">perimeter = number of edges &times; edge length</code></pre>
+<p>Therefore, subclasses simply <strong>inherit</strong> <code>perimeter()</code> &mdash; you do not override it.</p>
+<p>
+  The calculation of area, however, depends on the type of shape. Therefore, <code>area()</code> is declared
+  <code>virtual</code> in <code>Shape</code>.
+</p>
+
+<h3><code>Shape.hpp</code></h3>
+<pre><code class="language-cpp">#ifndef SHAPE_HPP
+#define SHAPE_HPP
+
+class Shape {
+public:
+    Shape();
+    Shape(int numEdges, double edgeLength);
+
+    int numEdges() const;
+    double edgeLength() const;
+
+    virtual double area() const;
+    double perimeter() const;
+
+private:
+    int numEdges_;
+    double edgeLength_;
+};
+
+#endif</code></pre>
+
+<h3><code>Shape.cpp</code></h3>
+<pre><code class="language-cpp">#include "Shape.hpp"
+
+Shape::Shape()
+    : numEdges_(1), edgeLength_(1) {
+}
+
+Shape::Shape(int numEdges, double edgeLength)
+    : numEdges_(numEdges &gt; 0 ? numEdges : 1),
+      edgeLength_(edgeLength &gt; 0 ? edgeLength : 1) {
+}
+
+int Shape::numEdges() const {
+    return numEdges_;
+}
+
+double Shape::edgeLength() const {
+    return edgeLength_;
+}
+
+double Shape::area() const {
+    return 0;   // placeholder for a general Shape
+}
+
+double Shape::perimeter() const {
+    return numEdges_ * edgeLength_;
+}</code></pre>
+
+<h2 id="triangle">2. Implement <code>Triangle</code></h2>
+<p>Create <code>Triangle.hpp</code> and <code>Triangle.cpp</code>. <code>Triangle</code> publicly inherits from <code>Shape</code>.</p>
+
+<h3>Requirements</h3>
+<p><code>Triangle</code> must provide:</p>
+<pre><code class="language-cpp">Triangle();
+Triangle(double edgeLength);
+double area() const override;</code></pre>
+<p>
+  The default constructor creates an equilateral triangle whose edge length is <code>2</code>. Therefore
+  <code>Triangle()</code> should initialize the <code>Shape</code> portion with 3 edges and edge length 2.
+</p>
+<p>
+  The parameterized constructor <code>Triangle(double edgeLength)</code> creates an equilateral triangle
+  having the specified edge length.
+</p>
+<div class="note">
+  <span class="label">Design constraint</span>
+  Do not add additional data members to <code>Triangle</code>. The edge length is already stored in the superclass
+  &mdash; access it through the inherited <code>edgeLength()</code> method.
+</div>
+<p>Calculate the area of an equilateral triangle using:</p>
+<pre><code class="language-cpp">area = (&radic;3 / 4) &times; edgeLength&sup2;</code></pre>
+<p>Use <code>&lt;cmath&gt;</code> for <code>std::sqrt()</code>. Use the qualified name <code>std::sqrt</code>, not a bare <code>sqrt</code>.</p>
+
+<h2 id="square">3. Implement <code>Square</code></h2>
+<p>Create <code>Square.hpp</code> and <code>Square.cpp</code>. <code>Square</code> publicly inherits from <code>Shape</code>.</p>
+
+<h3>Requirements</h3>
+<p><code>Square</code> must provide:</p>
+<pre><code class="language-cpp">Square();
+Square(double edgeLength);
+double area() const override;</code></pre>
+<p>
+  The default constructor creates a square whose edge length is <code>2</code>. Therefore <code>Square()</code>
+  should initialize the <code>Shape</code> portion with 4 edges and edge length 2.
+</p>
+<div class="note">
+  <span class="label">Design constraint</span>
+  Do not add additional data members to <code>Square</code>.
+</div>
+<p>The area of a square is:</p>
+<pre><code class="language-cpp">area = edgeLength&sup2;</code></pre>
+
+<h2 id="test">4. Complete <code>ShapeTriangleSquareTest.cpp</code></h2>
+<p>
+  You are given the following skeleton. Fill in each numbered <code>TODO</code>. The comment above each
+  blank tells you exactly what that piece of code should do.
+</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include "Shape.hpp"
+#include "Triangle.hpp"
+#include "Square.hpp"
+
+void printByPointer(Shape* spPtr);
+
+int main() {
+    // TODO 1:
+    // Instantiate a Triangle named tri with edge length 6.
+
+
+    // TODO 2:
+    // Instantiate a Square named sq with edge length 5.
+
+
+    // TODO 3:
+    // Create an array named shapePtrs containing Shape pointers.
+    // Store the addresses of tri and sq in the array.
+
+
+    // TODO 4:
+    // Determine the number of elements in shapePtrs.
+    // You may use: sizeof(shapePtrs) / sizeof(shapePtrs[0])
+
+
+    // TODO 5:
+    // Use a loop to call printByPointer() for every
+    // element of shapePtrs.
+
+
+    return 0;
+}
+
+void printByPointer(Shape* spPtr) {
+    // TODO 6:
+    // Print the number of edges.
+
+
+    // TODO 7:
+    // Print the edge length.
+
+
+    // TODO 8:
+    // Print the perimeter.
+
+
+    // TODO 9:
+    // Print the area.
+
+}</code></pre>
+<div class="hint">
+  <span class="label">Hint</span>
+  <code>spPtr</code> has type <code>Shape*</code>, but because <code>area()</code> is virtual, the version
+  selected at run time depends on the actual object that <code>spPtr</code> points to &mdash; not on the
+  declared type of the pointer.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>For:</p>
+<pre><code class="language-cpp">Triangle tri(6);
+Square sq(5);</code></pre>
+<p>the triangle should print:</p>
+<table>
+  <tr><th>number of edges</th><td><code>3</code></td></tr>
+  <tr><th>edge length</th><td><code>6</code></td></tr>
+  <tr><th>perimeter</th><td><code>18</code></td></tr>
+  <tr><th>area</th><td>approximately <code>15.5885</code> &nbsp;(&radic;3/4 &times; 6&sup2; = 9&radic;3)</td></tr>
+</table>
+<p>and the square should print:</p>
+<table>
+  <tr><th>number of edges</th><td><code>4</code></td></tr>
+  <tr><th>edge length</th><td><code>5</code></td></tr>
+  <tr><th>perimeter</th><td><code>20</code></td></tr>
+  <tr><th>area</th><td><code>25</code></td></tr>
+</table>
+<div class="note">
+  <span class="label">On floating-point output</span>
+  Say <em>approximately</em> <code>15.5885</code> &mdash; your area does not need to match one exact textual
+  representation. Small differences in the last printed digit, depending on how you print <code>double</code>
+  values, are expected and fine.
+</div>
+
+<h2 id="compile">Compile and Run</h2>
+<pre><code class="language-bash">g++ -std=c++17 Shape.cpp Triangle.cpp Square.cpp ShapeTriangleSquareTest.cpp -o ex1
+./ex1</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>Submit exactly these five files to Gradescope:</p>
+<p>
+  <span class="filecard submit">Triangle.hpp</span>
+  <span class="filecard submit">Triangle.cpp</span>
+  <span class="filecard submit">Square.hpp</span>
+  <span class="filecard submit">Square.cpp</span>
+  <span class="filecard submit">ShapeTriangleSquareTest.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Do not submit</span>
+  Modified versions of <code>Shape.hpp</code> or <code>Shape.cpp</code>.
+</div>
+
+</main>
+
+<footer>CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
