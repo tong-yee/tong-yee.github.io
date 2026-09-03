@@ -226,7 +226,7 @@
         <div class="sub"><a href="slides/day1_classes.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
     <td>Course overview; classes vs. objects, encapsulation (<code>Question</code>, <code>Rectangle</code>); overloaded constructors, invariants, copy constructor vs. assignment operator; references, pass-by-reference; lecture-slip exercises</td>
     <td></td>
-    <td><span class="badge b-proj">&#35;1A Posted</span></td>
+    <td><a href="projects/p1/p1a_minivector.html" data-available="2026-09-01" style="text-decoration:none;"><span class="badge b-proj">&#35;1A Posted</span></a></td>
   </tr>
 
   <tr>
@@ -245,7 +245,7 @@
     <td>Tu, 9/8</td>
     <td>Templates; MiniVector Interface &amp; Memory Management</td>
     <td>Why templates exist; function templates (<code>max&lt;T&gt;</code>, swap), class templates; MiniVector interface design; stack vs. heap, pointer arithmetic, <code>new</code> / <code>delete</code>, null pointers, memory leaks &mdash; detailed pointer practice reinforced in Ex&nbsp;2 rather than repeated at length here</td>
-    <td><span class="badge b-due">Ex&nbsp;1 Due</span> <span class="badge b-ex">Ex&nbsp;2 Posted</span>
+    <td><span class="badge b-ex">Ex&nbsp;2 Posted</span>
         <div class="sub">Pointer Practice</div></td>
     <td></td>
   </tr>
@@ -255,7 +255,7 @@
     <td>Th, 9/10</td>
     <td>Dynamic Arrays, Capacity Growth &amp; Algorithm Analysis</td>
     <td>Raw pointer arrays, resize strategy, amortized O(1) push; Big-O notation, O(1) / O(n) / O(log n) growth</td>
-    <td><span class="badge b-due">Ex&nbsp;2 Due</span></td>
+    <td><span class="badge b-due">Ex&nbsp;1 Due</span></td>
     <td></td>
   </tr>
 
@@ -264,7 +264,7 @@
     <td>Tu, 9/15</td>
     <td>Resource Management (Rule of Three) &mdash; Copy Constructor, Destructor, Copy Assignment</td>
     <td>Deep vs. shallow copy, RAII, self-assignment guard</td>
-    <td><span class="badge b-ex">Ex&nbsp;3 Posted</span>
+    <td><span class="badge b-due">Ex&nbsp;2 Due</span> <span class="badge b-ex">Ex&nbsp;3 Posted</span>
         <div class="sub">Big Three</div></td>
     <td></td>
   </tr>
@@ -274,7 +274,7 @@
     <td>Th, 9/17</td>
     <td>Completing MiniVector &mdash; Testing, Debugging &amp; Memory Errors</td>
     <td>Edge-case testing, memory leaks, dangling pointers, double delete; Valgrind demonstration; brief closing preview of <code>std::move</code> and why it exists</td>
-    <td><span class="badge b-due">Ex&nbsp;3 Due</span></td>
+    <td></td>
     <td><span class="badge b-due">&#35;1A Due</span>&nbsp;<span class="badge b-proj">&#35;1B Posted</span></td>
   </tr>
 
@@ -288,7 +288,7 @@
     <td>Tu, 9/22</td>
     <td>Abstract Data Types; Singly Linked List &mdash; Nodes &amp; Traversal</td>
     <td>Interface vs. implementation, node structure, head pointer, sequential access; preview of P2&rsquo;s <code>MazeSolver</code> abstract interface and its <code>DFSSolver</code> / <code>BFSSolver</code> subclasses</td>
-    <td></td>
+    <td><span class="badge b-due">Ex&nbsp;3 Due</span></td>
     <td></td>
   </tr>
 
@@ -307,7 +307,7 @@
     <td>Tu, 9/29</td>
     <td>Stack ADT &amp; Implementations</td>
     <td>Array-based stack, linked-list stack, push/pop, call-stack analogy, applications</td>
-    <td><span class="badge b-due">Ex&nbsp;4 Due</span></td>
+    <td></td>
     <td></td>
   </tr>
 
@@ -316,7 +316,7 @@
     <td>Th, 10/1</td>
     <td>Queue ADT &amp; Implementations</td>
     <td>Circular-buffer queue, linked queue, enqueue/dequeue, front &amp; back pointers, applications</td>
-    <td><span class="badge b-ex">Ex&nbsp;5 Posted</span>
+    <td><span class="badge b-due">Ex&nbsp;4 Due</span> <span class="badge b-ex">Ex&nbsp;5 Posted</span>
         <div class="sub">Stack &amp; Queue Trace</div></td>
     <td><span class="badge b-due">&#35;1B Due</span>&nbsp;<a href="projects/p2/p2_maze.html" data-available="2026-10-01" style="text-decoration:none;"><span class="badge b-proj">&#35;2 Posted</span></a></td>
   </tr>
@@ -326,7 +326,7 @@
     <td>Tu, 10/6</td>
     <td>Recursion and the Call Stack; Recursive DFS</td>
     <td>Base case, recursive leap of faith, stack frames; recursion uses an implicit stack; recursive DFS on a grid</td>
-    <td><span class="badge b-due">Ex&nbsp;5 Due</span></td>
+    <td></td>
     <td></td>
   </tr>
 
@@ -335,7 +335,7 @@
     <td>Th, 10/8</td>
     <td>BFS; DFS vs. BFS Comparison</td>
     <td>Breadth-first traversal with an explicit queue; shortest path and path reconstruction using a linked list; DFS vs. BFS time/space tradeoffs; calling <code>solve()</code> through a <code>MazeSolver*</code> without knowing the concrete type</td>
-    <td></td>
+    <td><span class="badge b-due">Ex&nbsp;5 Due</span></td>
     <td></td>
   </tr>
 
@@ -397,7 +397,7 @@
     <td>Th, 10/29</td>
     <td>Pruning the Search Tree; Early Termination</td>
     <td>Pair selection, reducing the problem size recursively; symmetry reduction; avoiding duplicate states</td>
-    <td><span class="badge b-due">Ex&nbsp;6 Due</span></td>
+    <td></td>
     <td><a href="projects/p3/p3_make24.html" data-available="2026-10-29" style="text-decoration:none;"><span class="badge b-proj">&#35;3 Posted</span></a></td>
   </tr>
 
@@ -411,7 +411,7 @@
     <td>Tu, 11/3</td>
     <td>Expression Parsing &amp; Shunting-Yard Algorithm</td>
     <td>Infix / prefix / postfix notation, operator precedence, step-by-step trace; expression trees as motivation and visualization; preview of P4 Expression Evaluator</td>
-    <td><span class="badge b-ex">Ex&nbsp;7 Posted</span>
+    <td><span class="badge b-due">Ex&nbsp;6 Due</span> <span class="badge b-ex">Ex&nbsp;7 Posted</span>
         <div class="sub">Shunting-Yard Trace</div></td>
     <td></td>
   </tr>
@@ -421,7 +421,7 @@
     <td>Th, 11/5</td>
     <td>Searching Algorithms and Complexity</td>
     <td>Linear search O(n), binary search O(log n), sorted-array requirement</td>
-    <td><span class="badge b-due">Ex&nbsp;7 Due</span></td>
+    <td></td>
     <td></td>
   </tr>
 
@@ -430,7 +430,7 @@
     <td>Tu, 11/10</td>
     <td>Sorting I &mdash; Quadratic Sorts</td>
     <td>Bubble, selection, insertion sort; O(n&sup2;) analysis; stability and in-place properties; when quadratic sorts are practical</td>
-    <td><span class="badge b-ex">Ex&nbsp;8 Posted</span>
+    <td><span class="badge b-due">Ex&nbsp;7 Due</span> <span class="badge b-ex">Ex&nbsp;8 Posted</span>
         <div class="sub">Sorting Trace</div></td>
     <td></td>
   </tr>
@@ -440,7 +440,7 @@
     <td>Th, 11/12</td>
     <td>Sorting II &mdash; Merge Sort</td>
     <td>Divide-and-conquer; recursive halving; merge step; O(n log n) time, O(n) auxiliary space; recurrence T(n) = 2T(n/2) + O(n)</td>
-    <td><span class="badge b-due">Ex&nbsp;8 Due</span></td>
+    <td></td>
     <td></td>
   </tr>
 
@@ -449,7 +449,7 @@
     <td>Tu, 11/17</td>
     <td>Sorting III &mdash; Quicksort</td>
     <td>Pivot selection, partitioning, recursive structure; average O(n log n), worst-case O(n&sup2;); comparison with Merge Sort; Heap Sort and Shell Sort if time permits</td>
-    <td></td>
+    <td><span class="badge b-due">Ex&nbsp;8 Due</span></td>
     <td></td>
   </tr>
 
@@ -473,7 +473,7 @@
     <td>Tu, 11/24</td>
     <td>Tries &mdash; Insert, Search &amp; Prefix Matching</td>
     <td>Trie nodes, insert, prefix enumeration, time complexity vs. BST/hash map</td>
-    <td><span class="badge b-due">Ex&nbsp;9 Due</span> <span class="badge b-ex">Ex&nbsp;10 Posted</span>
+    <td><span class="badge b-ex">Ex&nbsp;10 Posted</span>
         <div class="sub">Trie Operations</div></td>
     <td></td>
   </tr>
@@ -490,7 +490,7 @@
     <td>Tu, 12/1</td>
     <td>Hash Tables (overview) &mdash; Hash Functions, Collisions &amp; Chaining</td>
     <td>Hash function design, collision resolution, chaining vs. open addressing, load factor</td>
-    <td><span class="badge b-due">Ex&nbsp;10 Due</span></td>
+    <td><span class="badge b-due">Ex&nbsp;9 Due</span></td>
     <td></td>
   </tr>
 
@@ -499,7 +499,7 @@
     <td>Th, 12/3</td>
     <td>Graphs (overview) &mdash; Representations, DFS, BFS &amp; Dijkstra&rsquo;s</td>
     <td>Adjacency list vs. matrix, directed/undirected, weighted edges, shortest path intuition</td>
-    <td><span class="badge b-ex">Ex&nbsp;11 Posted</span>
+    <td><span class="badge b-due">Ex&nbsp;10 Due</span> <span class="badge b-ex">Ex&nbsp;11 Posted</span>
         <div class="sub">STL &amp; Graph Concepts</div></td>
     <td></td>
   </tr>
@@ -509,7 +509,7 @@
     <td>Tu, 12/8</td>
     <td>STL Containers &amp; Modern C++ (Overview)</td>
     <td><code>std::vector</code>, <code>std::map</code>, <code>std::unordered_map</code>; why modern C++ uses smart pointers; <code>unique_ptr</code> (brief overview); why we implemented raw pointers first</td>
-    <td><span class="badge b-due">Ex&nbsp;11 Due</span></td>
+    <td></td>
     <td></td>
   </tr>
 
@@ -518,7 +518,7 @@
     <td>Th, 12/10</td>
     <td>Comprehensive Final Review and Course Wrap-Up</td>
     <td>Data structure selection guide, CS electives overview, course survey</td>
-    <td></td>
+    <td><span class="badge b-due">Ex&nbsp;11 Due</span></td>
     <td><span class="badge b-due">&#35;4 Due</span></td>
   </tr>
 
