@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 2: Pointer Practice</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  h3 .task-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: .15rem .5rem;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: .5rem;
+  }
+  h3 .task-badge.optional {
+    background: var(--tan-border);
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 2 &mdash; Pointer Practice</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Due: Tuesday, September 15, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#taskA">Task A &mdash; Pointer Expressions</a></li>
+    <li><a href="#taskB">Task B &mdash; Dynamic Allocation</a></li>
+    <li><a href="#taskC">Task C &mdash; Pointer to the Last Minimum</a></li>
+    <li><a href="#taskD">Task D &mdash; Reverse In Place</a></li>
+    <li><a href="#taskE">Task E &mdash; Two Kinds of &ldquo;Swap&rdquo;</a></li>
+    <li><a href="#taskF">Task F &mdash; Palindrome Check (optional practice)</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>
+  This exercise is about pointers themselves, not about array algorithms you already know how to
+  write with indices. By the end of it you should be comfortable with:
+</p>
+<ul>
+  <li>the equivalence <code>arr[i]</code> &equiv; <code>*(arr + i)</code>, and <code>&amp;arr[i]</code> &equiv; <code>arr + i</code>;</li>
+  <li>allocating and freeing a dynamic array with <code>new[]</code> and <code>delete[]</code>;</li>
+  <li>returning a pointer <em>into</em> an existing array (<code>int*</code>), as distinct from returning a value (<code>int</code>);</li>
+  <li>walking an array with two pointers that move toward each other, instead of an integer index;</li>
+  <li>passing a pointer to a function so it can modify the pointee (<code>int*</code>), versus passing a pointer to a
+      pointer so it can modify what the pointer itself points to (<code>int**</code>).</li>
+</ul>
+<div class="note">
+  <span class="label">Why this matters for Project 1A</span>
+  MiniVector's internals &mdash; <code>data_</code>, <code>reserve()</code>, <code>push_back()</code> &mdash; are built
+  entirely out of the pointer operations you practice here. This exercise is meant to help with P1A, not
+  compete with it, so it is intentionally short: one conceptual task (A) and four small functions (B&ndash;E).
+  Task F is optional.
+</div>
+
+<h2 id="files">Files</h2>
+<p>The following files are provided:</p>
+<p>
+  <span class="filecard given">PointerPractice.hpp</span>
+  <span class="filecard given">PointerPracticeDemo.cpp&nbsp;(optional local test driver)</span>
+</p>
+<p>You will create and submit:</p>
+<p>
+  <span class="filecard submit">PointerPractice.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Important</span>
+  Do not modify <code>PointerPractice.hpp</code>. Gradescope compiles your submission against the
+  original version of this file. <code>PointerPracticeDemo.cpp</code> is for your own local testing
+  only &mdash; you do not submit it, and Gradescope does not use it.
+</div>
+
+<h2 id="taskA">Task A &mdash; Pointer Expressions</h2>
+<p>
+  No loops and no algorithms here &mdash; work out each expression below. Suppose:
+</p>
+<pre><code class="language-cpp">int arr[] = {10, 20, 30, 40};
+int* p = arr;</code></pre>
+<p>Work out each pair and determine their relationship:</p>
+<table>
+  <tr><th>Expression</th><th>Expression</th><th>Relationship</th></tr>
+  <tr><td><code>*arr</code></td><td><code>arr[0]</code></td><td>?</td></tr>
+  <tr><td><code>*(arr + 1)</code></td><td><code>arr[1]</code></td><td>?</td></tr>
+  <tr><td><code>arr + 1</code></td><td><code>&amp;arr[1]</code></td><td>?</td></tr>
+  <tr><td><code>*p</code></td><td><code>p[0]</code></td><td>?</td></tr>
+  <tr><td><code>*(p + 2)</code></td><td><code>p[2]</code></td><td>?</td></tr>
+</table>
+<p>Then decide true or false:</p>
+<pre><code class="language-cpp">arr + 1 == &amp;arr[1]      // true or false?
+*(arr + 2) == arr[2]    // true or false?</code></pre>
+<div class="note">
+  <span class="label">Takeaway</span>
+  You just confirmed it yourself: <code>arr[i]</code> is exactly <code>*(arr + i)</code>, and
+  <code>&amp;arr[i]</code> is exactly <code>arr + i</code>. The compiler treats them identically
+  &mdash; array indexing <em>is</em> pointer arithmetic, just with friendlier syntax. That is the
+  bridge between the two notations you have seen for arrays.
+</div>
+<h3>Requirements</h3>
+<p>
+  Fill in <code>taskA_pointerExpressions</code> in <code>PointerPractice.cpp</code>. It is given
+  <code>arr</code> (a 4-element array); create <code>p</code> yourself exactly as above, then fill in
+  each field of the <code>TaskAAnswers</code> struct with the result of the corresponding expression.
+</p>
+<div class="hint">
+  <span class="label">Hint: getting started</span>
+  Look at the comments next to the fields of <code>TaskAAnswers</code> in
+  <code>PointerPractice.hpp</code>. Each comment tells you which expression that field should store.
+  Create a <code>TaskAAnswers</code> object, fill in its fields, and return it.
+</div>
+
+<h2 id="taskB">Task B &mdash; Dynamic Allocation</h2>
+<pre><code class="language-cpp">int* allocate(std::size_t size);</code></pre>
+<p>
+  Return a dynamically allocated array containing <code>size</code> integers, with every element
+  value-initialized to <code>0</code>.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Use <code>new[]</code>, and value-initialize the elements so that each one starts at <code>0</code>.
+  Whoever calls <code>allocate()</code> is responsible for eventually calling <code>delete[]</code> on
+  what it returns &mdash; that is exactly the ownership responsibility <code>MiniVector</code>'s
+  destructor takes on for <code>data_</code>.
+</div>
+<h3>Requirements</h3>
+<p>Implement <code>allocate</code> in <code>PointerPractice.cpp</code>.</p>
+
+<h2 id="taskC">Task C &mdash; Pointer to the Last Minimum</h2>
+<pre><code class="language-cpp">int* lastMinimum(int* arr, std::size_t size);</code></pre>
+<p>
+  Return a pointer to the <strong>last</strong> occurrence of the smallest value in <code>arr</code>
+  &mdash; not the value itself, and not the first occurrence if the minimum appears more than once.
+  If <code>size == 0</code>, return <code>nullptr</code>.
+</p>
+<p>For example:</p>
+<pre><code class="language-cpp">int arr[] = {4, 2, 7, 2, 5};
+lastMinimum(arr, 5);   // returns &amp;arr[3], the SECOND 2 -- not &amp;arr[1]</code></pre>
+<div class="hint">
+  <span class="label">Hint</span>
+  Pay attention to the return type. <code>return arr[i];</code> returns an <code>int</code> &mdash; the
+  wrong type here, and it will not compile against this function's declared return type.
+  <code>return &amp;arr[i];</code> returns an <code>int*</code>, which is what you want: a pointer
+  <em>into</em> the caller's own array, not a copy of the value.
+</div>
+<h3>Requirements</h3>
+<p>Implement <code>lastMinimum</code> in <code>PointerPractice.cpp</code>.</p>
+
+<h2 id="taskD">Task D &mdash; Reverse In Place</h2>
+<pre><code class="language-cpp">void reverse(int* arr, std::size_t size);</code></pre>
+<p>Reverse the elements of <code>arr</code> in place.</p>
+<div class="note">
+  <span class="label">Requirement: use two pointers, not indices</span>
+  You must implement this with two pointers that start at opposite ends and walk toward each other,
+  swapping as they go. Start from:
+  <pre><code class="language-cpp">if (size &lt; 2) {
+    return;
+}
+
+int* left = arr;
+int* right = arr + size - 1;
+
+// Use left and right to reverse the array.</code></pre>
+  Move <code>left</code> and <code>right</code> toward each other, one step at a time, swapping the
+  two elements they point to at each step, until they meet or cross. Do not write this using
+  <code>arr[i]</code> and an integer index. The point of this task is practicing pointer arithmetic
+  (<code>++</code>, <code>--</code>, and pointer comparison with <code>&lt;</code>) directly, the
+  same way you will read and write <code>MiniVector</code> code.
+</div>
+<div class="hint">
+  <span class="label">Why the size &lt; 2 check matters</span>
+  <code>size</code> is unsigned, so when <code>size == 0</code>, <code>size - 1</code> underflows.
+  Handle <code>size &lt; 2</code> before constructing <code>right</code>.
+</div>
+<h3>Requirements</h3>
+<p>Implement <code>reverse</code> in <code>PointerPractice.cpp</code>, using the two-pointer pattern above.</p>
+
+<h2 id="taskE">Task E &mdash; Two Kinds of &ldquo;Swap&rdquo;</h2>
+<pre><code class="language-cpp">void swapValues(int* a, int* b);
+void swapPointers(int** a, int** b);</code></pre>
+<p>
+  These two functions look similar but do genuinely different things, because <code>int*</code> and
+  <code>int**</code> represent different levels of indirection.
+</p>
+<pre><code class="language-cpp">// swapValues changes the integers
+int x = 10;
+int y = 20;
+int* p = &amp;x;
+int* q = &amp;y;
+
+swapValues(p, q);
+// x == 20, y == 10
+// p still points to x; q still points to y
+
+// swapPointers changes the pointers
+int x2 = 10;
+int y2 = 20;
+int* p2 = &amp;x2;
+int* q2 = &amp;y2;
+
+swapPointers(&amp;p2, &amp;q2);
+// x2 == 10, y2 == 20
+// p2 now points to y2; q2 now points to x2</code></pre>
+<div style="display:flex; flex-wrap:wrap; gap:1.2rem; margin:1.1rem 0;">
+  <figure style="flex:1 1 320px; margin:0; text-align:center;">
+    <svg viewBox="0 0 360 180" role="img" aria-label="After swapValues: p still points to x, q still points to y; the values inside x and y have swapped." style="width:100%; height:auto; max-width:360px;">
+      <defs>
+        <marker id="arrowE1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1E2761"/>
+        </marker>
+      </defs>
+      <rect x="30" y="18" width="60" height="34" rx="6" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+      <text x="60" y="40" text-anchor="middle" font-family="monospace" font-size="15" fill="#1E2761">p</text>
+      <rect x="270" y="18" width="60" height="34" rx="6" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+      <text x="300" y="40" text-anchor="middle" font-family="monospace" font-size="15" fill="#1E2761">q</text>
+      <line x1="60" y1="52" x2="60" y2="106" stroke="#1E2761" stroke-width="1.75" marker-end="url(#arrowE1)"/>
+      <line x1="300" y1="52" x2="300" y2="106" stroke="#1E2761" stroke-width="1.75" marker-end="url(#arrowE1)"/>
+      <rect x="10" y="110" width="100" height="52" rx="6" fill="#ffffff" stroke="#5a6273" stroke-width="1.5"/>
+      <text x="60" y="130" text-anchor="middle" font-family="monospace" font-size="13" fill="#5a6273">x</text>
+      <text x="60" y="150" text-anchor="middle" font-family="monospace" font-size="17" font-weight="bold" fill="#1b1f2a">20</text>
+      <rect x="250" y="110" width="100" height="52" rx="6" fill="#ffffff" stroke="#5a6273" stroke-width="1.5"/>
+      <text x="300" y="130" text-anchor="middle" font-family="monospace" font-size="13" fill="#5a6273">y</text>
+      <text x="300" y="150" text-anchor="middle" font-family="monospace" font-size="17" font-weight="bold" fill="#1b1f2a">10</text>
+    </svg>
+    <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">After <code>swapValues(p, q)</code> &mdash; arrows unchanged, boxed values swapped</figcaption>
+  </figure>
+  <figure style="flex:1 1 320px; margin:0; text-align:center;">
+    <svg viewBox="0 0 360 180" role="img" aria-label="After swapPointers: p2 now points to y2, and q2 now points to x2; the values inside x2 and y2 are unchanged." style="width:100%; height:auto; max-width:360px;">
+      <defs>
+        <marker id="arrowE2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#C98A2B"/>
+        </marker>
+      </defs>
+      <rect x="30" y="18" width="60" height="34" rx="6" fill="#F7D9A0" stroke="#C98A2B" stroke-width="1.5"/>
+      <text x="60" y="40" text-anchor="middle" font-family="monospace" font-size="14" fill="#8a5a12">p2</text>
+      <rect x="270" y="18" width="60" height="34" rx="6" fill="#F7D9A0" stroke="#C98A2B" stroke-width="1.5"/>
+      <text x="300" y="40" text-anchor="middle" font-family="monospace" font-size="14" fill="#8a5a12">q2</text>
+      <line x1="60" y1="52" x2="295" y2="106" stroke="#C98A2B" stroke-width="1.75" marker-end="url(#arrowE2)"/>
+      <line x1="300" y1="52" x2="65" y2="106" stroke="#C98A2B" stroke-width="1.75" marker-end="url(#arrowE2)"/>
+      <rect x="10" y="110" width="100" height="52" rx="6" fill="#ffffff" stroke="#5a6273" stroke-width="1.5"/>
+      <text x="60" y="130" text-anchor="middle" font-family="monospace" font-size="13" fill="#5a6273">x2</text>
+      <text x="60" y="150" text-anchor="middle" font-family="monospace" font-size="17" font-weight="bold" fill="#1b1f2a">10</text>
+      <rect x="250" y="110" width="100" height="52" rx="6" fill="#ffffff" stroke="#5a6273" stroke-width="1.5"/>
+      <text x="300" y="130" text-anchor="middle" font-family="monospace" font-size="13" fill="#5a6273">y2</text>
+      <text x="300" y="150" text-anchor="middle" font-family="monospace" font-size="17" font-weight="bold" fill="#1b1f2a">20</text>
+    </svg>
+    <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">After <code>swapPointers(&amp;p2, &amp;q2)</code> &mdash; arrows cross, boxed values unchanged</figcaption>
+  </figure>
+</div>
+<ul>
+  <li><code>swapValues(int* a, int* b)</code> swaps the two <code>int</code>s that <code>a</code> and
+      <code>b</code> point to.</li>
+  <li><code>swapPointers(int** a, int** b)</code> swaps what the two pointers <code>*a</code> and
+      <code>*b</code> point to &mdash; it changes the pointers themselves, not any <code>int</code>.</li>
+</ul>
+<div class="hint">
+  <span class="label">Hint</span>
+  Read <code>int**</code> the same way you read <code>int*</code>, one level up:
+  <code>int*</code> lets a function change an <code>int</code> through its address;
+  <code>int**</code> lets a function change an <code>int*</code> (a pointer) through <em>its</em>
+  address. To call <code>swapPointers</code> you pass the address of a pointer variable, e.g.
+  <code>swapPointers(&amp;p2, &amp;q2)</code>.
+</div>
+<h3>Requirements</h3>
+<p>Implement both <code>swapValues</code> and <code>swapPointers</code> in <code>PointerPractice.cpp</code>.</p>
+
+<h2 id="taskF">Task F &mdash; Palindrome Check <span style="font-weight:400; color:var(--muted); font-size:.85em;">(optional practice)</span></h2>
+<pre><code class="language-cpp">bool isPalindrome(const int* arr, std::size_t size);</code></pre>
+<p>
+  Return <code>true</code> if <code>arr</code> reads the same forwards and backwards. An empty array,
+  or an array with a single element, counts as a palindrome.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Same two-pointer pattern as Task D, but you are comparing instead of swapping, and you never modify
+  <code>arr</code> &mdash; that is exactly what <code>const int*</code> promises the caller.
+</div>
+<h3>Requirements</h3>
+<p>
+  This task is optional and is not graded. It is provided for additional pointer practice, and
+  skipping it will not hurt your grade. If you attempt it, implement <code>isPalindrome</code> in
+  <code>PointerPractice.cpp</code> using two pointers, the same style as Task D.
+</p>
+
+<h2 id="compile">Compile and Run</h2>
+<p>To try your own work locally, before submitting:</p>
+<pre><code class="language-bash">g++ -std=c++17 PointerPractice.cpp PointerPracticeDemo.cpp -o demo
+./demo</code></pre>
+<p><code>PointerPracticeDemo.cpp</code> prints what each function returned next to what was expected, so you can spot a mistake before Gradescope does.</p>
+
+<h2 id="listings">Provided File Listings</h2>
+<p>
+  For reference, here is the complete text of the two files you are given. You do not need to copy
+  these &mdash; both files are attached to this assignment on Gradescope/the course page.
+</p>
+<h3><code>PointerPractice.hpp</code></h3>
+<pre><code class="language-cpp">// PointerPractice.hpp
+// CSCI 235 -- Exercise 2: Pointer Practice
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef POINTER_PRACTICE_HPP
+#define POINTER_PRACTICE_HPP
+
+#include &lt;cstddef&gt;
+
+// ---------------------------------------------------------------------
+// Task A -- Pointer expressions
+//
+// No loops, no algorithms here -- work out the result of each
+// expression from the table on the handout. arr is a 4-element array;
+// p is a plain int* that has been set equal to arr.
+// ---------------------------------------------------------------------
+struct TaskAAnswers {
+    int starArr;                          // *arr
+    int arrBracket0;                       // arr[0]
+    int starArrPlus1;                       // *(arr + 1)
+    int arrBracket1;                         // arr[1]
+    int* arrPlus1;                            // arr + 1
+    int* addrArrBracket1;                      // &amp;arr[1]
+    int starP;                                  // *p
+    int pBracket0;                               // p[0]
+    int starPPlus2;                               // *(p + 2)
+    int pBracket2;                                 // p[2]
+    bool arrPlus1EqualsAddrArrBracket1;             // arr + 1 == &amp;arr[1]
+    bool starArrPlus2EqualsArrBracket2;              // *(arr + 2) == arr[2]
+};
+
+TaskAAnswers taskA_pointerExpressions(int arr[]);
+
+// ---------------------------------------------------------------------
+// Task B -- Dynamic allocation
+//
+// Return a dynamically allocated array of `size` ints, every element
+// value-initialized to 0. The caller is responsible for deleting it
+// with delete[].
+// ---------------------------------------------------------------------
+int* allocate(std::size_t size);
+
+// ---------------------------------------------------------------------
+// Task C -- Pointer to the last occurrence of the minimum
+//
+// Return a pointer to the LAST occurrence of the smallest value in
+// arr (not the value itself). If size == 0, return nullptr.
+// ---------------------------------------------------------------------
+int* lastMinimum(int* arr, std::size_t size);
+
+// ---------------------------------------------------------------------
+// Task D -- Reverse in place, using pointer arithmetic
+//
+// Reverse the elements of arr in place. You must implement this with
+// two pointers that walk toward each other (e.g. int* left = arr;
+// int* right = arr + size - 1;) -- not with integer indices.
+// ---------------------------------------------------------------------
+void reverse(int* arr, std::size_t size);
+
+// ---------------------------------------------------------------------
+// Task E -- Two kinds of "swap"
+//
+// swapValues swaps the two ints that a and b point to.
+// swapPointers swaps what the two pointers *a and *b point to.
+// ---------------------------------------------------------------------
+void swapValues(int* a, int* b);
+void swapPointers(int** a, int** b);
+
+// ---------------------------------------------------------------------
+// Task F (OPTIONAL PRACTICE -- not graded, not required)
+//
+// Two-pointer palindrome check. arr is read-only.
+// ---------------------------------------------------------------------
+bool isPalindrome(const int* arr, std::size_t size);
+
+#endif</code></pre>
+
+<h3><code>PointerPracticeDemo.cpp</code></h3>
+<pre><code class="language-cpp">// PointerPracticeDemo.cpp
+// CSCI 235 -- Exercise 2: Pointer Practice
+//
+// A small driver so you can compile and run your PointerPractice.cpp
+// locally and see it in action before submitting. This file is
+// PROVIDED for your own testing -- you do NOT submit it, and Gradescope
+// does not use it; Gradescope has its own, more thorough checks.
+//
+// Compile and run with:
+//   g++ -std=c++17 PointerPractice.cpp PointerPracticeDemo.cpp -o demo
+//   ./demo
+
+#include &lt;iostream&gt;
+
+#include "PointerPractice.hpp"
+
+int main() {
+    std::cout &lt;&lt; "=== Task A: pointer expressions ===\n";
+    int arr[] = {10, 20, 30, 40};
+    TaskAAnswers ans = taskA_pointerExpressions(arr);
+    std::cout &lt;&lt; "*arr = " &lt;&lt; ans.starArr &lt;&lt; "   (expect 10)\n";
+    std::cout &lt;&lt; "arr[0] = " &lt;&lt; ans.arrBracket0 &lt;&lt; "   (expect 10)\n";
+    std::cout &lt;&lt; "*(arr + 1) = " &lt;&lt; ans.starArrPlus1 &lt;&lt; "   (expect 20)\n";
+    std::cout &lt;&lt; "arr[1] = " &lt;&lt; ans.arrBracket1 &lt;&lt; "   (expect 20)\n";
+    std::cout &lt;&lt; "arr + 1 == &amp;arr[1]? " &lt;&lt; (ans.arrPlus1EqualsAddrArrBracket1 ? "true" : "false")
+              &lt;&lt; "   (expect true)\n";
+    std::cout &lt;&lt; "*p = " &lt;&lt; ans.starP &lt;&lt; "   (expect 10)\n";
+    std::cout &lt;&lt; "p[2] = " &lt;&lt; ans.pBracket2 &lt;&lt; "   (expect 30)\n";
+    std::cout &lt;&lt; "*(arr + 2) == arr[2]? "
+              &lt;&lt; (ans.starArrPlus2EqualsArrBracket2 ? "true" : "false") &lt;&lt; "   (expect true)\n";
+
+    std::cout &lt;&lt; "\n=== Task B: allocate ===\n";
+    int* dyn = allocate(5);
+    std::cout &lt;&lt; "dyn == nullptr? " &lt;&lt; (dyn == nullptr ? "true" : "false")
+              &lt;&lt; "   (expect false)\n";
+    if (dyn != nullptr) {
+        std::cout &lt;&lt; "dyn[0..4] = ";
+        for (int i = 0; i &lt; 5; ++i) std::cout &lt;&lt; dyn[i] &lt;&lt; " ";
+        std::cout &lt;&lt; "  (expect 0 0 0 0 0)\n";
+    }
+    delete[] dyn;
+
+    std::cout &lt;&lt; "\n=== Task C: lastMinimum ===\n";
+    int c[] = {4, 2, 7, 2, 5};
+    int* m = lastMinimum(c, 5);
+    std::cout &lt;&lt; "min value = " &lt;&lt; (m != nullptr ? *m : -1) &lt;&lt; "   (expect 2)\n";
+    std::cout &lt;&lt; "index of that pointer into c = "
+              &lt;&lt; (m != nullptr ? (m - c) : -1) &lt;&lt; "   (expect 3, the LAST 2)\n";
+
+    std::cout &lt;&lt; "\n=== Task D: reverse ===\n";
+    int d[] = {1, 2, 3, 4, 5};
+    reverse(d, 5);
+    std::cout &lt;&lt; "reversed: ";
+    for (int i = 0; i &lt; 5; ++i) std::cout &lt;&lt; d[i] &lt;&lt; " ";
+    std::cout &lt;&lt; "  (expect 5 4 3 2 1)\n";
+
+    std::cout &lt;&lt; "\n=== Task E: swapValues vs. swapPointers ===\n";
+    int x = 10, y = 20;
+    int* p = &amp;x;
+    int* q = &amp;y;
+    swapValues(p, q);
+    std::cout &lt;&lt; "after swapValues: x = " &lt;&lt; x &lt;&lt; ", y = " &lt;&lt; y &lt;&lt; "   (expect x=20, y=10)\n";
+
+    int x2 = 10, y2 = 20;
+    int* p2 = &amp;x2;
+    int* q2 = &amp;y2;
+    swapPointers(&amp;p2, &amp;q2);
+    std::cout &lt;&lt; "after swapPointers: *p2 = " &lt;&lt; *p2 &lt;&lt; ", *q2 = " &lt;&lt; *q2
+              &lt;&lt; "   (expect *p2=20, *q2=10 -- p2 and q2 traded places)\n";
+
+    std::cout &lt;&lt; "\n=== Task F (optional): isPalindrome ===\n";
+    int f1[] = {1, 2, 3, 2, 1};
+    int f2[] = {1, 2, 3};
+    std::cout &lt;&lt; "isPalindrome({1,2,3,2,1}) = " &lt;&lt; (isPalindrome(f1, 5) ? "true" : "false")
+              &lt;&lt; "   (expect true)\n";
+    std::cout &lt;&lt; "isPalindrome({1,2,3}) = " &lt;&lt; (isPalindrome(f2, 3) ? "true" : "false")
+              &lt;&lt; "   (expect false)\n";
+
+    return 0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>Submit exactly one file to Gradescope:</p>
+<p>
+  <span class="filecard submit">PointerPractice.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Do not submit</span>
+  A modified version of <code>PointerPractice.hpp</code>.
+</div>
+
+</main>
+
+<footer>CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
