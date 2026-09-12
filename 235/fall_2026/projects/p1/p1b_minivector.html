@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1B: MiniVector (template) &mdash; CSCI 235 Fall 2026</title>
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+  header { border-bottom: 2px solid #1a1a1a; padding-bottom: .75rem; margin-bottom: 2rem; }
+  header h1 { font-size: 1.6rem; font-weight: bold; }
+  header .meta { font-family: "Courier New", monospace; font-size: .85rem; color: #444; margin-top: .3rem; }
+  h2 { font-size: 1.2rem; font-weight: bold; margin: 2.2rem 0 .5rem;
+       border-bottom: 1px solid #ccc; padding-bottom: .2rem; }
+  h3 { font-size: 1.05rem; font-weight: bold; margin: 1.6rem 0 .3rem; }
+  h4 { font-size: 1rem; font-weight: bold; font-family: "Courier New", monospace;
+       margin: 1.2rem 0 .25rem; }
+  p  { margin: .5rem 0; }
+  ul, ol { margin: .4rem 0 .4rem 1.6rem; }
+  li { margin: .25rem 0; }
+  code {
+    font-family: "Courier New", monospace; font-size: .88em;
+    background: #f3f3f3; padding: .1em .3em; border-radius: 3px;
+  }
+  .week-banner {
+    background: #1a1a1a; color: #fff;
+    padding: .45rem 1rem; border-radius: 4px;
+    font-family: "Courier New", monospace; font-size: .9rem;
+    margin: 2.4rem 0 1.2rem;
+    letter-spacing: .04em;
+  }
+  .task-box {
+    border: 1px solid #bbb; border-radius: 5px;
+    padding: 1rem 1.2rem; margin: 1rem 0 1.6rem;
+  }
+  .task-box h3 { margin-top: 0; }
+  table { border-collapse: collapse; width: 100%; margin: .8rem 0; font-size: .9rem; }
+  th { background: #f0f0f0; text-align: left; padding: .4rem .7rem; border: 1px solid #bbb;
+       font-family: "Courier New", monospace; }
+  td { padding: .35rem .7rem; border: 1px solid #ccc; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .code-wrap { position: relative; margin: .8rem 0; }
+  .copy-btn {
+    position: absolute; top: .4rem; right: .4rem;
+    font-family: "Courier New", monospace; font-size: .75rem;
+    padding: .2rem .55rem; background: #e8e8e8;
+    border: 1px solid #bbb; border-radius: 3px;
+    cursor: pointer; z-index: 10; transition: background .15s;
+  }
+  .copy-btn:hover  { background: #d0d0d0; }
+  .copy-btn.copied { background: #c6ecc6; border-color: #7cb97c; }
+  .code-wrap pre { margin: 0; border-radius: 4px; border: 1px solid #ddd; overflow-x: auto; }
+  .code-wrap pre code.hljs { font-size: .82rem; padding: 1rem; }
+  .note {
+    background: #fffbe6; border-left: 4px solid #e6a817;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+  }
+  .warn {
+    background: #fff0f0; border-left: 4px solid #c0392b;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+  }
+  .hint {
+    background: #f0f7ff; border-left: 4px solid #3a7bd5;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+  }
+  .subtle {
+    background: #f3f0ff; border-left: 4px solid #7c3aed;
+    padding: .6rem .9rem; margin: .8rem 0; font-size: .92rem;
+    font-family: "Courier New", monospace;
+  }
+  .subtle b { font-family: Georgia, serif; }
+  .trace {
+    font-family: "Courier New", monospace; font-size: .82rem; line-height: 1.6;
+    margin: .5rem 0; padding: .6rem .8rem; background: #fafafa;
+    border: 1px solid #ddd; border-radius: 4px; overflow-x: auto; white-space: pre;
+  }
+  footer {
+    margin-top: 3rem; border-top: 1px solid #ccc; padding-top: .5rem;
+    font-size: .8rem; color: #666; font-family: "Courier New", monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>P1B &mdash; MiniVector (template)</h1>
+  <div class="meta">
+    CSCI 235 &nbsp;|&nbsp; Software Design &amp; Analysis II &nbsp;|&nbsp;
+    Hunter College, CUNY &nbsp;|&nbsp; Fall 2026<br>
+    Posted: Thursday, September 17 &nbsp;|&nbsp;
+    <strong>Due: Thursday, October 1, 11:59&nbsp;PM</strong>
+    &nbsp;|&nbsp; Submit via Gradescope
+  </div>
+</header>
+
+<h2>Overview</h2>
+
+<p>
+  In Part A, you built <code>MiniVector</code>, an <code>int</code>-only stand-in for
+  <code>std::vector&lt;int&gt;</code>. In Part B, you convert that exact class into a
+  <strong>template</strong>, <code>MiniVector&lt;T&gt;</code>, so that the same array can hold
+  <code>int</code>, <code>double</code>, <code>std::string</code>, or a class type like
+  <code>Rectangle</code> &mdash; without writing the growth, copying, or ownership logic more
+  than once. Every design decision you already made in Part A (capacity starts at 2, never 0;
+  <code>reserve()</code> owns all allocate/copy/free logic; the allocate-before-release order in
+  <code>operator=</code>) carries over unchanged. Most of the conversion is mechanical: every
+  out-of-class function definition in <code>MiniVector.tpp</code> gains a
+  <code>template &lt;typename T&gt;</code> line, and the element type <code>int</code> becomes
+  <code>T</code>. But two things are genuinely new conceptual material, not just mechanical
+  substitution: the reason the implementation moves out of a <code>.cpp</code> file and into a
+  <code>.tpp</code> file (explained below), and the type requirements a generic <code>T</code>
+  must satisfy that a fixed type like <code>int</code> never had to (see the Type requirement
+  note further down).
+</p>
+
+<div class="hint">
+  <strong>Why a <code>.tpp</code> file instead of a <code>.cpp</code> file?</strong> A template
+  is not compiled the way an ordinary function is. The compiler cannot generate machine code for
+  <code>MiniVector&lt;T&gt;::push_back</code> until it knows what <code>T</code> is, and it only
+  learns that at the point in some <em>other</em> file where you write
+  <code>MiniVector&lt;int&gt;</code> or <code>MiniVector&lt;Rectangle&gt;</code>. That means the
+  compiler needs to see the full body of every template function in every file that uses
+  <code>MiniVector</code> &mdash; not just its declaration, the way an ordinary header/<code>.cpp</code>
+  split allows. The convention this project uses, and the one you will see in real C&#43;&#43;
+  codebases, is to put declarations in <code>MiniVector.hpp</code> as usual, put the
+  <em>implementations</em> in a separate file named <code>MiniVector.tpp</code>, and
+  <code>#include "MiniVector.tpp"</code> at the very bottom of <code>MiniVector.hpp</code>
+  (already done for you &mdash; see the Skeleton Code section). You still write your code in
+  <code>MiniVector.tpp</code> exactly the way you'd write a <code>.cpp</code> file; you just
+  never <code>#include</code> or compile that file directly yourself.
+</div>
+
+<p>
+  You are given <code>MiniVector.hpp</code> (the complete interface, reproduced below),
+  <code>MiniVectorTest.cpp</code> (the complete self-check harness), and
+  <code>Rectangle.hpp</code>/<code>Rectangle.cpp</code> (the class from Day 1, used unchanged
+  here to prove your template works for a type you didn't design around).
+  <code>MiniVector.tpp</code> (also reproduced below) has every required function stubbed out
+  with a <code>TODO</code>. Unlike Part A, where you created <code>MiniVector.cpp</code>
+  yourself, Part B provides the implementation-file structure so that you can focus on template
+  syntax and generic types.
+</p>
+<p>
+  Tests may fail, or terminate with a runtime memory error, until the corresponding and
+  prerequisite functions are implemented &mdash; an unimplemented constructor, missing growth
+  logic, or an incomplete copy can each cause a crash rather than just a failed assertion, since
+  earlier task groups feed the state later ones depend on. Complete the tasks in order: A, then
+  B, then C, then D.
+</p>
+
+<div class="hint">
+  <strong>Before Task A: study the five provided functions.</strong> Both overloads of
+  <code>operator[]</code>, <code>empty()</code>, <code>size()</code>, and <code>capacity()</code>
+  are already implemented for you, marked <code>PROVIDED</code> in the skeleton
+  <code>MiniVector.tpp</code> &mdash; you do not write them. Each is a single-line return statement
+  in terms of <code>data_</code>, <code>size_</code>, and <code>capacity_</code> (see the
+  specification comments in <code>MiniVector.hpp</code> below). Read them before starting Task A:
+  these five are not separately graded, but every task after this depends on them being correct.
+</div>
+<div class="hint">
+  <p>
+    <strong>Hint &mdash; repeat <code>template &lt;typename T&gt;</code>, but do not repeat
+    <code>explicit</code>.</strong> The count constructor's declaration in <code>MiniVector.hpp</code> is marked
+    <code>explicit</code> (already there &mdash; you don't add it). When you write that
+    constructor's <em>definition</em> in <code>MiniVector.tpp</code>, you repeat
+    <code>template &lt;typename T&gt;</code> above it (every template function definition needs
+    this), but you do <strong>not</strong> repeat <code>explicit</code>:
+  </p>
+  <div class="code-wrap">
+<pre><code class="language-cpp">template &lt;typename T&gt;
+MiniVector&lt;T&gt;::MiniVector(std::size_t count) { ... }   // correct</code></pre>
+  </div>
+</div>
+
+<p>Compile and run the self-check:</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-bash">g++ -std=c++17 -Wall -Wextra -pedantic MiniVectorTest.cpp Rectangle.cpp -o MiniVectorTest
+./MiniVectorTest</code></pre>
+</div>
+<div class="note">
+  <strong>One program, not four task groups.</strong> Unlike Part A's
+  <code>./MiniVectorTest A/B/C/D</code>, this self-check is a single continuous program: it
+  builds <code>MiniVector&lt;int&gt;</code> objects, then <code>MiniVector&lt;double&gt;</code>,
+  <code>MiniVector&lt;std::string&gt;</code>, and <code>MiniVector&lt;Rectangle&gt;</code> ones,
+  in one <code>main()</code>. It uses <code>assert()</code> rather than printed
+  <code>FAIL:</code> lines, so a failing check stops the program immediately at that line
+  (<code>Assertion `...' failed.</code>) instead of continuing to report every other failure.
+  Read the assertion that fired and the surrounding code to see which task it belongs to; the
+  unit test tables below map every assertion in the file to a task. Because the checks build on
+  each other in sequence, expect the program to get partway through and then assert-fail until
+  the functions up to that point are implemented &mdash; that is expected, not a bug in this
+  file, exactly as in Part A.
+</div>
+<p>
+  This command does not check for the memory errors that the "code quality &amp; memory
+  correctness" grading component looks for. To reproduce that check locally, compile with
+  sanitizers enabled instead:
+</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-bash">g++ -std=c++17 -Wall -Wextra -pedantic \
+    -fsanitize=address,undefined \
+    -fno-omit-frame-pointer \
+    MiniVectorTest.cpp Rectangle.cpp -o MiniVectorTest
+./MiniVectorTest</code></pre>
+</div>
+<p>
+  A sanitizer-enabled build runs more slowly but prints a detailed diagnostic, often with a stack
+  trace, when it detects an invalid memory access or other undefined behavior &mdash; long before
+  such a bug would otherwise surface as a mysterious wrong answer or an unrelated crash. This
+  matters more here than in Part A: a bug like allocating <code>new T[other.size()]</code>
+  instead of <code>new T[other.capacity()]</code> in the copy constructor can report the
+  <em>right</em> <code>capacity()</code> value while still under-allocating the actual array,
+  and only a sanitizer (or a <code>push_back()</code> into the "extra" space) will catch it. The
+  self-check's Task D assertions are written specifically to probe that gap; see the Task D
+  section below.
+</p>
+
+<div class="note">
+  <p>
+    <strong>Scope note.</strong> As in Part A, this project intentionally has a
+    <em>reduced</em> interface &mdash; no <code>front()</code> or <code>back()</code>. The new
+    requirement in Part B is entirely about genericity:
+  </p>
+  <p style="margin-top:.4rem;">
+    <strong>Type requirement.</strong> This simplified implementation requires <code>T</code> to
+    support default construction, copying, copy assignment, and destruction. A production
+    <code>std::vector</code> manages raw, uninitialized storage separately from the objects
+    constructed in it, so it can support some element types that do not meet all of these
+    requirements (a type with no default constructor, for instance); <code>MiniVector</code>
+    cannot, because <code>new T[capacity]</code> default-constructs every capacity slot up front.
+    <code>int</code>, <code>double</code>, <code>std::string</code>, and <code>Rectangle</code>
+    (given, from Day&nbsp;1) all satisfy <code>MiniVector</code>'s requirements. This implementation
+    provides no exception guarantee if copying or assigning a <code>T</code> throws mid-operation
+    &mdash; that is an advanced topic beyond this project's scope.
+  </p>
+</div>
+
+<!-- ================================================================ -->
+<div class="week-banner">Suggested checkpoint &mdash; Tasks A &amp; B by Thursday 9/24</div>
+
+<!-- Task A -->
+<div class="task-box">
+<h3>Task A &mdash; Construction and destruction <span style="font-weight:normal">(5 pts)</span></h3>
+
+<p>
+  Implement the default constructor, the count constructor, and the destructor &mdash; the same
+  three functions as Part A's Task A, now templated on <code>T</code>.
+</p>
+
+<p>
+  The default constructor allocates a starting array of capacity 2, exactly as in Part A, using
+  <code>new T[2]{}</code> rather than <code>new T[2]</code>. <code>new T[2]{}</code>
+  <strong>value-initializes</strong> every allocated element. For <code>Rectangle</code>, both
+  <code>new Rectangle[2]</code> and <code>new Rectangle[2]{}</code> call its user-provided default
+  constructor for each slot &mdash; the braces make no difference here. The braces are especially
+  significant for built-in types such as <code>int</code>, whose elements become zero rather than
+  indeterminate: <code>new int[2]</code> (no braces) would leave both slots holding whatever
+  garbage bytes happened to already be at that memory address, while <code>new int[2]{}</code>
+  guarantees zero. The reason to always write the braced form here is that it gives one
+  consistent value-initialization rule for every <code>T</code>, rather than a rule that matters
+  for some types and does nothing for others. <code>Rectangle</code>'s default constructor
+  happens to set <code>length_</code> and <code>width_</code> to 2.0 and 1.0; whatever a type's
+  default constructor does is what a freshly-allocated, not-yet-used <code>MiniVector&lt;T&gt;</code>
+  slot will contain.
+</p>
+
+<div class="trace">MiniVector&lt;int&gt; v;              // data_ -&gt; [0, 0]                       size_=0  capacity_=2
+MiniVector&lt;int&gt; w(3);           // data_ -&gt; [0, 0, 0]                    size_=3  capacity_=3
+MiniVector&lt;Rectangle&gt; r(3);     // data_ -&gt; [Rectangle(2.0, 1.0), Rectangle(2.0, 1.0), Rectangle(2.0, 1.0)]     size_=3  capacity_=3</div>
+
+<p>
+  The destructor's entire job is <code>delete[] data_;</code> &mdash; nothing else, exactly as in
+  Part A. <code>delete[]</code> correctly calls each element's own destructor before freeing the
+  array, whatever <code>T</code> is; you do not write a loop for this.
+</p>
+
+<h4>Self-check coverage (Task A)</h4>
+<table>
+  <tr><th>Where in <code>MiniVectorTest.cpp</code></th><th>What it checks</th></tr>
+  <tr><td><code>v.size()</code>, <code>v.capacity()</code> after five <code>push_back</code>s</td><td>Default constructor's starting state feeds directly into Task B's growth trace; printed, not asserted &mdash; compare the printed capacity against the doubling sequence in Task B below.</td></tr>
+  <tr><td><code>MiniVector&lt;int&gt; v5(3)</code>, <code>MiniVector&lt;int&gt; v6(1)</code>, <code>MiniVector&lt;int&gt; large(10)</code>, etc.</td><td>The count constructor is exercised throughout the Task D block; if it mis-sizes <code>capacity_</code>, several Task D assertions fail even though they are testing <code>operator=</code>.</td></tr>
+  <tr><td><code>MiniVector&lt;Rectangle&gt; defaultRectangles(3);</code>, four <code>assert</code>s</td><td>Genericity: the count constructor's value-initialized <code>Rectangle</code> elements must actually be default-constructed (length 2, width 1), not zero-filled memory reinterpreted as a <code>Rectangle</code>.</td></tr>
+</table>
+<div class="note">
+  The hidden Gradescope autograder tests Task A directly and separately (12 tests, worth all 5
+  points on their own), including the exact <code>size()</code>/<code>capacity()</code>/
+  value-initialization checks that Part A's Task A had, plus a
+  <code>MiniVector&lt;Rectangle&gt;</code> count-constructor check.
+</div>
+</div>
+
+<!-- Task B -->
+<div class="task-box">
+<h3>Task B &mdash; Growth and capacity <span style="font-weight:normal">(6 pts)</span></h3>
+
+<p>
+  Implement <code>reserve(std::size_t newCapacity)</code> and <code>push_back(T element)</code>
+  &mdash; identical logic to Part A, with <code>int</code> replaced by <code>T</code> throughout,
+  including the parameter and array element type.
+</p>
+
+<p>
+  <code>reserve(newCapacity)</code>: if <code>newCapacity</code> is larger than the current
+  <code>capacity()</code>, allocate a new array of exactly that size. <code>new T[newCapacity]</code>
+  (no trailing <code>{}</code>) is fine here, because the loop below only ever overwrites the first
+  <code>size()</code> slots &mdash; the remaining <code>newCapacity - size()</code> slots are spare
+  capacity that no code reads until a later <code>push_back()</code> writes into it first. (For a
+  class type such as <code>Rectangle</code>, every allocated slot is still default-constructed
+  regardless of the braces, since <code>new T[n]</code> always default-constructs class-type
+  elements; for a built-in type such as <code>int</code>, the unused spare slots may hold
+  uninitialized garbage, which is harmless precisely because they are outside the logical range.)
+  Then copy the existing <code>size()</code> elements into the new array with a loop (<code>T</code>
+  supports copying, but not necessarily <code>memcpy</code>-style bitwise copying &mdash; a
+  <code>std::string</code> or <code>Rectangle</code> element must be copied with
+  <code>operator=</code>, not by copying raw bytes), and free the old array. Otherwise,
+  <code>reserve()</code> does nothing.
+
+</p>
+
+<div class="trace">v: size=2  capacity=2   [10, 20]
+v.reserve(10)   ->   size=2  capacity=10  [10, 20, _, _, _, _, _, _, _, _]
+v.reserve(1)    ->   size=2  capacity=10  (no-op: 1 &lt;= capacity())</div>
+
+<p>
+  <code>push_back(T element)</code> should not duplicate <code>reserve()</code>'s logic: when
+  <code>size() == capacity()</code>, call <code>reserve(2 * capacity())</code>, then write
+  <code>element</code> into <code>data_[size_]</code> and increment <code>size_</code>.
+</p>
+
+<div class="trace">push_back(Rectangle(4.0, 5.0))   size=1  capacity=2
+push_back(Rectangle(6.0, 7.0))   size=2  capacity=2
+push_back(Rectangle(8.0, 9.0))   size=3  capacity=4     &lt;- reserve(4) called: 2 -&gt; 4</div>
+
+<p><strong>Error / throw conditions:</strong> none required. Ordinary allocation failure follows
+<code>new[]</code>'s behavior (<code>std::bad_alloc</code>, not caught here).</p>
+
+<h4>Self-check coverage (Task B)</h4>
+<table>
+  <tr><th>Where in <code>MiniVectorTest.cpp</code></th><th>What it checks</th></tr>
+  <tr><td>Five <code>push_back</code>s on <code>MiniVector&lt;int&gt;</code>, then printed <code>size()</code>/<code>capacity()</code></td><td>Doubling sequence 2, 2, 4, 4, 8 after 5 elements &mdash; printed for you to check by eye, not asserted.</td></tr>
+  <tr><td><code>v.reserve(20); v.push_back(3);</code> after <code>v.clear()</code></td><td><code>reserve()</code> grows capacity directly; the following <code>push_back()</code> must land in the reserved space without doubling again (printed capacity stays 20, size becomes 1).</td></tr>
+  <tr><td><code>v5.push_back(40)</code> after count-constructing <code>v5(3)</code></td><td>Pushing into a full count-constructed vector (size 3 == capacity 3) must trigger exactly one doubling, to capacity 6 &mdash; this is what creates the "slack" that Task D's tests rely on.</td></tr>
+  <tr><td><code>MiniVector&lt;Rectangle&gt; rectangles</code>, three <code>push_back</code>s, then <code>rectangles.capacity()</code></td><td>Genericity: the same doubling schedule (2 &rarr; 2 &rarr; 4) must hold for a non-primitive <code>T</code>, and each pushed <code>Rectangle</code>'s properties are checked across several stored elements, including <code>area()</code> through <code>at()</code>.</td></tr>
+</table>
+<div class="note">
+  The hidden autograder tests Task B directly (20 tests, worth all 6 points): a longer
+  doubling trace, <code>reserve()</code> growing and refusing to shrink, <code>reserve(0)</code>
+  as a no-op, and a <code>MiniVector&lt;Rectangle&gt;</code> growth check.
+</div>
+</div>
+
+<!-- Task C -->
+<div class="task-box">
+<h3>Task C &mdash; Removal and checked access <span style="font-weight:normal">(5 pts)</span></h3>
+
+<p>Implement <code>pop_back()</code>, <code>clear()</code>, and both overloads of
+<code>at(std::size_t pos)</code> &mdash; identical to Part A, templated on <code>T</code>.</p>
+
+<p>
+  <code>at()</code> must throw <code>std::out_of_range</code> when <code>pos &gt;= size()</code>,
+  exactly like <code>std::vector&lt;T&gt;::at()</code>. <code>pop_back()</code> keeps Part A's
+  contract unchanged: precondition <code>!empty()</code>, undefined behavior (not a throw) if
+  violated, and it must not touch <code>capacity_</code> or the underlying array beyond
+  decrementing <code>size_</code>. <code>clear()</code> is the same "logical removal only"
+  operation as Part A: set <code>size_</code> to 0, with no precondition, leaving
+  <code>capacity_</code> and the array untouched.
+</p>
+
+<div class="trace">v: [10, 20, 30]   size=3  capacity=4
+pop_back()   -&gt;   [10, 20]         size=2  capacity=4   (capacity unchanged)
+at(5)        -&gt;   throws std::out_of_range   (5 &gt;= size_)
+at(1)        -&gt;   returns 20</div>
+
+<div class="warn">
+  <strong>A subtlety unique to templates:</strong> this differs from <code>std::vector::clear()</code>
+  and <code>std::vector::pop_back()</code>. A standard vector destroys the removed element(s)
+  immediately (calling their destructors) but normally retains its raw allocated capacity. This
+  simplified <code>MiniVector</code> does not separately manage constructed objects and raw
+  storage the way a production vector does, so both functions perform <strong>logical removal
+  only</strong>: <code>clear()</code> sets <code>size_ = 0</code>, and <code>pop_back()</code>
+  decrements <code>size_</code> by one, but neither destroys anything &mdash; the old <code>T</code>
+  objects remain alive in the allocated array until they are overwritten, the array is
+  reallocated, or the <code>MiniVector</code> itself is destroyed. For <code>int</code>, that's
+  invisible &mdash; leftover bytes are just leftover bytes. For a type like
+  <code>std::string</code>, it means a string's heap buffer is still allocated and still owned by
+  that slot; it isn't leaked (the array itself still owns it, and the destructor will eventually
+  free it), but it also isn't doing any useful work in the meantime.
+</div>
+
+<h4>Self-check coverage (Task C)</h4>
+<table>
+  <tr><th>Where in <code>MiniVectorTest.cpp</code></th><th>What it checks</th></tr>
+  <tr><td><code>v.at(0)</code>, <code>v.at(0) = 7;</code> early in <code>main()</code></td><td><code>at()</code> works as both a getter and, via the non-const overload, an lvalue you can assign through.</td></tr>
+  <tr><td><code>v.clear();</code> then printed <code>capacity()</code>/<code>size()</code></td><td><code>clear()</code> resets <code>size()</code> to 0 while <code>capacity()</code> is unchanged (printed, not asserted).</td></tr>
+  <tr><td><code>v5.at(v5.size())</code> inside a <code>try</code>/<code>catch</code>, <code>assert(caught)</code></td><td><code>at()</code> throws <code>std::out_of_range</code> exactly at the boundary <code>pos == size()</code>.</td></tr>
+  <tr><td><code>popTest</code>: two <code>push_back</code>s, two <code>pop_back</code>s, checking <code>size()</code> and <code>capacity()</code> after each</td><td><code>pop_back()</code> decrements <code>size()</code> by exactly one and never changes <code>capacity()</code>, down to an empty vector.</td></tr>
+  <tr><td><code>rectangles.at(2).area()</code>, and a fresh <code>MiniVector&lt;Rectangle&gt;</code>'s <code>at(0)</code> on an empty vector (hidden autograder)</td><td>Genericity: bounds checking and <code>at()</code>'s return value work the same for a class type as for <code>int</code>.</td></tr>
+</table>
+<div class="note">
+  The hidden autograder tests Task C directly (13 tests, worth all 5 points): boundary and
+  far-out-of-range <code>at()</code> calls, <code>at()</code> on an empty vector, the
+  <code>const</code> overload, and a <code>MiniVector&lt;Rectangle&gt;</code> throwing check.
+</div>
+</div>
+
+<!-- Task D -->
+<div class="task-box">
+<h3>Task D &mdash; Rule of Three <span style="font-weight:normal">(9 pts)</span></h3>
+
+<p>
+  Implement the copy constructor and copy-assignment operator, templated on <code>T</code>,
+  using the same allocate-before-release pattern from Part A:
+</p>
+<ol>
+  <li>guard against self-assignment (<code>if (this == &amp;other) return *this;</code>)</li>
+  <li>allocate a <strong>temporary</strong> new array sized to <code>other.capacity()</code></li>
+  <li>copy <code>other</code>'s elements into the temporary array, one at a time with
+      <code>operator=</code> (a loop, not <code>memcpy</code> &mdash; <code>T</code> may own its
+      own heap memory, as <code>std::string</code> does)</li>
+  <li><code>delete[]</code> the old array</li>
+  <li>install the new pointer, and update <code>size_</code>/<code>capacity_</code></li>
+</ol>
+
+<div class="hint">
+  <p>
+    <strong>Why <code>this == &amp;other</code>, not <code>*this == other</code>?</strong>
+    <code>this</code> is a pointer to the destination object, and <code>&amp;other</code> is a
+    pointer to the source object. Comparing these addresses asks the correct question: "Are
+    these the same object?" In contrast, <code>*this == other</code> attempts to compare the two
+    objects <em>by value</em>. That expression does not even compile unless
+    <code>MiniVector&lt;T&gt;</code> defines <code>operator==</code> (it doesn't) &mdash; and even
+    if value equality were implemented, two <em>different</em> vectors that happen to contain
+    equal elements would not be a self-assignment, so testing value equality would ask the wrong
+    question anyway.
+  </p>
+</div>
+
+<div class="warn">
+  <p>
+    <strong>The bug this project is specifically designed to catch:</strong> allocating
+    <code>new T[other.size()]</code> instead of <code>new T[other.capacity()]</code>. Both versions
+    report the <em>same, correct</em> <code>capacity()</code> value afterward (you just copy
+    <code>other.capacity_</code> into your own <code>capacity_</code> either way) &mdash; the bug
+    is that the underlying array is physically too small for the capacity you're claiming. A copy
+    or assignment that only reads back the elements it just copied will never notice. The
+    self-check catches this by <code>push_back()</code>-ing one more element immediately after a
+    copy or assignment, writing into the "slack" between <code>size()</code> and
+    <code>capacity()</code> that should already exist as real, allocated storage:
+  </p>
+<div class="trace">MiniVector&lt;int&gt; v5(3);    // size=3  capacity=3
+v5[0]=10; v5[1]=20; v5[2]=30;
+v5.push_back(40);            // size=4  capacity=6  (one doubling; capacity 6, size 4 -- 2 slots of slack)
+
+MiniVector&lt;int&gt; v6(1);
+v6 = v5;                     // v6 now claims capacity() == 6
+v6.push_back(999);           // writes into v6's slack slot -- if the underlying array was only
+                              // sized to other.size_ (4), this is a heap-buffer-overflow that
+                              // AddressSanitizer catches immediately, even though v6.capacity()
+                              // itself still (wrongly) reads 6</div>
+</div>
+
+<p>
+  A deep copy must also be independent in both directions: mutating the copy must never affect
+  the source, and vice versa. This matters even more for <code>MiniVector&lt;Rectangle&gt;</code>
+  than it did for <code>int</code> in Part A &mdash; if your copy loop somehow shared storage
+  instead of duplicating it (for instance, by copying the pointer <code>data_</code> itself
+  rather than looping and copying element by element), the bug would be far more obvious with a
+  class type, since assigning a new <code>Rectangle</code> into one copy would silently overwrite
+  the "original" too.
+</p>
+
+<p><strong>Error / throw conditions:</strong> none required beyond what <code>new[]</code> or a
+<code>T</code>'s own copy assignment might throw; self-assignment (<code>v = v;</code>) must
+leave <code>v</code> completely unchanged and must not corrupt or leak memory.</p>
+
+<h4>Self-check coverage (Task D)</h4>
+<table>
+  <tr><th>Where in <code>MiniVectorTest.cpp</code></th><th>What it checks</th></tr>
+  <tr><td><code>v6 = v5; v6.push_back(999);</code> then five <code>assert</code>s</td><td>Assignment copies <code>size()</code>/<code>capacity()</code>/elements correctly, <em>and</em> the underlying array is actually big enough to hold the claimed capacity (the slack-storage check above).</td></tr>
+  <tr><td><code>v6 = v6;</code> (self-assignment), printed <code>v6[0]</code> afterward</td><td>Self-assignment must not corrupt <code>v6</code>'s data.</td></tr>
+  <tr><td><code>v6 = empty;</code>, printed <code>empty()</code>/<code>size()</code>/<code>capacity()</code></td><td>Assigning an empty source genuinely replaces the destination's old size and capacity (result: <code>capacity() == 2</code>, not the destination's old value).</td></tr>
+  <tr><td><code>large(10); large = v5;</code>, five <code>assert</code>s</td><td>Assigning a small source into a larger destination shrinks <code>size()</code>/<code>capacity()</code> to match the source &mdash; a destination's old, larger capacity must not "win."</td></tr>
+  <tr><td><code>const MiniVector&lt;int&gt; constVector(v5);</code>, four <code>assert</code>s</td><td>Copy constructor works correctly when accessed only through <code>const</code> member functions. (This object is <code>const</code>, so it cannot be probed with a follow-up <code>push_back()</code> the way the checks below are.)</td></tr>
+  <tr><td><code>MiniVector&lt;Rectangle&gt; rectangleCopy(rectangles);</code> ... <code>rectangleCopy.push_back(Rectangle(9.0, 10.0));</code>, four more <code>assert</code>s</td><td>Genericity: deep-copy independence for a class type, <em>and</em> the copy constructor's underlying array is actually sized to <code>other.capacity()</code> &mdash; the same slack-storage check as the assignment check above, now for the copy constructor.</td></tr>
+  <tr><td>A further, differently-numbered <code>MiniVector&lt;Rectangle&gt;</code> copy-constructor slack check (hidden autograder)</td><td>Same genericity and slack-storage guarantees, retested with values the public self-check never uses.</td></tr>
+</table>
+<div class="note">
+  The hidden autograder tests Task D directly (23 tests, worth all 9 points) &mdash; the largest
+  share of the project, matching Part A's emphasis on the Rule of Three. It repeats every group
+  above with different numbers, and adds a dedicated <code>MiniVector&lt;Rectangle&gt;</code>
+  deep-copy-independence check with its own slack-storage probe.
+</div>
+</div>
+
+<!-- ================================================================ -->
+<h2>Algorithm Reference</h2>
+
+<h3>Complexity Analysis</h3>
+<p>Let <em>n</em> = the number of elements pushed. These bounds are unchanged from Part A &mdash;
+templates change what is stored, not how the growth algorithm behaves.</p>
+<div class="note">
+  The bounds below count each construction or assignment of one <code>T</code> object as a single
+  <strong>element operation</strong>. That is exactly accurate for <code>int</code>, and reasonable
+  for a small class like <code>Rectangle</code>. For a general <code>T</code> &mdash; a long
+  <code>std::string</code>, say &mdash; copying or assigning one element can itself take
+  nonconstant time, so multiply the bounds below by whatever that per-element cost is. In other
+  words, "amortized O(1)" below means amortized O(1) <em>element operations</em>, which is the
+  correct statement for a generic <code>T</code>; it does not mean O(1) wall-clock time regardless
+  of what <code>T</code> is.
+</div>
+<table>
+  <tr><th>Resource</th><th>Bound</th><th>Why</th></tr>
+  <tr>
+    <td><strong>Time per <code>push_back</code> &mdash; amortized O(1)</strong></td>
+    <td>O(1) amortized, O(<em>n</em>) worst case for any single call (element operations)</td>
+    <td>
+      Most calls are O(1): there's room, so it's a write and an increment. The expensive
+      O(<em>n</em>) reallocation happens only at the doubling points, and the total number of
+      element copies caused by all reallocations across <em>n</em> insertions is
+      <code>2 + 4 + 8 + &hellip; &lt; 2n</code> &mdash; a geometric sum, so O(<em>n</em>) total,
+      not O(<em>n</em>&sup2;). Dividing that O(<em>n</em>) total by the <em>n</em> insertions that
+      caused it gives an <strong>amortized</strong> cost of O(1) element operations per
+      <code>push_back</code>.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Allocated space</strong></td>
+    <td>O(<code>capacity()</code>)</td>
+    <td>
+      The heap array contains exactly <code>capacity()</code> slots of type <code>T</code>. If
+      capacity grows only through <code>push_back()</code>, capacity remains within a constant
+      factor of <code>size()</code>, so allocated space is O(<em>n</em>) &times; <code>sizeof(T)</code>.
+    </td>
+  </tr>
+</table>
+
+<h3>Why templates instead of a separate class per type?</h3>
+<p>
+  Without templates, supporting <code>MiniVector</code> for both <code>int</code> and
+  <code>Rectangle</code> would mean either writing (and maintaining, and debugging) two nearly
+  identical classes, or something worse like <code>void*</code>-based type erasure. A template is
+  compiled once <em>per type actually used</em> &mdash; the compiler generates a distinct
+  <code>MiniVector&lt;int&gt;</code> and a distinct <code>MiniVector&lt;Rectangle&gt;</code>, each
+  type-checked and optimized independently, from the single generic definition you write once.
+  This is the same idea behind every standard-library container you've used
+  (<code>std::vector&lt;T&gt;</code>, <code>std::map&lt;K,V&gt;</code>, and so on).
+</p>
+<div class="subtle">
+  <b>Concept check (ungraded reflection):</b> The self-check builds
+  <code>MiniVector&lt;int&gt;</code>, <code>MiniVector&lt;double&gt;</code>,
+  <code>MiniVector&lt;std::string&gt;</code>, and <code>MiniVector&lt;Rectangle&gt;</code> in the
+  same program. Roughly how many distinct versions of <code>push_back</code> does the compiler
+  actually generate machine code for? What determines that number?
+</div>
+
+<!-- ================================================================ -->
+<h2>What Is Provided</h2>
+
+<p>You are given five files, all reproduced in full in the Skeleton Code section below:</p>
+<ul>
+  <li><code>MiniVector.hpp</code> &mdash; the complete interface, with a specification comment
+      above every member function. Ends with <code>#include "MiniVector.tpp"</code>.</li>
+  <li><code>MiniVector.tpp</code> &mdash; every required function stubbed with <code>TODO</code>.
+      Unlike Part A, where you created <code>MiniVector.cpp</code> yourself, this file's
+      structure is provided so you can focus on template syntax and generic types.</li>
+  <li><code>MiniVectorTest.cpp</code> &mdash; the complete self-check test harness.</li>
+  <li><code>Rectangle.hpp</code> and <code>Rectangle.cpp</code> &mdash; the class from Day 1,
+      used here unmodified as a genericity check.</li>
+</ul>
+<p>
+  <strong>Do not modify <code>MiniVector.hpp</code>, <code>MiniVectorTest.cpp</code>,
+  <code>Rectangle.hpp</code>, or <code>Rectangle.cpp</code>.</strong> Complete the project by
+  filling in the <code>TODO</code>s in <code>MiniVector.tpp</code> and submitting only that file.
+</p>
+
+<!-- ================================================================ -->
+<h2>Grading</h2>
+
+<p>
+  Submitted via Gradescope, auto-graded (30 pts total). Partial credit is awarded within each
+  task based on sub-tests passed. The autograder compiles with
+  <code>g++ -std=c++17 -Wall -Wextra</code> and runs your submission under AddressSanitizer,
+  UndefinedBehaviorSanitizer, and leak detection on Linux; make sure your code compiles cleanly
+  and runs clean on the Hunter lab machines before submitting.
+</p>
+
+<table>
+  <tr><th>Task</th><th>Function(s)</th><th>Tests</th><th>Points</th></tr>
+  <tr><td>A</td><td>Default ctor, count ctor, destructor</td><td>12</td><td>5</td></tr>
+  <tr><td>B</td><td><code>reserve()</code>, <code>push_back()</code></td><td>20</td><td>6</td></tr>
+  <tr><td>C</td><td><code>pop_back()</code>, <code>clear()</code>, <code>at()</code></td><td>13</td><td>5</td></tr>
+  <tr><td>D</td><td>Copy constructor, <code>operator=</code></td><td>23</td><td>9</td></tr>
+  <tr><td colspan="2">Code quality &amp; memory correctness</td><td>&mdash;</td><td>5</td></tr>
+  <tr><td colspan="3"><strong>Total</strong></td><td><strong>30</strong></td></tr>
+</table>
+
+<div class="note">
+  <strong>Code quality &amp; memory correctness (5 pts)</strong> is graded separately from the
+  four coding tasks: 2 points for compiling with zero <code>-Wall -Wextra</code> warnings, and 3
+  points for running clean under AddressSanitizer, UndefinedBehaviorSanitizer, and leak detection
+  (no leaks, no invalid reads or writes, no double-frees) across all four autograder task suites.
+</div>
+<div class="note">
+  Every hidden task's test suite includes at least one check with a type other than
+  <code>int</code> (<code>MiniVector&lt;Rectangle&gt;</code>), in addition to retesting the same
+  behavioral contracts from Part A with different <code>int</code> values than
+  <code>MiniVectorTest.cpp</code> uses. An implementation that only happens to work for
+  <code>int</code> &mdash; for instance, one that assumes elements can be copied with
+  <code>memcpy</code> &mdash; will lose points here even if every <code>int</code>-based check
+  passes.
+</div>
+
+<div class="warn">
+  <strong>Academic integrity.</strong> You may use AI tools to ask conceptual questions and to
+  help interpret compiler or runtime errors. You may <strong>not</strong> ask an AI tool to
+  generate, complete, or rewrite any function required by this project. Any code you submit must be
+  written and understood by you &mdash; you
+  should be able to explain, line by line, what every statement does and why. If you are
+  uncertain whether a particular use of an AI tool is permitted, ask the instructor
+  <em>before</em> using it, not after submitting.
+</div>
+
+<!-- ================================================================ -->
+<h2>Skeleton Code</h2>
+
+<p>
+  Download the starter-code bundle from Gradescope. It contains five files in the same directory:
+  <code>MiniVector.hpp</code>, <code>MiniVector.tpp</code>, <code>MiniVectorTest.cpp</code>,
+  <code>Rectangle.hpp</code>, and <code>Rectangle.cpp</code>. The starter project will not build
+  into a working executable until you complete the required <code>TODO</code>s in
+  <code>MiniVector.tpp</code>. Submit only <code>MiniVector.tpp</code>.
+</p>
+<p>
+  All provided files are reproduced below for convenient reference. Do not modify any of them
+  except <code>MiniVector.tpp</code>; the versions the autograder compiles against are its own
+  canonical copies, not whatever you submit under these filenames (other than
+  <code>MiniVector.tpp</code> itself).
+</p>
+
+<h3><code>MiniVector.hpp</code> &mdash; do not modify</h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// File name: MiniVector.hpp, template version
+//
+// MiniVector: a simplified template vector.
+//
+// The point of this class (as with std::vector) is to give clients an
+// array that can grow. Internally we keep three pieces of state:
+//
+//   data_      - pointer to a dynamically allocated array of type T on the heap
+//   size_      - how many elements are actually "in use" (logical length)
+//   capacity_  - how many elements the current allocation can hold
+//                before we must reallocate
+//
+// size_ &lt;= capacity_ always. The gap between them is spare room that lets
+// push_back() be fast most of the time (amortized O(1)) instead of
+// reallocating on every single insertion.
+//
+#ifndef MINIVECTOR_HPP
+#define MINIVECTOR_HPP
+
+#include &lt;cstddef&gt;
+
+// Type requirement:
+// T must support default construction, copying, assignment, and destruction.
+template &lt;typename T&gt;
+class MiniVector {
+public:
+  // Creates an empty vector with an allocated array of capacity 2.
+  // size() == 0 and capacity() == 2.
+  MiniVector();
+
+  // If count &gt; 0, creates a vector containing count value-initialized
+  // elements, with size() == capacity() == count.
+  // If count == 0, behaves like the default constructor:
+  // size() == 0 and capacity() == 2.
+  // Marked explicit so that an integer count cannot implicitly convert
+  // into a MiniVector&lt;T&gt;.
+  explicit MiniVector(std::size_t count);
+
+  // Deep copy: `other`'s elements are duplicated into freshly allocated
+  // storage. Modifying one vector must never affect the other.
+  MiniVector(const MiniVector&amp; other);
+
+  // Deep-copy assignment. Must correctly handle self-assignment
+  // (v = v;) and release any storage this vector previously owned.
+  MiniVector&amp; operator=(const MiniVector&amp; other);
+
+  // Releases the heap array owned by this vector.
+  ~MiniVector();
+
+  // Bounds-checked element access: throws std::out_of_range if
+  // pos &gt;= size(). Prefer this over operator[] when you're not sure
+  // the index is valid.
+  // MiniVector.tpp includes &lt;stdexcept&gt; for std::out_of_range.
+  T&amp; at(std::size_t pos);
+  const T&amp; at(std::size_t pos) const;
+
+  // Unchecked element access (like std::vector::operator[]).
+  // Passing an out-of-range position results in undefined behavior.
+  T&amp; operator[](std::size_t pos);
+  const T&amp; operator[](std::size_t pos) const;
+
+  bool empty() const;
+  std::size_t size() const;
+  std::size_t capacity() const;
+
+  // Ensures capacity() &gt;= newCapacity, reallocating if necessary.
+  // Existing elements and size() are preserved.
+  // Does nothing if newCapacity &lt;= capacity().
+  void reserve(std::size_t newCapacity);
+
+  // Removes all elements. size() becomes 0, but capacity() and the
+  // underlying allocation remain unchanged.
+  void clear();
+
+  // Appends element to the end. If size() == capacity(),
+  // doubles the capacity before inserting.
+  void push_back(T element);
+
+  // Precondition: !empty(). Like std::vector::pop_back(), calling this
+  // on an empty MiniVector is undefined behavior -- do not add a check,
+  // and do not throw. Must not change capacity().
+  void pop_back();
+
+private:
+  T* data_;
+  std::size_t size_;
+  std::size_t capacity_;
+};
+
+// The template definitions must be visible to every file that uses MiniVector.
+#include "MiniVector.tpp"
+
+#endif</code></pre>
+</div>
+
+<h3><code>MiniVector.tpp</code> &mdash; complete the TODOs and submit this file</h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// File name: MiniVector.tpp  (submit this file, renamed if needed, to Gradescope)
+// Name:
+// Email:
+//
+// CSCI 235 -- Project 1B: MiniVector (template)
+// Hunter College, CUNY | Fall 2026
+//
+// Implement every function marked "TODO" below. Do not change any
+// function's signature, and do not modify MiniVector.hpp.
+//
+// This file is a .tpp, not a .cpp, because MiniVector is now a template:
+// the compiler needs to see a template function's full body at the point
+// where it is used, for whatever type T that use asks for. MiniVector.hpp
+// already #includes this file at the bottom, so you never #include
+// MiniVector.tpp yourself, and you never compile it directly -- just
+// implement the TODOs here exactly as you would in a .cpp file.
+//
+// Compile (with MiniVectorTest.cpp, which is provided and already runs a
+// battery of self-checks):
+//   g++ -std=c++17 -Wall -Wextra -pedantic MiniVectorTest.cpp Rectangle.cpp -o MiniVectorTest
+// Tests may fail or terminate with a runtime memory error until the
+// corresponding and prerequisite TODO sections are completed. Complete the
+// tasks in order:
+//   Task A, then Task B, then Task C, then Task D.
+
+#include &lt;stdexcept&gt;
+#include &lt;string&gt;   // std::to_string, for at()'s exception message
+
+// ============================================================
+// Task A -- Construction and destruction
+// ============================================================
+
+// TODO (Task A): Default constructor.
+// Allocate data_ as a new array of capacity 2, with every element
+// value-initialized. Use `new T[2]{}` so built-in types such as int
+// are initialized to zero; class types invoke their default constructor.
+// size_ = 0, capacity_ = 2.
+template &lt;typename T&gt;
+MiniVector&lt;T&gt;::MiniVector() {
+  data_ = nullptr;       // placeholder -- replace with `new T[2]{}`
+  size_ = 0;
+  capacity_ = 0;          // placeholder -- replace with 2
+}
+
+// TODO (Task A): Count constructor.
+// If count &gt; 0: capacity_ = size_ = count; allocate data_ with count
+// value-initialized elements (`new T[count]{}`).
+// If count == 0: behave exactly like the default constructor above
+// (capacity_ == 2, data_ pointing to a real 2-element allocation) --
+// do not leave data_ null in this case.
+template &lt;typename T&gt;
+MiniVector&lt;T&gt;::MiniVector(std::size_t count) {
+  (void)count;            // placeholder -- remove once you use count
+  data_ = nullptr;
+  size_ = 0;
+  capacity_ = 0;
+}
+
+// TODO (Task A): Destructor.
+// Release the array data_ points to. That is the only cleanup needed --
+// size_ and capacity_ do not need to be reset, since the object is about
+// to stop existing.
+template &lt;typename T&gt;
+MiniVector&lt;T&gt;::~MiniVector() {
+  // TODO
+}
+
+// ============================================================
+// PROVIDED -- study these, you do not need to change them.
+// ============================================================
+
+// Unchecked element access. Out-of-range pos is undefined behavior,
+// exactly like std::vector::operator[].
+template &lt;typename T&gt;
+T&amp; MiniVector&lt;T&gt;::operator[](std::size_t pos) {
+  return data_[pos];
+}
+
+template &lt;typename T&gt;
+const T&amp; MiniVector&lt;T&gt;::operator[](std::size_t pos) const {
+  return data_[pos];
+}
+
+template &lt;typename T&gt;
+bool MiniVector&lt;T&gt;::empty() const {
+  return size_ == 0;
+}
+
+template &lt;typename T&gt;
+std::size_t MiniVector&lt;T&gt;::size() const {
+  return size_;
+}
+
+template &lt;typename T&gt;
+std::size_t MiniVector&lt;T&gt;::capacity() const {
+  return capacity_;
+}
+
+// ============================================================
+// Task B -- Growth and capacity
+// ============================================================
+
+// TODO (Task B): Ensure capacity for at least newCapacity elements.
+// If newCapacity &gt; capacity_, allocate a new array of exactly newCapacity
+// elements, copy the existing size_ elements into it, and delete[] the
+// old array, then point data_ at the new one. (capacity_ starts at 2 from
+// the constructors above, so you never need a special case for
+// capacity_ == 0.) If newCapacity &lt;= capacity_, do nothing.
+template &lt;typename T&gt;
+void MiniVector&lt;T&gt;::reserve(std::size_t newCapacity) {
+  (void)newCapacity;        // placeholder -- remove once you use newCapacity
+  // TODO
+}
+
+// TODO (Task B): Append element at the end.
+// If size_ == capacity_, there is no room: call reserve(2 * capacity_) to
+// grow before inserting. reserve() (above) already contains the
+// allocate/copy/free logic -- push_back() should not duplicate it. Then
+// write element into data_[size_] and increment size_.
+template &lt;typename T&gt;
+void MiniVector&lt;T&gt;::push_back(T element) {
+  (void)element;            // placeholder -- remove once you use element
+  // TODO
+}
+
+// ============================================================
+// Task C -- Removal and checked access
+// ============================================================
+
+// TODO (Task C): Bounds-checked element access.
+// If pos &gt;= size_, throw std::out_of_range with a helpful message.
+// Otherwise, behave exactly like operator[].
+template &lt;typename T&gt;
+T&amp; MiniVector&lt;T&gt;::at(std::size_t pos) {
+  // TODO: bounds check, then `return data_[pos];`
+  return data_[pos];   // placeholder -- currently unchecked, fix this
+}
+
+template &lt;typename T&gt;
+const T&amp; MiniVector&lt;T&gt;::at(std::size_t pos) const {
+  // TODO: bounds check, then `return data_[pos];`
+  return data_[pos];   // placeholder -- currently unchecked, fix this
+}
+
+// TODO (Task C): Remove the last element.
+// Precondition: !empty(). Like std::vector::pop_back(), calling this on
+// an empty MiniVector is undefined behavior -- do not add a check, and
+// do not throw. Decrement size_ by one. Do not touch capacity_ or the
+// underlying array -- the removed element's old slot is simply no longer
+// considered "in use."
+template &lt;typename T&gt;
+void MiniVector&lt;T&gt;::pop_back() {
+  // TODO
+}
+
+// TODO (Task C): Remove all elements.
+// Set size_ to 0. No precondition -- calling this on an already-empty
+// MiniVector is safe. Do not touch capacity_ or the underlying array.
+template &lt;typename T&gt;
+void MiniVector&lt;T&gt;::clear() {
+  // TODO
+}
+
+// ============================================================
+// Task D -- Rule of Three (copy constructor &amp; copy assignment)
+// ============================================================
+
+// TODO (Task D): Copy constructor.
+// Allocate a new array of other.capacity_ elements, then copy
+// other.size_ elements from other into it. Set size_/capacity_ to
+// match other.
+template &lt;typename T&gt;
+MiniVector&lt;T&gt;::MiniVector(const MiniVector&amp; other) {
+  (void)other;             // placeholder -- remove once you use other
+  data_ = nullptr;
+  size_ = 0;
+  capacity_ = 0;
+}
+
+// TODO (Task D): Copy-assignment operator.
+// 1. If this == &amp;other, return *this immediately (self-assignment guard).
+// 2. Allocate a NEW array sized other.capacity_ -- do this BEFORE
+//    touching this object's existing array, so that if allocation ever
+//    fails, *this still has its original, valid data.
+// 3. Copy other.size_ elements into the new array.
+// 4. delete[] this object's old array.
+// 5. Install the new pointer, and update size_/capacity_.
+template &lt;typename T&gt;
+MiniVector&lt;T&gt;&amp; MiniVector&lt;T&gt;::operator=(const MiniVector&amp; other) {
+  (void)other;             // placeholder -- remove once you use other
+  return *this;
+}</code></pre>
+</div>
+
+<h3><code>MiniVectorTest.cpp</code> &mdash; do not modify, do not submit</h3>
+<p>
+  This is the exact self-check harness described throughout this handout.
+</p>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">//File name: MiniVectorTest.cpp, template version
+//name:
+//email:
+
+// command to compile:
+// g++ -std=c++17 -Wall -Wextra -pedantic MiniVectorTest.cpp Rectangle.cpp -o MiniVectorTest
+#include &lt;iostream&gt;
+#include &lt;cassert&gt;
+#include &lt;stdexcept&gt;
+#include &lt;string&gt;
+#include "MiniVector.hpp"
+#include "Rectangle.hpp"
+
+int main() {
+  MiniVector&lt;int&gt; v;
+
+  v.push_back(3);
+  v.push_back(2);
+  v.push_back(1);
+  v.push_back(-1);
+  v.push_back(6);
+  std::cout &lt;&lt; v.size() &lt;&lt; '\n';
+  std::cout &lt;&lt; v.capacity() &lt;&lt; '\n';
+  //std::cout &lt;&lt; v[0] &lt;&lt; '\n';
+
+  v[0] = 1; // call int&amp; operator[](size_t pos) method
+  std::cout &lt;&lt; v.at(0) &lt;&lt; '\n';
+  v.at(0) = 7;
+
+  v.clear();
+  std::cout &lt;&lt; "\nCall v.clear(); capacity and size of v are as follows.\n";
+  std::cout &lt;&lt; "capacity: " &lt;&lt; v.capacity() &lt;&lt; '\n';
+  std::cout &lt;&lt; "size: " &lt;&lt; v.size() &lt;&lt; '\n';
+
+  v.reserve(20);
+  v.push_back(3);
+  std::cout &lt;&lt; "\nThen call v.reserve(20); capacity and size of v are as follows.\n";
+  std::cout &lt;&lt; "capacity: " &lt;&lt; v.capacity() &lt;&lt; '\n';
+  std::cout &lt;&lt; "size: " &lt;&lt; v.size() &lt;&lt; '\n';
+
+  MiniVector&lt;int&gt; v2(10);
+  MiniVector&lt;int&gt; v3 = v2;
+  std::cout &lt;&lt; "\nRun MiniVector v2(10); Set v3 to be v2. Then change ith element of v3 to be i + 1, where i &gt;= 0\n";
+
+  for (std::size_t i = 0; i &lt; v3.size(); ++i) {
+    v3[i] = static_cast&lt;int&gt;(i + 1);
+    std::cout &lt;&lt; v3[i] &lt;&lt; " ";
+  }
+  std::cout &lt;&lt; "\n\n";
+
+  std::cout &lt;&lt; "Contents of v2 are not changed:\n";
+  for (std::size_t i = 0; i &lt; v2.size(); ++i) {
+    std::cout &lt;&lt; v2[i] &lt;&lt; " ";
+  }
+  std::cout &lt;&lt; "\n\n";
+
+  v2.clear();
+  std::cout &lt;&lt; "Call clear method for v2.\n";
+  MiniVector&lt;int&gt; v4 = v2;
+
+  std::cout &lt;&lt; "After v4 = v2, is v4 an empty vector? " &lt;&lt; std::boolalpha &lt;&lt; v4.empty() &lt;&lt; '\n';
+
+  MiniVector&lt;int&gt; v5(3);
+  v5[0] = 10;
+  v5[1] = 20;
+  v5[2] = 30;
+  v5.push_back(40);
+
+  MiniVector&lt;int&gt; v6(1);
+
+  v6 = v5;
+  v6.push_back(999);
+  assert(v6.size() == v5.size() + 1);
+  assert(v6.capacity() == v5.capacity());
+  assert(v6[0] == 10);
+  assert(v6[1] == 20);
+  assert(v6[2] == 30);
+
+  v6[0] = 100;
+
+  std::cout &lt;&lt; v5[0] &lt;&lt; '\n';  // 10
+  std::cout &lt;&lt; v6[0] &lt;&lt; '\n';  // 100
+
+  v6 = v6;                     // self-assignment
+  std::cout &lt;&lt; v6[0] &lt;&lt; '\n';  // 100
+
+  MiniVector&lt;int&gt; empty;
+  v6 = empty;
+
+  std::cout &lt;&lt; v6.empty() &lt;&lt; '\n';     // true
+  std::cout &lt;&lt; v6.size() &lt;&lt; '\n';      // 0
+  std::cout &lt;&lt; v6.capacity() &lt;&lt; '\n';  // 2
+
+  MiniVector&lt;int&gt; large(10);
+  large = v5;
+
+  assert(large.size() == v5.size());
+  assert(large.capacity() == v5.capacity());
+  assert(large[0] == 10);
+  assert(large[1] == 20);
+  assert(large[2] == 30);
+  assert(large[3] == 40);
+
+  const MiniVector&lt;int&gt; constVector(v5);
+
+  assert(constVector.size() == v5.size());
+  assert(!constVector.empty());
+  assert(constVector[0] == 10);
+  assert(constVector.at(1) == 20);
+
+  bool caught = false;
+
+  try {
+    v5.at(v5.size());
+  }
+  catch (const std::out_of_range&amp;) {
+    caught = true;
+  }
+
+  assert(caught);
+
+  MiniVector&lt;int&gt; popTest;
+  popTest.push_back(10);
+  popTest.push_back(20);
+
+  std::size_t oldCapacity = popTest.capacity();
+
+  popTest.pop_back();
+  assert(popTest.size() == 1);
+  assert(popTest.capacity() == oldCapacity);
+
+  popTest.pop_back();
+  assert(popTest.empty());
+  assert(popTest.capacity() == oldCapacity);
+
+  MiniVector&lt;double&gt; decimals;
+  decimals.push_back(1.5);
+  decimals.push_back(2.75);
+  assert(decimals[0] == 1.5);
+  assert(decimals[1] == 2.75);
+
+  MiniVector&lt;std::string&gt; words;
+  words.push_back("tree");
+  words.push_back("string");
+  assert(words.size() == 2);
+  assert(words[0] == "tree");
+  assert(words[1] == "string");
+
+  MiniVector&lt;Rectangle&gt; defaultRectangles(3);
+
+  assert(defaultRectangles.size() == 3);
+  assert(defaultRectangles.capacity() == 3);
+  assert(defaultRectangles[0].length() == 2.0);
+  assert(defaultRectangles[0].width() == 1.0);
+
+  MiniVector&lt;Rectangle&gt; rectangles;
+
+  rectangles.push_back(Rectangle(3.0, 4.0));
+  rectangles.push_back(Rectangle(5.0, 6.0));
+  rectangles.push_back(Rectangle(7.0, 8.0));
+
+  assert(rectangles.size() == 3);
+  assert(rectangles.capacity() == 4);
+  assert(rectangles[0].length() == 3.0);
+  assert(rectangles[1].width() == 6.0);
+  assert(rectangles.at(2).area() == 56.0);  // 7.0 * 8.0
+
+  MiniVector&lt;Rectangle&gt; rectangleCopy(rectangles);
+  rectangleCopy[0] = Rectangle(10.0, 2.0);
+
+  assert(rectangleCopy[0].length() == 10.0);
+  assert(rectangleCopy[0].width() == 2.0);
+  assert(rectangles[0].length() == 3.0);
+  assert(rectangles[0].width() == 4.0);
+
+  rectangleCopy.push_back(Rectangle(9.0, 10.0));
+
+  assert(rectangleCopy.size() == 4);
+  assert(rectangleCopy.capacity() == rectangles.capacity());
+  assert(rectangleCopy[3].length() == 9.0);
+  assert(rectangleCopy[3].width() == 10.0);
+
+  return 0;
+}</code></pre>
+</div>
+
+<h3><code>Rectangle.hpp</code> &mdash; do not modify (from Day 1)</h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">#ifndef RECTANGLE_HPP // Do not write ifndef as ifdef, otherwise, Rectangle class is not recognized.
+#define RECTANGLE_HPP
+class Rectangle {
+  public:
+    Rectangle(); // Set length and width to be 2 and 1, respectively.
+    Rectangle(double length, double width); // parameterized constructor
+    Rectangle(const Rectangle&amp; rect);
+    // Overload the assignment operator.
+    Rectangle&amp; operator=(const Rectangle&amp; rect);
+    double length() const;
+    double width() const;
+    double area() const;
+    double perimeter() const;
+    void setLength(double length);
+    void setWidth(double width);
+    void print() const;
+
+  private:
+    double length_;
+    double width_;
+};
+#endif</code></pre>
+</div>
+
+<h3><code>Rectangle.cpp</code> &mdash; do not modify (from Day 1)</h3>
+<div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-cpp">// File name: Rectangle.cpp
+
+#include &lt;iostream&gt; // std::cout
+#include "Rectangle.hpp"
+
+Rectangle::Rectangle() : length_(2), width_(1) { // Set length and width to be 2 and 1, respectively.
+}
+
+Rectangle::Rectangle(double length, double width)  : length_(length &gt; 0 ? length : 2), width_(width &gt; 0 ? width : 1) {
+
+}
+
+Rectangle&amp; Rectangle::operator=(const Rectangle&amp; rect) {
+  length_ = rect.length_;
+  width_ = rect.width_;
+  return *this;
+}
+
+Rectangle::Rectangle(const Rectangle&amp; rect) : length_(rect.length_), width_(rect.width_) {
+
+}
+
+double Rectangle::length() const {
+  return length_;
+}
+
+double Rectangle::width() const {
+  return width_;
+}
+
+double Rectangle::area() const {
+  return length_ * width_;
+}
+
+double Rectangle::perimeter() const {
+  return 2 * length_ + 2 * width_;
+}
+
+void Rectangle::setLength(double length) {
+  if (length &gt; 0) {
+    length_ = length;
+  }
+}
+
+void Rectangle::setWidth(double width) {
+  if (width &gt; 0) {
+    width_ = width;
+  }
+}
+
+void Rectangle::print() const {
+  std::cout &lt;&lt; "rectangle length: " &lt;&lt; length_
+    &lt;&lt; ", rectangle width: " &lt;&lt; width_ &lt;&lt; '\n';
+  std::cout &lt;&lt; "area: " &lt;&lt; area() &lt;&lt; '\n';
+  std::cout &lt;&lt; "perimeter: " &lt;&lt; perimeter() &lt;&lt; "\n\n";
+}</code></pre>
+</div>
+
+<footer>
+  CSCI 235 &mdash; Fall 2026 &nbsp;|&nbsp; Tong Yi &nbsp;|&nbsp;
+  Hunter College, CUNY &nbsp;|&nbsp; ty680@hunter.cuny.edu
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('pre code').forEach(function (block) {
+      hljs.highlightElement(block);
+    });
+  });
+  function copyCode(btn) {
+    const code = btn.nextElementSibling.querySelector('code');
+    const text = code.innerText;
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(function () {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
