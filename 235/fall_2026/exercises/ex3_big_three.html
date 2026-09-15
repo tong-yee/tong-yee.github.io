@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 3: The Big Three</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 3 &mdash; The Big Three</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Due: Tuesday, September 22, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#visual">The Big Three, Visually</a></li>
+    <li><a href="#taskA">Task A &mdash; The Destructor</a></li>
+    <li><a href="#taskB">Task B &mdash; The Copy Constructor</a></li>
+    <li><a href="#taskC">Task C &mdash; The Copy Assignment Operator</a></li>
+    <li><a href="#taskD">Task D &mdash; <code>average()</code></a></li>
+    <li><a href="#taskE">Task E &mdash; <code>growTo()</code> (optional practice)</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>This exercise is entirely about the Rule of Three from Tuesday's lecture. By the end of it you should be comfortable with:</p>
+<ul>
+  <li>writing a <strong>destructor</strong> that frees exactly the memory the object owns;</li>
+  <li>writing a <strong>copy constructor</strong> that makes a genuine deep copy, not a copy of a pointer;</li>
+  <li>writing a <strong>copy assignment operator</strong> that guards against self-assignment and frees its old memory only <em>after</em> the new memory is safely allocated;</li>
+  <li>recognizing, on sight, the double-free and dangling-pointer bugs that appear when any of the three is missing;</li>
+  <li>computing a value (like an average) over only the elements actually stored (<code>count_</code>), not the full backing array (<code>capacity_</code>).</li>
+</ul>
+<div class="note">
+  <span class="label">Why GradeBook, not MiniVector</span>
+  <code>GradeBook</code> is deliberately <em>not</em> <code>MiniVector</code> &mdash; it gives you additional
+  practice applying the Rule of Three to a different class, reinforcing the same resource-management pattern
+  you used in Project&nbsp;1A. The sequencing: you learned the pattern in Tuesday's lecture (9/15), applied it
+  to <code>MiniVector</code> in Project&nbsp;1A (due 9/17), and now practice it independently on
+  <code>GradeBook</code> by the following Tuesday (9/22).
+</div>
+
+<h2 id="files">Files</h2>
+<p>The following files are provided:</p>
+<p>
+  <span class="filecard given">GradeBook.hpp</span>
+  <span class="filecard given">GradeBook.cpp&nbsp;(partial)</span>
+  <span class="filecard given">GradeBookDemo.cpp&nbsp;(optional local test driver)</span>
+</p>
+<p>You will complete and submit:</p>
+<p>
+  <span class="filecard submit">GradeBook.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Important</span>
+  Do not modify <code>GradeBook.hpp</code>. Gradescope compiles your submission against the original
+  version of this file. <code>GradeBookDemo.cpp</code> is for your own local testing only &mdash; you do
+  not submit it, and Gradescope does not use it.
+</div>
+
+<h2 id="visual">The Big Three, Visually</h2>
+<p>
+  <code>GradeBook</code> owns a heap array <code>grades_</code> &mdash; exactly the way <code>MiniVector</code>
+  owns <code>data_</code>. Suppose we build <code>a</code>, then copy it into <code>b</code> with
+  <code>GradeBook b = a;</code>. Without a hand-written copy constructor, the compiler generates one for free
+  &mdash; and it does the wrong thing:
+</p>
+<div style="display:flex; flex-wrap:wrap; gap:1.2rem; margin:1.1rem 0;">
+  <figure style="flex:1 1 320px; margin:0; text-align:center;">
+    <svg viewBox="0 0 360 200" role="img" aria-label="Without a copy constructor: a.grades_ and b.grades_ point to the same array on the heap -- a shallow copy." style="width:100%; height:auto; max-width:360px;">
+      <defs>
+        <marker id="arrowS1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/>
+        </marker>
+      </defs>
+      <rect x="20" y="18" width="110" height="34" rx="6" fill="#f6d3d0" stroke="#b3261e" stroke-width="1.5"/>
+      <text x="75" y="40" text-anchor="middle" font-family="monospace" font-size="14" fill="#7a190f">a.grades_</text>
+      <rect x="230" y="18" width="110" height="34" rx="6" fill="#f6d3d0" stroke="#b3261e" stroke-width="1.5"/>
+      <text x="285" y="40" text-anchor="middle" font-family="monospace" font-size="14" fill="#7a190f">b.grades_</text>
+      <line x1="90" y1="52" x2="172" y2="112" stroke="#b3261e" stroke-width="1.75" marker-end="url(#arrowS1)"/>
+      <line x1="270" y1="52" x2="188" y2="112" stroke="#b3261e" stroke-width="1.75" marker-end="url(#arrowS1)"/>
+      <rect x="115" y="116" width="130" height="46" rx="6" fill="#ffffff" stroke="#5a6273" stroke-width="1.5"/>
+      <text x="180" y="144" text-anchor="middle" font-family="monospace" font-size="13" fill="#1b1f2a">one array</text>
+      <text x="180" y="184" text-anchor="middle" font-size="12.5" fill="#7a190f" font-weight="bold">SAME address &mdash; double free!</text>
+    </svg>
+    <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">Compiler-generated copy: both objects point at the <em>same</em> array</figcaption>
+  </figure>
+  <figure style="flex:1 1 320px; margin:0; text-align:center;">
+    <svg viewBox="0 0 360 200" role="img" aria-label="With a correct copy constructor: a.grades_ and b.grades_ each point to their own separate array -- a deep copy." style="width:100%; height:auto; max-width:360px;">
+      <defs>
+        <marker id="arrowS2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1E2761"/>
+        </marker>
+      </defs>
+      <rect x="20" y="18" width="110" height="34" rx="6" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+      <text x="75" y="40" text-anchor="middle" font-family="monospace" font-size="14" fill="#1E2761">a.grades_</text>
+      <rect x="230" y="18" width="110" height="34" rx="6" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+      <text x="285" y="40" text-anchor="middle" font-family="monospace" font-size="14" fill="#1E2761">b.grades_</text>
+      <line x1="75" y1="52" x2="75" y2="112" stroke="#1E2761" stroke-width="1.75" marker-end="url(#arrowS2)"/>
+      <line x1="285" y1="52" x2="285" y2="112" stroke="#1E2761" stroke-width="1.75" marker-end="url(#arrowS2)"/>
+      <rect x="15" y="116" width="120" height="46" rx="6" fill="#ffffff" stroke="#5a6273" stroke-width="1.5"/>
+      <text x="75" y="144" text-anchor="middle" font-family="monospace" font-size="13" fill="#1b1f2a">a's array</text>
+      <rect x="225" y="116" width="120" height="46" rx="6" fill="#ffffff" stroke="#5a6273" stroke-width="1.5"/>
+      <text x="285" y="144" text-anchor="middle" font-family="monospace" font-size="13" fill="#1b1f2a">b's array</text>
+      <text x="180" y="184" text-anchor="middle" font-size="12.5" fill="#1E2761" font-weight="bold">separate addresses &mdash; safe</text>
+    </svg>
+    <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">Your copy constructor: each object owns its own array</figcaption>
+  </figure>
+</div>
+<p>
+  When <code>a</code> and <code>b</code> both go out of scope, each destructor calls <code>delete[]</code> on
+  <code>grades_</code>. In the left picture, that is the <strong>same address, deleted twice</strong> &mdash; undefined
+  behavior. In the right picture, each destructor frees its own array exactly once. This is the bug your Task&nbsp;B
+  code prevents; Task&nbsp;C prevents the analogous problem during copy assignment.
+</p>
+
+<h2 id="taskA">Task A &mdash; The Destructor</h2>
+<pre><code class="language-cpp">~GradeBook();</code></pre>
+<p>
+  <code>GradeBook</code> owns exactly one heap allocation: <code>grades_</code>. Free it.
+</p>
+<h3>Requirements</h3>
+<p>Implement <code>GradeBook::~GradeBook()</code> in <code>GradeBook.cpp</code>.</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  <code>grades_</code> was allocated with <code>new[]</code>. Remember that the form of <code>delete</code>
+  must match the form of <code>new</code>.
+</div>
+
+<h2 id="taskB">Task B &mdash; The Copy Constructor</h2>
+<pre><code class="language-cpp">GradeBook(const GradeBook& other);</code></pre>
+<p>
+  Build a brand-new <code>GradeBook</code> that is a deep copy of <code>other</code>: same <code>count_</code>
+  and <code>capacity_</code>, but its <strong>own</strong> array holding the same grade values.
+</p>
+<h3>Requirements</h3>
+<ol>
+  <li>Allocate a new array of <code>other.capacity_</code> doubles.</li>
+  <li>Copy <code>other.count_</code> elements into it, one at a time.</li>
+  <li>Copy <code>count_</code> and <code>capacity_</code> from <code>other</code>.</li>
+</ol>
+<p>Implement <code>GradeBook::GradeBook(const GradeBook&amp; other)</code> in <code>GradeBook.cpp</code>.</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  This is a constructor, so use a member initializer list for <code>grades_</code>, <code>count_</code>, and
+  <code>capacity_</code>, and copy the individual grade values inside the constructor body with a loop &mdash;
+  exactly the pattern from Tuesday's lecture slides for <code>MiniVector::MiniVector(const MiniVector&amp;)</code>.
+</div>
+
+<h2 id="taskC">Task C &mdash; The Copy Assignment Operator</h2>
+<pre><code class="language-cpp">GradeBook& operator=(const GradeBook& other);</code></pre>
+<p>
+  Make <code>*this</code> a deep copy of <code>other</code>, replacing whatever <code>*this</code> owned before.
+  Unlike the copy constructor, <code>*this</code> already owns memory when this function runs &mdash; that
+  memory must be freed, but only <em>after</em> the new array is safely allocated.
+</p>
+<h3>Requirements</h3>
+<ol>
+  <li><strong>Guard</strong>: if <code>this == &amp;other</code>, return <code>*this</code> immediately.</li>
+  <li><strong>Allocate</strong> a new array of <code>other.capacity_</code> doubles.</li>
+  <li><strong>Copy</strong> <code>other.count_</code> elements into it, one at a time.</li>
+  <li><strong>Free</strong> the old array (<code>delete[] grades_;</code>).</li>
+  <li><strong>Point</strong> <code>grades_</code> at the new array; copy <code>count_</code> and
+      <code>capacity_</code> from <code>other</code>; return <code>*this</code>.</li>
+</ol>
+<p>Implement <code>GradeBook&amp; GradeBook::operator=(const GradeBook&amp; other)</code> in <code>GradeBook.cpp</code>.</p>
+<div class="note">
+  <span class="label">Why check for self-assignment?</span>
+  With the allocate-copy-free-point implementation above, <code>gb = gb;</code> could still work without this
+  check, but it would unnecessarily allocate a new array and copy every element. The
+  <code>this == &amp;other</code> check detects self-assignment immediately and avoids that unnecessary work.
+</div>
+<div class="hint">
+  <span class="label">Hint: allocate-before-free, not free-before-allocate</span>
+  If you <code>delete[] grades_;</code> before allocating the new array, and the new <code>new[]</code> throws
+  (out of memory), <code>*this</code> is left holding a dangling pointer. Allocate first, copy into the new
+  array, <em>then</em> free the old one. This is exactly the order used for <code>MiniVector::reserve()</code>.
+</div>
+
+<h2 id="taskD">Task D &mdash; <code>average()</code></h2>
+<pre><code class="language-cpp">double average() const;</code></pre>
+<p>
+  Return the average of the grades actually stored &mdash; not the average over the full <code>capacity_</code>
+  of the array.
+</p>
+<h3>Requirements</h3>
+<ol>
+  <li>If <code>count_ == 0</code>, return <code>0.0</code> (do not divide by zero).</li>
+  <li>Otherwise, sum the first <code>count_</code> grades in <code>grades_</code>, one at a time, and divide by
+      <code>count_</code>.</li>
+</ol>
+<p>Implement <code>GradeBook::average() const</code> in <code>GradeBook.cpp</code>.</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Only the first <code>count_</code> slots of <code>grades_</code> hold real grades &mdash; the remaining slots up
+  to <code>capacity_</code> are unused space, not zero-valued grades to average in. Sum with a loop bounded by
+  <code>count_</code>, the same way you bound the copying loops in Tasks B and C.
+</div>
+
+<h2 id="taskE">Task E &mdash; <code>growTo()</code> <span style="font-weight:400; color:var(--muted); font-size:.85em;">(optional practice)</span></h2>
+<pre><code class="language-cpp">void growTo(std::size_t newCapacity);</code></pre>
+<p>
+  If <code>newCapacity</code> is greater than the current <code>capacity_</code>, replace <code>grades_</code> with
+  a larger array of size <code>newCapacity</code>, preserving the first <code>count_</code> grades already stored.
+  If <code>newCapacity &lt;= capacity_</code>, do nothing.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Same four steps as <code>operator=</code>&rsquo;s allocate/copy/free/point &mdash; except here you copy only
+  the <code>count_</code> grades that actually exist, not the full old capacity. This is precisely the resize
+  strategy behind <code>MiniVector::reserve()</code> from Thursday's lecture, applied by hand instead of doubling.
+</div>
+<h3>Requirements</h3>
+<p>
+  This task is optional and is not graded. If you attempt it, implement <code>growTo</code> in
+  <code>GradeBook.cpp</code> using the allocate/copy/free/point pattern above.
+</p>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>These examples exercise Tasks B and C, but every <code>average()</code> call below also depends on your
+Task&nbsp;D implementation being correct.</p>
+<p>Deep copy, verified by mutating one object and checking the other is unaffected:</p>
+<pre><code class="language-cpp">GradeBook a(3);
+a.addGrade(90);
+a.addGrade(80);
+
+GradeBook b = a;      // Task B: copy constructor
+b.addGrade(70);       // modifies ONLY b
+
+// a.count() == 2, a.average() == 85     (a is untouched)
+// b.count() == 3, b.average() == 80     (b has the extra grade)</code></pre>
+<p>Copy assignment, replacing what the target used to own:</p>
+<pre><code class="language-cpp">GradeBook c(2);
+c.addGrade(100);
+c = a;                 // Task C: copy assignment
+c.addGrade(60);
+
+// a unchanged: a.count() == 2, a.average() == 85
+// c now holds a's two grades plus 60: c.count() == 3, c.average() == 76.67 (approx)</code></pre>
+<p>Self-assignment must not crash or corrupt the object:</p>
+<pre><code class="language-cpp">c = c;
+// c.count() and c.average() are exactly what they were before</code></pre>
+<div class="note">
+  <span class="label">On floating-point output</span>
+  Say <em>approximately</em> <code>76.67</code> &mdash; small differences in the last printed digit are expected
+  and fine.
+</div>
+
+<h2 id="compile">Compile and Run</h2>
+<p>To try your own work locally, before submitting:</p>
+<pre><code class="language-bash">g++ -std=c++17 GradeBook.cpp GradeBookDemo.cpp -o demo
+./demo</code></pre>
+<p><code>GradeBookDemo.cpp</code> prints what each operation produced next to what was expected, so you can spot a mistake before Gradescope does.</p>
+
+<h2 id="listings">Provided File Listings</h2>
+<p>
+  For reference, here is the complete text of the files you are given. You do not need to copy these &mdash;
+  both files are attached to this assignment on Gradescope/the course page.
+</p>
+<h3><code>GradeBook.hpp</code></h3>
+<pre><code class="language-cpp">// GradeBook.hpp
+// CSCI 235 -- Exercise 3: The Big Three
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef GRADEBOOK_HPP
+#define GRADEBOOK_HPP
+
+#include &lt;cstddef&gt;
+
+// GradeBook stores a list of numeric grades in a dynamically
+// allocated array -- the same "owns a heap array" shape as MiniVector,
+// simplified here to a single array of doubles.
+class GradeBook {
+public:
+    explicit GradeBook(std::size_t capacity);   // provided
+
+    // ---- The Big Three: implement these in GradeBook.cpp ----
+    GradeBook(const GradeBook&amp; other);              // Task B
+    GradeBook&amp; operator=(const GradeBook&amp; other);    // Task C
+    ~GradeBook();                                       // Task A
+
+    void addGrade(double grade);    // provided -- appends if room remains
+    double average() const;         // Task D
+    std::size_t count() const;      // provided
+    std::size_t capacity() const;   // provided
+
+    // Task E (OPTIONAL PRACTICE -- not graded)
+    void growTo(std::size_t newCapacity);
+
+private:
+    double* grades_;
+    std::size_t count_;
+    std::size_t capacity_;
+};
+
+#endif</code></pre>
+
+<h3><code>GradeBook.cpp</code> (partial &mdash; given)</h3>
+<pre><code class="language-cpp">// GradeBook.cpp
+// CSCI 235 -- Exercise 3: The Big Three
+// Complete the TODO sections below and submit this file.
+
+#include "GradeBook.hpp"
+
+GradeBook::GradeBook(std::size_t capacity)
+    : grades_(new double[capacity]{}), count_(0), capacity_(capacity) {
+}
+
+void GradeBook::addGrade(double grade) {
+    if (count_ &lt; capacity_) {
+        grades_[count_] = grade;
+        ++count_;
+    }
+    // If the book is full, the grade is silently dropped.
+    // The optional growTo() function can increase the capacity.
+}
+
+std::size_t GradeBook::count() const { return count_; }
+std::size_t GradeBook::capacity() const { return capacity_; }
+
+// --------------------------------------------------------------
+// TODO -- Task A: GradeBook::~GradeBook()
+//
+// TODO -- Task B: GradeBook::GradeBook(const GradeBook&amp; other)
+//
+// TODO -- Task C: GradeBook&amp; GradeBook::operator=(const GradeBook&amp; other)
+//
+// TODO -- Task D: double GradeBook::average() const
+//
+// TODO -- Task E (optional): void GradeBook::growTo(std::size_t newCapacity)
+// --------------------------------------------------------------</code></pre>
+
+<h3><code>GradeBookDemo.cpp</code></h3>
+<pre><code class="language-cpp">// GradeBookDemo.cpp
+// CSCI 235 -- Exercise 3: The Big Three
+//
+// A small driver so you can compile and run your GradeBook.cpp locally
+// and see it in action before submitting. This file is PROVIDED for
+// your own testing -- you do NOT submit it, and Gradescope does not
+// use it; Gradescope has its own, more thorough checks.
+//
+// Compile and run with:
+//   g++ -std=c++17 GradeBook.cpp GradeBookDemo.cpp -o demo
+//   ./demo
+
+#include &lt;iostream&gt;
+
+#include "GradeBook.hpp"
+
+int main() {
+    std::cout &lt;&lt; "=== Copy constructor ===\n";
+    GradeBook a(3);
+    a.addGrade(90);
+    a.addGrade(80);
+
+    GradeBook b = a;
+    b.addGrade(70);
+
+    std::cout &lt;&lt; "a.count() = " &lt;&lt; a.count() &lt;&lt; "   (expect 2)\n";
+    std::cout &lt;&lt; "a.average() = " &lt;&lt; a.average() &lt;&lt; "   (expect 85)\n";
+    std::cout &lt;&lt; "b.count() = " &lt;&lt; b.count() &lt;&lt; "   (expect 3)\n";
+    std::cout &lt;&lt; "b.average() = " &lt;&lt; b.average() &lt;&lt; "   (expect 80)\n";
+
+    std::cout &lt;&lt; "\n=== Copy assignment ===\n";
+    GradeBook c(2);
+    c.addGrade(100);
+    c = a;
+    c.addGrade(60);
+
+    std::cout &lt;&lt; "a.count() = " &lt;&lt; a.count() &lt;&lt; "   (expect 2, unchanged)\n";
+    std::cout &lt;&lt; "a.average() = " &lt;&lt; a.average() &lt;&lt; "   (expect 85, unchanged)\n";
+    std::cout &lt;&lt; "c.count() = " &lt;&lt; c.count() &lt;&lt; "   (expect 3)\n";
+    std::cout &lt;&lt; "c.average() = " &lt;&lt; c.average() &lt;&lt; "   (expect approx 76.67)\n";
+
+    std::cout &lt;&lt; "\n=== Self-assignment ===\n";
+    std::size_t beforeCount = c.count();
+    double beforeAvg = c.average();
+    c = c;
+    std::cout &lt;&lt; "c.count() unchanged? "
+              &lt;&lt; (c.count() == beforeCount ? "true" : "false") &lt;&lt; "   (expect true)\n";
+    std::cout &lt;&lt; "c.average() unchanged? "
+              &lt;&lt; (c.average() == beforeAvg ? "true" : "false") &lt;&lt; "   (expect true)\n";
+
+    std::cout &lt;&lt; "\n=== Task E (optional): growTo ===\n";
+    GradeBook d(2);
+    d.addGrade(10);
+    d.addGrade(20);
+    d.growTo(4);
+    d.addGrade(30);
+    std::cout &lt;&lt; "d.capacity() = " &lt;&lt; d.capacity() &lt;&lt; "   (expect 4)\n";
+    std::cout &lt;&lt; "d.count() = " &lt;&lt; d.count() &lt;&lt; "   (expect 3)\n";
+    std::cout &lt;&lt; "d.average() = " &lt;&lt; d.average() &lt;&lt; "   (expect 20)\n";
+
+    return 0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>Submit exactly one file to Gradescope:</p>
+<p>
+  <span class="filecard submit">GradeBook.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Do not submit</span>
+  A modified version of <code>GradeBook.hpp</code>.
+</div>
+
+</main>
+
+<footer>CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
