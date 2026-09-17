@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup: Valgrind via GitHub Codespaces</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .step {
+    display: flex;
+    gap: .9rem;
+    align-items: flex-start;
+    margin: 1.3rem 0;
+  }
+  .step .num {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .95rem;
+  }
+  .step .body { flex: 1 1 auto; padding-top: .1rem; }
+  .step .body p:first-child { margin-top: 0; }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Setup: Using Valgrind via GitHub Codespaces</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#why">Why This Setup</a></li>
+    <li><a href="#need">What You Need</a></li>
+    <li><a href="#step1">Step 1 &mdash; Fork the Repository</a></li>
+    <li><a href="#step2">Step 2 &mdash; Create Your Codespace</a></li>
+    <li><a href="#step3">Step 3 &mdash; Verify the Environment</a></li>
+    <li><a href="#step4">Step 4 &mdash; Compile and Run With Valgrind</a></li>
+    <li><a href="#save">Save Your Work</a></li>
+    <li><a href="#later">Coming Back to Your Codespace Later</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#alternative">If Codespaces Doesn&rsquo;t Work For You</a></li>
+  </ol>
+</nav>
+
+<h2 id="why">Why This Setup</h2>
+<p>
+  Valgrind &mdash; the memory-checking tool we use throughout this course &mdash; is a Linux tool. This course
+  supports Valgrind through Linux: native Windows is not supported, and native macOS support is limited and not
+  supported for this course. Since most of you use VS Code on a Mac or Windows laptop, we need a real Linux
+  environment to run it in.
+</p>
+<p>
+  <strong>GitHub Codespaces</strong> gives you exactly that: a full Linux machine in the cloud, pre-configured
+  with <code>g++</code>, <code>gdb</code>, and <code>valgrind</code> already installed, that opens directly
+  inside VS Code &mdash; in your browser, or in your local VS Code app if you prefer. Nothing to install beyond
+  a GitHub account, and it uses your own free monthly Codespaces quota, not anything billed to the course.
+</p>
+
+<h2 id="need">What You Need</h2>
+<ul>
+  <li>A (free) <a href="https://github.com/join" target="_blank" rel="noopener">GitHub account</a>. If you
+      already have one from a previous course or personal projects, that works fine.</li>
+  <li>A web browser. That&rsquo;s it &mdash; no local installs are required for this path.</li>
+</ul>
+<div class="note">
+  <span class="label">Free usage</span>
+  A free GitHub account includes 120 core-hours of Codespaces use per month &mdash; about 60 hours of running
+  time on the standard 2-core machine, since usage is multiplied by machine size &mdash; plus 15&nbsp;GB of
+  storage. This should cover course use if you stop your codespace when you&rsquo;re finished (see
+  <a href="#later">Coming Back to Your Codespace Later</a> below). Accounts may need a payment method or
+  spending limit on file to continue past the included quota. Each of you uses your own account and your own
+  quota &mdash; nothing is shared or billed to anyone else.
+  <br><br>
+  <span style="font-size:.85em; color:var(--muted);">Reference:
+  <a href="https://docs.github.com/en/billing/reference/product-usage-included" target="_blank" rel="noopener">GitHub plan allowances</a>
+  &middot;
+  <a href="https://docs.github.com/en/codespaces/troubleshooting/troubleshooting-included-usage" target="_blank" rel="noopener">how usage is calculated</a></span>
+</div>
+
+<h2 id="step1">Step 1 &mdash; Fork the Repository</h2>
+<div class="note">
+  <span class="label">The workflow you&rsquo;re learning</span>
+  <p style="margin:.3rem 0 .7rem; font-family:'SFMono-Regular', Consolas, monospace; font-size:.83rem;">
+    Course repository &rarr; Fork &rarr; your personal GitHub repository &rarr; Codespace &rarr; edit &rarr;
+    <code>git status</code> &rarr; <code>git add</code> &rarr; <code>git commit</code> &rarr;
+    <code>git push</code>
+  </p>
+  The course repository is the shared starting point everyone forks from. Your <strong>fork</strong> is your
+  own personal copy of it on GitHub &mdash; a real repository that belongs to you. The
+  <strong>codespace</strong> is a temporary Linux workspace you open on top of your fork; nothing in it is
+  permanent until you save it. <code>commit</code> records a snapshot of your work locally, inside the
+  codespace; <code>push</code> sends that snapshot to your fork on GitHub, where it&rsquo;s saved for good.
+</div>
+<div class="step">
+  <div class="num">1</div>
+  <div class="body">
+    <p>
+      Sign in to GitHub with your <strong>own</strong> account first. Then go to the course repository:
+      <a href="https://github.com/tong-yee/cs235_program_f26" target="_blank" rel="noopener"><code>github.com/tong-yee/cs235_program_f26</code></a>.
+    </p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">2</div>
+  <div class="body">
+    <p>Click <strong>Fork</strong> in the upper-right corner of the page.</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">3</div>
+  <div class="body">
+    <p>Keep the repository name as it is, make sure your <strong>personal GitHub account</strong> is selected
+    as the owner, and click <strong>Create fork</strong>.</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">4</div>
+  <div class="body">
+    <p>
+      GitHub takes you to your fork &mdash; check the address bar: it should now show your own username (e.g.
+      <code>github.com/&lt;your-username&gt;/cs235_program_f26</code>), not the instructor&rsquo;s. From here
+      on, work <strong>from your fork</strong>, not the original course repository.
+    </p>
+  </div>
+</div>
+
+<h2 id="step2">Step 2 &mdash; Create Your Codespace</h2>
+<div class="step">
+  <div class="num">1</div>
+  <div class="body">
+    <p>From your fork, click the green <strong>&lt;&gt; Code</strong> button near the top of the page.</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">2</div>
+  <div class="body">
+    <p>Select the <strong>Codespaces</strong> tab (next to <em>Local</em>).</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">3</div>
+  <div class="body">
+    <p>Click <strong>Create codespace on main</strong>.</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">4</div>
+  <div class="body">
+    <p>
+      Wait about a minute while GitHub builds your environment &mdash; you&rsquo;ll see a progress screen the
+      first time. When it&rsquo;s done, VS Code opens automatically in your browser, already connected to your
+      own private Linux machine.
+    </p>
+  </div>
+</div>
+<div class="hint">
+  <span class="label">This is private to you</span>
+  Because this codespace sits on top of <em>your own fork</em>, you already have full write access &mdash;
+  later, <code>git push</code> will go straight to your fork with no extra setup.
+</div>
+
+<h2 id="step3">Step 3 &mdash; Verify the Environment</h2>
+<p>Open a terminal inside your codespace (it usually opens automatically at the bottom of the window; if not,
+use the menu <strong>Terminal &rarr; New Terminal</strong>), and run:</p>
+<pre><code class="language-bash">g++ --version
+valgrind --version</code></pre>
+<p>You should see a real version number printed for each &mdash; for example <code>valgrind-3.22.0</code>.
+If instead you see <code>command not found</code>, see <a href="#troubleshooting">Troubleshooting</a> below.</p>
+
+<h2 id="step4">Step 4 &mdash; Compile and Run With Valgrind</h2>
+<p>
+  If you&rsquo;re instructed to reproduce the lecture example, create a folder named <code>Buffer</code> in your
+  codespace (right-click the file list on the left &rarr; <strong>New Folder</strong>), and inside it, create
+  four files with the contents below.
+</p>
+<h3><code>Buffer.hpp</code></h3>
+<pre><code class="language-cpp">// Buffer.hpp -- from lecture slip on September 15, 2026
+// Declarations only -- see Buffer.cpp for implementations.
+#ifndef BUFFER_HPP
+#define BUFFER_HPP
+
+#include &lt;cstddef&gt;
+
+class Buffer {
+public:
+    explicit Buffer(std::size_t size);
+    ~Buffer();
+
+    Buffer(const Buffer&amp; other);
+
+    // NEW today -- buggy, see grow() in Buffer.cpp
+    void grow(std::size_t newSize);
+
+    int&amp; at(std::size_t i);
+    std::size_t size() const;
+
+private:
+    int* data_;
+    std::size_t size_;
+};
+
+#endif</code></pre>
+<h3><code>Buffer.cpp</code></h3>
+<pre><code class="language-cpp">// Buffer.cpp -- all Buffer member functions are implemented here.
+// Buffer::grow() was added in the September 17, 2026 lecture -- buggy on
+// purpose, see the lecture slip's Q1.
+#include "Buffer.hpp"
+
+Buffer::Buffer(std::size_t size)
+    : data_(new int[size]{}), size_(size) {
+}
+
+Buffer::~Buffer() {
+    delete[] data_;
+}
+
+Buffer::Buffer(const Buffer&amp; other)
+    : data_(new int[other.size_]), size_(other.size_) {
+    for (std::size_t i = 0; i &lt; size_; ++i) {
+        data_[i] = other.data_[i];
+    }
+}
+
+void Buffer::grow(std::size_t newSize) {
+    int* newData = new int[newSize]{};
+    for (std::size_t i = 0; i &lt; size_; ++i) {
+        newData[i] = data_[i];
+    }
+    data_ = newData;
+    size_ = newSize;
+}
+
+int&amp; Buffer::at(std::size_t i) {
+    return data_[i];
+}
+
+std::size_t Buffer::size() const {
+    return size_;
+}
+
+// --- FIXED grow() (for after the demo) ----------------------------------
+// void Buffer::grow(std::size_t newSize) {
+//     int* newData = new int[newSize]{};
+//     for (std::size_t i = 0; i &lt; size_; ++i) {
+//         newData[i] = data_[i];
+//     }
+//     delete[] data_;      // free the OLD array first
+//     data_ = newData;
+//     size_ = newSize;
+// }</code></pre>
+<h3><code>main.cpp</code></h3>
+<pre><code class="language-cpp">// main.cpp -- drives the leak from the September 17, 2026 lecture, Q1.
+#include "Buffer.hpp"
+
+int main() {
+    Buffer b(4);
+    b.grow(8);   // triggers the leak -- see Valgrind's "definitely lost" report
+    return 0;
+}</code></pre>
+<h3><code>.gitignore</code></h3>
+<pre><code class="language-bash">test</code></pre>
+<p>
+  Compiling below produces a binary named <code>test</code>. Without the <code>.gitignore</code> line above,
+  that binary would show up in Source Control as a file to commit &mdash; a compiled binary doesn&rsquo;t
+  belong in a git repository, so this keeps it out automatically instead of leaving it for you to notice and
+  remember to exclude every time.
+</p>
+<p>
+  Every command below assumes your terminal is inside the <code>Buffer</code> folder &mdash; that&rsquo;s what
+  the <code>cd Buffer</code> line does. If you ever aren&rsquo;t sure where your terminal is, run <code>pwd</code>
+  to check.
+</p>
+<p style="margin-bottom:.4rem;">
+  <span style="font-weight:700; color:var(--navy); font-size:.85rem; text-transform:uppercase; letter-spacing:.03em;">Copy/paste, in the terminal</span>
+</p>
+<pre><code class="language-bash">cd Buffer
+g++ -std=c++17 -g Buffer.cpp main.cpp -o test
+valgrind --leak-check=full ./test</code></pre>
+<p>
+  For the buggy <code>grow()</code> from lecture, you should see Valgrind report
+  <code>definitely lost: 16 bytes in 1 blocks</code> &mdash; the same leak from the lecture slip. This is the
+  general pattern you&rsquo;ll use for every exercise and project that asks you to check your work with
+  Valgrind: compile with <code>-g</code> (so Valgrind can point to line numbers), then run the program through
+  <code>valgrind --leak-check=full</code> instead of running it directly.
+</p>
+
+<h3>Reading the Report</h3>
+<p>The relevant part of the output looks like this:</p>
+<pre><code class="nohighlight">==12345== HEAP SUMMARY:
+==12345==     in use at exit: 16 bytes in 1 blocks
+==12345==   total heap usage: 3 allocs, 2 frees, 73,776 bytes allocated
+==12345==
+==12345== 16 bytes in 1 blocks are definitely lost in loss record 1 of 1
+==12345==    at 0x...: operator new[](unsigned long)
+==12345==    by 0x...: Buffer::Buffer(unsigned long)
+==12345==    by 0x...: main</code></pre>
+<div class="note">
+  <span class="label">Ignore the totals, trust the leak summary</span>
+  <code>total heap usage</code> counts <em>every</em> heap allocation in the whole program &mdash; including
+  ones the C++ runtime itself makes on startup that have nothing to do with your code. Don&rsquo;t try to match
+  that number against your own <code>new</code> calls. The line that matters is <code>definitely lost</code>:
+  that is a genuine leak &mdash; memory nothing in your program can reach anymore.
+</div>
+<p>
+  Now look closely at the stack trace under <code>definitely lost</code>. It points at
+  <code>Buffer::Buffer(unsigned long)</code> &mdash; the <strong>constructor</strong> &mdash; not at
+  <code>grow()</code>. That can be confusing, since the constructor didn&rsquo;t do anything wrong. What
+  Valgrind is telling you is <em>where the lost block was allocated</em>, not which function is responsible for
+  losing track of it. Those are often different functions, and telling them apart is the real skill here:
+</p>
+<ol>
+  <li><strong>Check the size.</strong> 16 bytes is four <code>int</code>s &mdash; that matches
+      <code>Buffer(4)</code>&rsquo;s array, not <code>grow(8)</code>&rsquo;s (which would be 32 bytes). So the
+      block that went missing is the <em>original</em> array from the constructor.</li>
+  <li><strong>Search your class for every place that pointer gets reassigned.</strong> Look for
+      <code>data_&nbsp;=</code> throughout <code>Buffer.cpp</code>. It happens in exactly one place outside the
+      constructor: <code>grow()</code>.</li>
+  <li><strong>That reassignment, with no <code>delete[]</code> first, is the actual bug</strong> &mdash; even
+      though <code>grow()</code> never appears anywhere in the stack trace.</li>
+</ol>
+<div class="hint">
+  <span class="label">The general method</span>
+  Valgrind always names the <em>allocation</em> site for a lost block. It&rsquo;s on you to trace forward
+  through the code from there and find where that same pointer gets overwritten without being freed first
+  &mdash; that function is the one actually responsible for the leak. You&rsquo;ll use this exact reasoning on
+  every project this semester, not just this demo.
+</div>
+
+<h2 id="save">Save Your Work</h2>
+<p>
+  Files in your codespace are <strong>not</strong> automatically backed up anywhere else. This is also your
+  first real practice with the everyday git workflow you&rsquo;ll use all semester: check what changed, stage
+  it, commit it with a message, and push it to GitHub. Take the extra minute here &mdash; this loop is worth
+  more than any single exercise.
+</p>
+<p style="margin-bottom:.4rem;">
+  <span style="font-weight:700; color:var(--navy); font-size:.85rem; text-transform:uppercase; letter-spacing:.03em;">Copy/paste, in the terminal</span>
+</p>
+<pre><code class="language-bash">cd Buffer
+git status
+git add Buffer.hpp Buffer.cpp main.cpp .gitignore
+git commit -m "Complete Buffer exercise"
+git push</code></pre>
+<p>
+  <code>git status</code> shows what&rsquo;s changed. <code>git add</code> stages the files you want in the
+  next snapshot. <code>git commit</code> records that snapshot locally, with a message describing what you did.
+  <code>git push</code> sends it to your fork on GitHub.
+</p>
+<p>
+  Now confirm it actually landed there: go to your fork&rsquo;s page in the browser, refresh it, and click
+  <strong>Commits</strong> (near the top of the file list, next to the branch selector). You should see the
+  exact commit message you typed. Seeing your own commit show up on GitHub &mdash; not just a clean terminal
+  &mdash; is the real confirmation your work is saved.
+</p>
+<div class="note">
+  <span class="label">Codespaces are not permanent storage</span>
+  An idle codespace may be automatically deleted after a period of inactivity (up to 30 days by default),
+  <strong>including any work you never pushed</strong>. Get in the habit of committing and pushing before you
+  stop working, not just before a deadline.
+  <br><br>
+  <span style="font-size:.85em; color:var(--muted);">Reference:
+  <a href="https://docs.github.com/en/codespaces/setting-your-user-preferences/configuring-automatic-deletion-of-your-codespaces" target="_blank" rel="noopener">Codespace retention</a></span>
+</div>
+<div class="hint">
+  <span class="label">The codespace and your fork are not the same thing</span>
+  Each codespace you create gets its own random, disposable name &mdash; something like
+  <code>cs235_program_f26 [fuzzy carnival]</code>, shown in the Explorer panel. That name refers only to this
+  one running container. If that codespace is deleted (or you delete it yourself), only that container and
+  anything unpushed inside it disappear. Your fork on GitHub &mdash; and any commits you pushed to it &mdash;
+  is a separate, permanent thing that isn&rsquo;t affected. You can always create a brand-new codespace (with a
+  different random name) from your fork, and it will start with whatever you last pushed.
+</div>
+
+<h2 id="later">Coming Back to Your Codespace Later</h2>
+<p>
+  Reopen the same codespace to continue working &mdash; go to
+  <a href="https://github.com/codespaces" target="_blank" rel="noopener"><code>github.com/codespaces</code></a>
+  to see your existing ones. Reopening preserves any unpushed files for as long as that codespace still exists.
+  But commit and push regularly anyway: if that codespace is later deleted, a new codespace you create
+  afterward will not automatically include unpushed work &mdash; only what you&rsquo;ve already pushed to your
+  fork survives.
+</p>
+<p>
+  <strong>Stop your codespace when you&rsquo;re done</strong>, rather than just closing the browser tab &mdash;
+  closing the tab does not stop it. From
+  <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, click the
+  &ldquo;&hellip;&rdquo; next to a running codespace and choose <strong>Stop codespace</strong>. This is what
+  keeps you within your free monthly quota.
+</p>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<div class="hint">
+  <span class="label">My browser URL shows the instructor&rsquo;s username, not mine</span>
+  This means you created a codespace directly on the original course repository instead of your fork &mdash;
+  you&rsquo;ll be able to run Valgrind, but <code>git push</code> won&rsquo;t work the way this guide describes.
+  Delete that codespace from
+  <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, go back to
+  Step 1, and make sure you land on <em>your</em> fork before creating a codespace.
+</div>
+<div class="hint">
+  <span class="label"><code>valgrind: command not found</code></span>
+  This means your codespace wasn&rsquo;t built from the course&rsquo;s dev container configuration &mdash; most
+  likely you're in a codespace created before the setup was fixed, or on a different repository. Delete that
+  codespace from <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>
+  and create a fresh one from your fork following Step 2 again.
+</div>
+<div class="hint">
+  <span class="label">&ldquo;This codespace is running in recovery mode&rdquo;</span>
+  This means the container failed to build. Delete the codespace and create a new one. If it happens again,
+  post on the course forum or email the instructor with a screenshot of the error &mdash; don&rsquo;t spend
+  more than a few minutes troubleshooting it yourself.
+</div>
+<div class="hint">
+  <span class="label">Codespace seems slow or won&rsquo;t load</span>
+  Try a hard refresh of the browser tab. If that doesn&rsquo;t help, close the tab, go back to
+  <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, and reopen
+  it from there.
+</div>
+
+<h2 id="alternative">If Codespaces Doesn&rsquo;t Work For You</h2>
+<p>
+  If you run out of free Codespaces hours, or your account can&rsquo;t create one for some reason, the same
+  environment also runs locally through <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">Docker Desktop</a>
+  plus VS Code&rsquo;s <strong>Dev Containers</strong> extension &mdash; free, with no hour limit, using the
+  exact same configuration file. Ask the instructor for the local setup instructions if you need this option.
+</p>
+
+</main>
+
+<footer>CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
