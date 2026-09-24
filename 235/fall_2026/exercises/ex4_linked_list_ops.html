@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 4: Linked List Operations</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 4 &mdash; Linked List Operations</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Due: Thursday, October 1, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#rule">The Rule Behind Every Task</a></li>
+    <li><a href="#taskA">Task A &mdash; <code>prepend()</code></a></li>
+    <li><a href="#taskB">Task B &mdash; <code>append()</code></a></li>
+    <li><a href="#taskC">Task C &mdash; <code>insertAt()</code></a></li>
+    <li><a href="#taskD">Task D &mdash; <code>removeValue()</code></a></li>
+    <li><a href="#taskE">Task E &mdash; <code>reverse()</code></a></li>
+    <li><a href="#taskF">Task F &mdash; <code>removeAt()</code> (optional practice)</a></li>
+    <li><a href="#edges">Edge Cases to Test</a></li>
+    <li><a href="#grading">Grading</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>
+  This exercise is the Thursday lecture in code form. By the end of it you should be able to:
+</p>
+<ul>
+  <li>insert a node at the <strong>front</strong>, at the <strong>back</strong>, and at an arbitrary <strong>position</strong>;</li>
+  <li>remove a node by value, freeing exactly the memory you unhook &mdash; no leak, no double free;</li>
+  <li>reverse a list <strong>in place</strong>, with three pointers and no new allocation;</li>
+  <li>recognize why position <code>0</code> and the empty list are separate cases in almost every function;</li>
+  <li>order your pointer writes so that you never destroy the only pointer to something you still need.</li>
+</ul>
+<div class="note">
+  <span class="label">This is not MiniVector</span>
+  There is no array here and no capacity. Each node is its own heap allocation, and the order of the list
+  lives in the <code>next</code> pointers rather than in the arithmetic of an index.
+</div>
+
+<h2 id="files">Files</h2>
+<p>The following files are provided:</p>
+<p>
+  <span class="filecard given">LinkedList.hpp</span>
+  <span class="filecard given">LinkedList.cpp&nbsp;(partial)</span>
+  <span class="filecard given">LinkedListDemo.cpp&nbsp;(optional local test driver)</span>
+</p>
+<p>You will complete and submit:</p>
+<p>
+  <span class="filecard submit">LinkedList.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Important</span>
+  Do not modify <code>LinkedList.hpp</code>. Gradescope compiles your submission against the original
+  version of this file. <code>LinkedListDemo.cpp</code> is for your own local testing only &mdash; you do
+  not submit it, and Gradescope does not use it.
+</div>
+<p>
+  The constructor, destructor, <code>empty()</code>, <code>size()</code>, <code>getEntry()</code> and
+  <code>toString()</code> are already written for you. Your work is the five <code>TODO</code> sections,
+  plus an optional sixth.
+</p>
+<div class="hint">
+  <span class="label">Why copying is disabled</span>
+  <code>LinkedList.hpp</code> marks the copy constructor and copy assignment operator <code>= delete</code>.
+  Deep-copying a chain of nodes is a Rule of Three problem, and it is not what this exercise is about &mdash;
+  so rather than let you write an accidental shallow copy and spend an hour chasing the double free,
+  the compiler simply refuses. If you see an error mentioning a deleted function, you copied a
+  <code>LinkedList</code> somewhere; pass it by reference instead.
+</div>
+
+<h2 id="rule">The Rule Behind Every Task</h2>
+<div class="note">
+  <span class="label">Pointer surgery, in one sentence</span>
+  Before you overwrite any pointer, make sure something else still holds the address you are about to lose.
+</div>
+<p>
+  Every task below is that one rule in a different disguise. The two diagrams show it for the two
+  hardest cases &mdash; inserting between two nodes, and removing one:
+</p>
+<div style="display:flex; flex-wrap:wrap; gap:1.2rem; margin:1.1rem 0;">
+
+<figure style="flex:1 1 340px; margin:0; text-align:center;">
+  <svg viewBox="0 0 380 210" role="img" aria-label="Mid-list insert: first point the new node at prev's old successor, then point prev at the new node." style="width:100%; height:auto; max-width:380px;">
+    <defs>
+      <marker id="arrIns" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#1E2761"/>
+      </marker>
+      <marker id="arrInsOld" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/>
+      </marker>
+    </defs>
+    <text x="52" y="24" text-anchor="middle" font-family="monospace" font-size="12.5" fill="#1E2761">prev</text>
+    <line x1="52" y1="30" x2="52" y2="52" stroke="#1E2761" stroke-width="1.6" marker-end="url(#arrIns)"/>
+    <rect x="18" y="56" width="46" height="34" rx="5" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+    <rect x="64" y="56" width="26" height="34" rx="5" fill="#9fb6e8" stroke="#1E2761" stroke-width="1.5"/>
+    <text x="41" y="79" text-anchor="middle" font-family="monospace" font-size="13" fill="#1E2761">18</text>
+    <rect x="272" y="56" width="46" height="34" rx="5" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+    <rect x="318" y="56" width="26" height="34" rx="5" fill="#9fb6e8" stroke="#1E2761" stroke-width="1.5"/>
+    <text x="295" y="79" text-anchor="middle" font-family="monospace" font-size="13" fill="#1E2761">54</text>
+    <line x1="90" y1="73" x2="266" y2="73" stroke="#b3261e" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrInsOld)"/>
+    <text x="178" y="64" text-anchor="middle" font-size="11.5" fill="#b3261e">old link</text>
+    <rect x="145" y="140" width="46" height="34" rx="5" fill="#d8f0da" stroke="#1f7a34" stroke-width="1.5"/>
+    <rect x="191" y="140" width="26" height="34" rx="5" fill="#a9ddb2" stroke="#1f7a34" stroke-width="1.5"/>
+    <text x="168" y="163" text-anchor="middle" font-family="monospace" font-size="13" fill="#14562a">36</text>
+    <path d="M77,90 C90,126 118,152 141,157" fill="none" stroke="#1f7a34" stroke-width="1.9" marker-end="url(#arrIns)"/>
+    <path d="M217,152 C250,140 282,110 293,94" fill="none" stroke="#1f7a34" stroke-width="1.9" marker-end="url(#arrIns)"/>
+    <text x="96" y="122" font-size="12" fill="#14562a" font-weight="bold">2</text>
+    <text x="256" y="122" font-size="12" fill="#14562a" font-weight="bold">1</text>
+    <text x="190" y="200" text-anchor="middle" font-size="12" fill="#14562a" font-weight="bold">write 1 before write 2</text>
+  </svg>
+  <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">Insert: point the new node at <code>prev-&gt;next</code> <em>first</em></figcaption>
+</figure>
+
+<figure style="flex:1 1 340px; margin:0; text-align:center;">
+  <svg viewBox="0 0 380 210" role="img" aria-label="Mid-list remove: first route prev past the doomed node, then delete the doomed node." style="width:100%; height:auto; max-width:380px;">
+    <defs>
+      <marker id="arrRem" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#1E2761"/>
+      </marker>
+      <marker id="arrRemGo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#1f7a34"/>
+      </marker>
+    </defs>
+    <text x="40" y="24" text-anchor="middle" font-family="monospace" font-size="12.5" fill="#1E2761">prev</text>
+    <line x1="40" y1="30" x2="40" y2="52" stroke="#1E2761" stroke-width="1.6" marker-end="url(#arrRem)"/>
+    <text x="190" y="24" text-anchor="middle" font-family="monospace" font-size="12.5" fill="#b3261e">doomed</text>
+    <line x1="190" y1="30" x2="190" y2="52" stroke="#b3261e" stroke-width="1.6" marker-end="url(#arrRem)"/>
+    <rect x="12" y="56" width="42" height="34" rx="5" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+    <rect x="54" y="56" width="24" height="34" rx="5" fill="#9fb6e8" stroke="#1E2761" stroke-width="1.5"/>
+    <text x="33" y="79" text-anchor="middle" font-family="monospace" font-size="13" fill="#1E2761">12</text>
+    <rect x="160" y="56" width="42" height="34" rx="5" fill="#f6d3d0" stroke="#b3261e" stroke-width="1.5"/>
+    <rect x="202" y="56" width="24" height="34" rx="5" fill="#eeb3ad" stroke="#b3261e" stroke-width="1.5"/>
+    <text x="181" y="79" text-anchor="middle" font-family="monospace" font-size="13" fill="#7a190f">24</text>
+    <rect x="300" y="56" width="42" height="34" rx="5" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
+    <rect x="342" y="56" width="24" height="34" rx="5" fill="#9fb6e8" stroke="#1E2761" stroke-width="1.5"/>
+    <text x="321" y="79" text-anchor="middle" font-family="monospace" font-size="13" fill="#1E2761">36</text>
+    <line x1="78" y1="73" x2="156" y2="73" stroke="#5a6273" stroke-width="1.4" stroke-dasharray="4 4"/>
+    <line x1="226" y1="73" x2="296" y2="73" stroke="#5a6273" stroke-width="1.4" stroke-dasharray="4 4"/>
+    <path d="M66,90 C110,140 250,140 312,94" fill="none" stroke="#1f7a34" stroke-width="2" marker-end="url(#arrRemGo)"/>
+    <text x="190" y="152" text-anchor="middle" font-size="12" fill="#14562a" font-weight="bold">1. prev-&gt;next = doomed-&gt;next;</text>
+    <text x="190" y="176" text-anchor="middle" font-size="12" fill="#7a190f" font-weight="bold">2. delete doomed;</text>
+    <text x="190" y="199" text-anchor="middle" font-size="11.5" fill="var(--muted)">bypass first, free second</text>
+  </svg>
+  <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">Remove: unhook the node <em>before</em> freeing it</figcaption>
+</figure>
+</div>
+<p>
+  Get the order backwards on the left and the tail of the list is leaked; get it backwards on the right
+  and you read through a pointer to memory you already gave back. Neither mistake necessarily crashes,
+  which is exactly what makes them worth practicing.
+</p>
+
+<h2 id="taskA">Task A &mdash; <code>prepend()</code></h2>
+<pre><code class="language-cpp">void prepend(int value);</code></pre>
+<p>
+  Insert <code>value</code> at the front of the list. This is the operation linked lists exist for: nothing
+  shifts, nothing is reallocated, and it takes the same time whether the list holds three nodes or three
+  million.
+</p>
+<h3>Requirements</h3>
+<ul>
+  <li>The new node becomes the first node; the old first node follows it.</li>
+  <li>It must work on an empty list, with no special case needed.</li>
+  <li>It must run in <strong>O(1)</strong> &mdash; if your implementation walks the list, it is wrong even if the output looks right.</li>
+</ul>
+<div class="hint">
+  <span class="label">Hint</span>
+  Two pointers change: the new node's <code>next</code>, and <code>head_</code>. Decide which one to write
+  first, and ask yourself what the other one still needs to be readable at that moment. Note that
+  <code>head_</code> is already <code>nullptr</code> for an empty list, which is exactly the value the new
+  node's <code>next</code> should have &mdash; that is why no <code>if</code> is needed.
+</div>
+
+<h2 id="taskB">Task B &mdash; <code>append()</code></h2>
+<pre><code class="language-cpp">void append(int value);</code></pre>
+<p>
+  Insert <code>value</code> at the back of the list. Unlike <code>prepend()</code>, there is no pointer that
+  already refers to the end, so you have to go find it.
+</p>
+<h3>Requirements</h3>
+<ul>
+  <li>The new node becomes the last node, and its <code>next</code> is <code>nullptr</code>.</li>
+  <li>Appending to an <strong>empty list</strong> must work. This is a genuinely separate case.</li>
+  <li>The existing order must not change.</li>
+</ul>
+<div class="hint">
+  <span class="label">Hint</span>
+  You need the loop that stops <em>on</em> the last node, not the one that walks past it &mdash;
+  <code>while (curr-&gt;next != nullptr)</code>, not <code>while (curr != nullptr)</code>. And that loop
+  dereferences <code>curr</code> immediately, so it cannot be the first thing your function does when the
+  list is empty: on an empty list there is no node whose <code>next</code> could be set, and
+  <code>head_</code> itself is what has to change.
+</div>
+
+<h2 id="taskC">Task C &mdash; <code>insertAt()</code></h2>
+<pre><code class="language-cpp">bool insertAt(int pos, int value);</code></pre>
+<p>
+  Insert <code>value</code> so that it ends up at index <code>pos</code>, counting from <code>0</code>.
+  Return <code>true</code> if the insert happened and <code>false</code> if it did not.
+</p>
+<h3>Requirements</h3>
+<ul>
+  <li><code>pos == 0</code> inserts at the front.</li>
+  <li><code>pos == size()</code> is <strong>legal</strong> and appends &mdash; inserting just past the last element is how you add to the end.</li>
+  <li><code>pos &lt; 0</code> or <code>pos &gt; size()</code> returns <code>false</code> and leaves the list <strong>completely unchanged</strong>.</li>
+  <li>A successful insert increases <code>size()</code> by exactly one.</li>
+</ul>
+<div class="note">
+  <span class="label">Watch this one</span>
+  A refused insert must not leave a <code>Node</code> allocated. If you call <code>new</code> before you
+  know the position is valid, and then <code>return false</code>, that node is leaked &mdash; the
+  autograder's memory check will find it even though every value you print looks correct.
+</div>
+<div class="hint">
+  <span class="label">Hint</span>
+  For any position other than <code>0</code>, the pointer you must change lives in the node
+  <em>before</em> the insertion point, so walk a <code>prev</code> pointer to index <code>pos - 1</code>
+  and stop. If that walk runs off the end, the position was too large. Position <code>0</code> needs its
+  own branch because the pointer that changes is <code>head_</code>, which is not inside any node.
+</div>
+
+<h2 id="taskD">Task D &mdash; <code>removeValue()</code></h2>
+<pre><code class="language-cpp">bool removeValue(int target);</code></pre>
+<p>
+  Remove the <strong>first</strong> node whose <code>data</code> equals <code>target</code>, free it, and
+  return <code>true</code>. If no node holds that value, change nothing and return <code>false</code>.
+</p>
+<h3>Requirements</h3>
+<ul>
+  <li>Only the first match is removed, even when the list holds duplicates.</li>
+  <li>Removing the first node must work &mdash; <code>head_</code> itself changes in that case.</li>
+  <li>Removing from an empty list returns <code>false</code> and must not crash.</li>
+  <li>Every node you unhook must be <code>delete</code>d exactly once.</li>
+</ul>
+<div class="hint">
+  <span class="label">Hint</span>
+  The search loop has to stop one node <em>before</em> the target, because that is the node whose
+  <code>next</code> you will rewrite &mdash; so test <code>prev-&gt;next-&gt;data</code>, not
+  <code>prev-&gt;data</code>. Then bypass the node, and only after that free it. If you free it first, the
+  pointer you need in order to bypass it is no longer yours to read.
+</div>
+
+<h2 id="taskE">Task E &mdash; <code>reverse()</code></h2>
+<pre><code class="language-cpp">void reverse();</code></pre>
+<p>
+  Reverse the list in place: every <code>next</code> points the other way, and <code>head_</code> ends up at
+  what used to be the last node. No node is created, and no node is destroyed &mdash; only the arrows change.
+</p>
+<h3>Requirements</h3>
+<ul>
+  <li><code>O(n)</code> time and <code>O(1)</code> extra space: a fixed number of pointer variables, whatever the length.</li>
+  <li>Reversing an empty list, or a one-node list, must work and must not crash.</li>
+  <li>After reversing, the list must still be usable &mdash; in particular the new last node's <code>next</code> must be <code>nullptr</code>.</li>
+  <li>Reversing twice must give back the original list.</li>
+</ul>
+<div class="hint">
+  <span class="label">Hint</span>
+  Three pointers are exactly enough: the part already reversed, the node being flipped now, and the rest
+  of the list. The order inside the loop matters: the statement that flips a node's link destroys the only
+  record of where the rest of the list is, so something has to be holding that address before the flip
+  happens. When the loop ends, ask yourself which of your three pointers is standing on the node that
+  should now be first.
+</div>
+
+<h2 id="taskF">Task F &mdash; <code>removeAt()</code> (optional practice)</h2>
+<pre><code class="language-cpp">bool removeAt(int pos);</code></pre>
+<p>
+  Remove the node at index <code>pos</code>, or return <code>false</code> if <code>pos</code> is out of
+  range. This task is <strong>not graded</strong> and you do not have to define it at all.
+</p>
+<div class="hint">
+  <span class="label">Why it is worth doing</span>
+  <code>removeAt()</code> is Task C's walk combined with Task D's bypass-then-free. Writing it is the
+  fastest way to find out whether you understood both, and it is the shape of the code you will need for
+  the Stack and Queue in the next two classes.
+</div>
+
+<h2 id="edges">Edge Cases to Test</h2>
+<p>
+  These five are where linked-list bugs live. A function that works on a three-node list in the middle
+  tells you very little; run every one of your functions against this list before you submit:
+</p>
+<table>
+  <tr><th>Case</th><th>What is special</th><th>What breaks if you forget</th></tr>
+  <tr><td>The empty list</td><td>no node exists; <code>head_</code> is what changes</td><td>dereferencing <code>nullptr</code> &mdash; a crash</td></tr>
+  <tr><td>A one-node list</td><td>the first node is also the last</td><td>a loop that assumes a successor</td></tr>
+  <tr><td>Position <code>0</code></td><td>there is no predecessor node</td><td>a crash, or the whole list leaked</td></tr>
+  <tr><td>The last node</td><td><code>prev-&gt;next</code> must become <code>nullptr</code></td><td>a dangling <code>next</code></td></tr>
+  <tr><td>Value absent / position out of range</td><td>the walk runs off the end</td><td>dereferencing <code>nullptr</code>, or a leaked node</td></tr>
+</table>
+
+<h2 id="grading">Grading</h2>
+<table>
+  <tr><th>Task</th><th>Function</th><th>Points</th></tr>
+  <tr><td>A</td><td><code>prepend()</code></td><td>15</td></tr>
+  <tr><td>B</td><td><code>append()</code></td><td>15</td></tr>
+  <tr><td>C</td><td><code>insertAt()</code></td><td>20</td></tr>
+  <tr><td>D</td><td><code>removeValue()</code></td><td>20</td></tr>
+  <tr><td>E</td><td><code>reverse()</code></td><td>20</td></tr>
+  <tr><td>&mdash;</td><td>Memory safety across all operations (checked with Valgrind)</td><td>10</td></tr>
+  <tr><td>F</td><td><code>removeAt()</code> &mdash; optional practice</td><td>0</td></tr>
+  <tr><th colspan="2" style="text-align:right;">Total</th><th>100</th></tr>
+</table>
+<div class="note">
+  <span class="label">About the memory-safety points</span>
+  That last row is graded by running every operation thousands of times under Valgrind. It is scored
+  separately from the behavioral tests on purpose: a leaked node produces completely correct output, so
+  it is possible to pass Tasks A&ndash;E and still lose those points. Run
+  <code>valgrind --leak-check=full ./demo</code> on the lab machines before you submit.
+</div>
+<div class="hint">
+  <span class="label">A note on Task order</span>
+  The tests for Tasks D and E build their lists using <code>prepend()</code>, since that is the only way
+  to put nodes in a list. If Task A is not working, those tasks report that instead of a list of
+  confusing failures &mdash; so write <code>prepend()</code> first.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>With all six tasks implemented, <code>LinkedListDemo.cpp</code> prints:</p>
+<pre><code>=== Task A: prepend ===
+a = 10 -&gt; 20 -&gt; 30   (expect 10 -&gt; 20 -&gt; 30)
+a.size() = 3   (expect 3)
+
+=== Task B: append ===
+b = 10 -&gt; 20 -&gt; 30   (expect 10 -&gt; 20 -&gt; 30)
+
+=== Task C: insertAt ===
+insertAt(1, 20) returned true   (expect true)
+c = 10 -&gt; 20 -&gt; 30   (expect 10 -&gt; 20 -&gt; 30)
+insertAt(0, 5) returned true   (expect true)
+insertAt(4, 40) returned true   (expect true -- pos == length appends)
+insertAt(99, 7) returned false   (expect false)
+c = 5 -&gt; 10 -&gt; 20 -&gt; 30 -&gt; 40   (expect 5 -&gt; 10 -&gt; 20 -&gt; 30 -&gt; 40)
+
+=== Task D: removeValue ===
+removeValue(20) returned true   (expect true)
+d = 10 -&gt; 30   (expect 10 -&gt; 30)
+removeValue(10) returned true   (expect true -- removing the first node)
+d = 30   (expect 30)
+removeValue(99) returned false   (expect false -- not in the list)
+
+=== Task E: reverse ===
+e = 21 -&gt; 14 -&gt; 7   (expect 21 -&gt; 14 -&gt; 7)
+f = (empty)   (expect (empty))
+g = 42   (expect 42)</code></pre>
+<div class="note">
+  <span class="label">Remember</span>
+  The Task F block at the end of the demo is commented out, because Task F is optional and leaving the
+  calls active would stop the program from linking until you define <code>removeAt()</code>. Uncomment it
+  if you attempt Task F.
+</div>
+
+<h2 id="compile">Compile and Run</h2>
+<pre><code class="language-bash">g++ -std=c++17 -g LinkedList.cpp LinkedListDemo.cpp -o demo
+./demo
+
+# On the Linux lab machines (Hunter North 1001B/1001C), check for leaks:
+valgrind --leak-check=full ./demo</code></pre>
+<p>
+  A clean run ends with <code>All heap blocks were freed -- no leaks are possible</code> and
+  <code>ERROR SUMMARY: 0 errors</code>.
+</p>
+
+<h2 id="listings">Provided File Listings</h2>
+<h3>LinkedList.hpp &mdash; do not modify</h3>
+<pre><code class="language-cpp">// LinkedList.hpp
+// CSCI 235 -- Exercise 4: Linked List Operations
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef LINKEDLIST_HPP
+#define LINKEDLIST_HPP
+
+#include &lt;string&gt;
+
+// A singly linked list of ints: a chain of heap-allocated nodes, each
+// holding one value and the address of the next node. head_ points at the
+// first node; the last node&#x27;s next is nullptr; head_ == nullptr is the
+// empty list.
+class LinkedList {
+public:
+    LinkedList();      // provided -- head_ = nullptr
+    ~LinkedList();     // provided -- deletes every node
+
+    // Copying a LinkedList is out of scope for this exercise, so it is
+    // disabled here. (Without a deep copy, two lists would share one chain
+    // of nodes and both destructors would delete each node -- the double
+    // free from Day 6.) Attempting to copy is a compile error, not a
+    // run-time bug, which is exactly what you want.
+    LinkedList(const LinkedList&amp; other) = delete;
+    LinkedList&amp; operator=(const LinkedList&amp; other) = delete;
+
+    // ---- Implement these five in LinkedList.cpp ----
+    void prepend(int value);                // Task A
+    void append(int value);                 // Task B
+    bool insertAt(int pos, int value);      // Task C
+    bool removeValue(int target);           // Task D
+    void reverse();                         // Task E
+
+    // Task F (OPTIONAL PRACTICE -- not graded)
+    bool removeAt(int pos);
+
+    // ---- Provided observers ----
+    bool empty() const;               // head_ == nullptr
+    int  size() const;                // O(n): counts the nodes by walking them
+    int  getEntry(int pos) const;     // 0-based; throws std::out_of_range
+    std::string toString() const;     // &quot;10 -&gt; 20 -&gt; 30&quot;, or &quot;(empty)&quot;
+
+private:
+    struct Node {
+        int   data;
+        Node* next;
+    };
+
+    Node* head_;
+};
+
+#endif</code></pre>
+<h3>LinkedList.cpp &mdash; complete the TODO sections and submit this file</h3>
+<pre><code class="language-cpp">// LinkedList.cpp
+// CSCI 235 -- Exercise 4: Linked List Operations
+// Complete the TODO sections below and submit this file.
+
+#include &quot;LinkedList.hpp&quot;
+
+#include &lt;stdexcept&gt;
+#include &lt;string&gt;
+
+// ==============================================================
+// PROVIDED -- you do not need to change anything above the line
+// marked &quot;TODO&quot; further down.
+// ==============================================================
+
+LinkedList::LinkedList() : head_(nullptr) {
+}
+
+LinkedList::~LinkedList() {
+    while (head_ != nullptr) {
+        Node* doomed = head_;     // remember the node to free
+        head_ = head_-&gt;next;      // advance FIRST, while we still can
+        delete doomed;            // now it is safe to free it
+    }
+}
+
+bool LinkedList::empty() const {
+    return head_ == nullptr;
+}
+
+// Note: this walks the chain rather than returning a stored counter, so it
+// always reports what the pointers actually say. A production list would
+// cache the length in a data member and keep it up to date in every
+// insert and remove -- one more invariant to maintain.
+int LinkedList::size() const {
+    int count = 0;
+    for (Node* curr = head_; curr != nullptr; curr = curr-&gt;next) {
+        ++count;
+    }
+    return count;
+}
+
+int LinkedList::getEntry(int pos) const {
+    if (pos &lt; 0) {
+        throw std::out_of_range(&quot;getEntry: position must not be negative&quot;);
+    }
+    Node* curr = head_;
+    for (int i = 0; i &lt; pos &amp;&amp; curr != nullptr; ++i) {
+        curr = curr-&gt;next;
+    }
+    if (curr == nullptr) {
+        throw std::out_of_range(&quot;getEntry: position past the end of the list&quot;);
+    }
+    return curr-&gt;data;
+}
+
+std::string LinkedList::toString() const {
+    if (head_ == nullptr) {
+        return &quot;(empty)&quot;;
+    }
+    std::string out;
+    for (Node* curr = head_; curr != nullptr; curr = curr-&gt;next) {
+        out += std::to_string(curr-&gt;data);
+        if (curr-&gt;next != nullptr) {
+            out += &quot; -&gt; &quot;;
+        }
+    }
+    return out;
+}
+
+// --------------------------------------------------------------
+// TODO -- Task A: void LinkedList::prepend(int value)
+// Insert value at the FRONT of the list, in O(1).
+void LinkedList::prepend(int value) {
+}
+
+// TODO -- Task B: void LinkedList::append(int value)
+// Insert value at the BACK of the list. Remember the empty list.
+void LinkedList::append(int value) {
+}
+
+// TODO -- Task C: bool LinkedList::insertAt(int pos, int value)
+// Insert value so that it ends up at index pos (0-based). Inserting at
+// pos == size() appends. Return false and change nothing if pos is
+// negative or greater than size().
+bool LinkedList::insertAt(int pos, int value) {
+    return false;
+}
+
+// TODO -- Task D: bool LinkedList::removeValue(int target)
+// Remove the FIRST node whose data equals target and free it. Return
+// false if the value is not in the list.
+bool LinkedList::removeValue(int target) {
+    return false;
+}
+
+// TODO -- Task E: void LinkedList::reverse()
+// Reverse the list IN PLACE -- no new nodes, no deleted nodes.
+void LinkedList::reverse() {
+}
+
+// TODO -- Task F (optional, not graded): bool LinkedList::removeAt(int pos)
+// Remove the node at index pos. Return false if pos is out of range.
+// --------------------------------------------------------------</code></pre>
+<h3>LinkedListDemo.cpp &mdash; optional local test driver</h3>
+<pre><code class="language-cpp">// LinkedListDemo.cpp
+// CSCI 235 -- Exercise 4: Linked List Operations
+//
+// A small driver so you can compile and run your LinkedList.cpp locally
+// and see it in action before submitting. This file is PROVIDED for
+// your own testing -- you do NOT submit it, and Gradescope does not
+// use it; Gradescope has its own, more thorough checks.
+//
+// Compile and run with:
+//   g++ -std=c++17 -g LinkedList.cpp LinkedListDemo.cpp -o demo
+//   ./demo
+//
+// And on the Linux lab machines, check for leaks:
+//   valgrind --leak-check=full ./demo
+
+#include &lt;iostream&gt;
+
+#include &quot;LinkedList.hpp&quot;
+
+int main() {
+    std::cout &lt;&lt; &quot;=== Task A: prepend ===\n&quot;;
+    LinkedList a;
+    a.prepend(30);
+    a.prepend(20);
+    a.prepend(10);
+    std::cout &lt;&lt; &quot;a = &quot; &lt;&lt; a.toString() &lt;&lt; &quot;   (expect 10 -&gt; 20 -&gt; 30)\n&quot;;
+    std::cout &lt;&lt; &quot;a.size() = &quot; &lt;&lt; a.size() &lt;&lt; &quot;   (expect 3)\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task B: append ===\n&quot;;
+    LinkedList b;
+    b.append(10);              // the empty-list case
+    b.append(20);
+    b.append(30);
+    std::cout &lt;&lt; &quot;b = &quot; &lt;&lt; b.toString() &lt;&lt; &quot;   (expect 10 -&gt; 20 -&gt; 30)\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task C: insertAt ===\n&quot;;
+    LinkedList c;
+    c.append(10);
+    c.append(30);
+    std::cout &lt;&lt; &quot;insertAt(1, 20) returned &quot;
+              &lt;&lt; (c.insertAt(1, 20) ? &quot;true&quot; : &quot;false&quot;) &lt;&lt; &quot;   (expect true)\n&quot;;
+    std::cout &lt;&lt; &quot;c = &quot; &lt;&lt; c.toString() &lt;&lt; &quot;   (expect 10 -&gt; 20 -&gt; 30)\n&quot;;
+    std::cout &lt;&lt; &quot;insertAt(0, 5) returned &quot;
+              &lt;&lt; (c.insertAt(0, 5) ? &quot;true&quot; : &quot;false&quot;) &lt;&lt; &quot;   (expect true)\n&quot;;
+    std::cout &lt;&lt; &quot;insertAt(4, 40) returned &quot;
+              &lt;&lt; (c.insertAt(4, 40) ? &quot;true&quot; : &quot;false&quot;)
+              &lt;&lt; &quot;   (expect true -- pos == length appends)\n&quot;;
+    std::cout &lt;&lt; &quot;insertAt(99, 7) returned &quot;
+              &lt;&lt; (c.insertAt(99, 7) ? &quot;true&quot; : &quot;false&quot;) &lt;&lt; &quot;   (expect false)\n&quot;;
+    std::cout &lt;&lt; &quot;c = &quot; &lt;&lt; c.toString() &lt;&lt; &quot;   (expect 5 -&gt; 10 -&gt; 20 -&gt; 30 -&gt; 40)\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task D: removeValue ===\n&quot;;
+    LinkedList d;
+    d.append(10);
+    d.append(20);
+    d.append(30);
+    std::cout &lt;&lt; &quot;removeValue(20) returned &quot;
+              &lt;&lt; (d.removeValue(20) ? &quot;true&quot; : &quot;false&quot;) &lt;&lt; &quot;   (expect true)\n&quot;;
+    std::cout &lt;&lt; &quot;d = &quot; &lt;&lt; d.toString() &lt;&lt; &quot;   (expect 10 -&gt; 30)\n&quot;;
+    std::cout &lt;&lt; &quot;removeValue(10) returned &quot;
+              &lt;&lt; (d.removeValue(10) ? &quot;true&quot; : &quot;false&quot;)
+              &lt;&lt; &quot;   (expect true -- removing the first node)\n&quot;;
+    std::cout &lt;&lt; &quot;d = &quot; &lt;&lt; d.toString() &lt;&lt; &quot;   (expect 30)\n&quot;;
+    std::cout &lt;&lt; &quot;removeValue(99) returned &quot;
+              &lt;&lt; (d.removeValue(99) ? &quot;true&quot; : &quot;false&quot;)
+              &lt;&lt; &quot;   (expect false -- not in the list)\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task E: reverse ===\n&quot;;
+    LinkedList e;
+    e.append(7);
+    e.append(14);
+    e.append(21);
+    e.reverse();
+    std::cout &lt;&lt; &quot;e = &quot; &lt;&lt; e.toString() &lt;&lt; &quot;   (expect 21 -&gt; 14 -&gt; 7)\n&quot;;
+
+    LinkedList f;              // reversing an empty list must not crash
+    f.reverse();
+    std::cout &lt;&lt; &quot;f = &quot; &lt;&lt; f.toString() &lt;&lt; &quot;   (expect (empty))\n&quot;;
+
+    LinkedList g;              // reversing a one-node list
+    g.append(42);
+    g.reverse();
+    std::cout &lt;&lt; &quot;g = &quot; &lt;&lt; g.toString() &lt;&lt; &quot;   (expect 42)\n&quot;;
+
+    // === Task F (optional): removeAt ===
+    // Task F is optional, so this block is commented out: leaving it active
+    // would stop the program from linking until removeAt() is defined.
+    // Uncomment it once you have implemented Task F.
+    //
+    // std::cout &lt;&lt; &quot;\n=== Task F (optional): removeAt ===\n&quot;;
+    // LinkedList h;
+    // h.append(10);
+    // h.append(20);
+    // h.append(30);
+    // std::cout &lt;&lt; &quot;removeAt(1) returned &quot;
+    //           &lt;&lt; (h.removeAt(1) ? &quot;true&quot; : &quot;false&quot;) &lt;&lt; &quot;   (expect true)\n&quot;;
+    // std::cout &lt;&lt; &quot;h = &quot; &lt;&lt; h.toString() &lt;&lt; &quot;   (expect 10 -&gt; 30)\n&quot;;
+
+    return 0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>Submit exactly one file to Gradescope:</p>
+<p>
+  <span class="filecard submit">LinkedList.cpp</span>
+</p>
+<div class="note">
+  <span class="label">Do not submit</span>
+  <code>LinkedList.hpp</code> or <code>LinkedListDemo.cpp</code>, and do not submit a modified version of
+  <code>LinkedList.hpp</code>.
+</div>
+<div class="note">
+  <span class="label">Reminder</span>
+  Exercises have no late submissions, because solutions are released immediately afterward.
+</div>
+
+</main>
+
+<footer>
+  CSCI 235 &middot; Data Structures &middot; Hunter College, CUNY &middot; Fall 2026
+</footer>
+
+<script>hljs.highlightAll();</script>
+
+</body>
+</html>
