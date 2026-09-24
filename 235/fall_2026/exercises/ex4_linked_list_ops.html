@@ -203,7 +203,8 @@
   <li>insert a node at the <strong>front</strong>, at the <strong>back</strong>, and at an arbitrary <strong>position</strong>;</li>
   <li>remove a node by value, freeing exactly the memory you unhook &mdash; no leak, no double free;</li>
   <li>reverse a list <strong>in place</strong>, with three pointers and no new allocation;</li>
-  <li>recognize why position <code>0</code> and the empty list are separate cases in almost every function;</li>
+  <li>recognize how position <code>0</code> and the empty list affect which pointer must be changed,
+      and when a general algorithm handles these boundary cases naturally;</li>
   <li>order your pointer writes so that you never destroy the only pointer to something you still need.</li>
 </ul>
 <div class="note">
@@ -287,7 +288,7 @@
 </figure>
 
 <figure style="flex:1 1 340px; margin:0; text-align:center;">
-  <svg viewBox="0 0 380 210" role="img" aria-label="Mid-list remove: first route prev past the doomed node, then delete the doomed node." style="width:100%; height:auto; max-width:380px;">
+  <svg viewBox="0 0 380 210" role="img" aria-label="Mid-list remove: first route prev past the node being removed, then delete it." style="width:100%; height:auto; max-width:380px;">
     <defs>
       <marker id="arrRem" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
         <path d="M0,0 L10,5 L0,10 z" fill="#1E2761"/>
@@ -298,7 +299,7 @@
     </defs>
     <text x="40" y="24" text-anchor="middle" font-family="monospace" font-size="12.5" fill="#1E2761">prev</text>
     <line x1="40" y1="30" x2="40" y2="52" stroke="#1E2761" stroke-width="1.6" marker-end="url(#arrRem)"/>
-    <text x="190" y="24" text-anchor="middle" font-family="monospace" font-size="12.5" fill="#b3261e">doomed</text>
+    <text x="190" y="24" text-anchor="middle" font-family="monospace" font-size="12.5" fill="#b3261e">curr</text>
     <line x1="190" y1="30" x2="190" y2="52" stroke="#b3261e" stroke-width="1.6" marker-end="url(#arrRem)"/>
     <rect x="12" y="56" width="42" height="34" rx="5" fill="#CADCFC" stroke="#1E2761" stroke-width="1.5"/>
     <rect x="54" y="56" width="24" height="34" rx="5" fill="#9fb6e8" stroke="#1E2761" stroke-width="1.5"/>
@@ -312,8 +313,8 @@
     <line x1="78" y1="73" x2="156" y2="73" stroke="#5a6273" stroke-width="1.4" stroke-dasharray="4 4"/>
     <line x1="226" y1="73" x2="296" y2="73" stroke="#5a6273" stroke-width="1.4" stroke-dasharray="4 4"/>
     <path d="M66,90 C110,140 250,140 312,94" fill="none" stroke="#1f7a34" stroke-width="2" marker-end="url(#arrRemGo)"/>
-    <text x="190" y="152" text-anchor="middle" font-size="12" fill="#14562a" font-weight="bold">1. prev-&gt;next = doomed-&gt;next;</text>
-    <text x="190" y="176" text-anchor="middle" font-size="12" fill="#7a190f" font-weight="bold">2. delete doomed;</text>
+    <text x="190" y="152" text-anchor="middle" font-size="12" fill="#14562a" font-weight="bold">1. prev-&gt;next = curr-&gt;next;</text>
+    <text x="190" y="176" text-anchor="middle" font-size="12" fill="#7a190f" font-weight="bold">2. delete curr;</text>
     <text x="190" y="199" text-anchor="middle" font-size="11.5" fill="var(--muted)">bypass first, free second</text>
   </svg>
   <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">Remove: unhook the node <em>before</em> freeing it</figcaption>
@@ -328,7 +329,7 @@
 <h2 id="taskA">Task A &mdash; <code>prepend()</code></h2>
 <pre><code class="language-cpp">void prepend(int value);</code></pre>
 <p>
-  Insert <code>value</code> at the front of the list. This is the operation linked lists exist for: nothing
+  Insert <code>value</code> at the front of the list. This demonstrates one of the main advantages of linked lists: nothing
   shifts, nothing is reallocated, and it takes the same time whether the list holds three nodes or three
   million.
 </p>
@@ -388,10 +389,9 @@
 </div>
 <div class="hint">
   <span class="label">Hint</span>
-  For any position other than <code>0</code>, the pointer you must change lives in the node
-  <em>before</em> the insertion point, so walk a <code>prev</code> pointer to index <code>pos - 1</code>
-  and stop. If that walk runs off the end, the position was too large. Position <code>0</code> needs its
-  own branch because the pointer that changes is <code>head_</code>, which is not inside any node.
+  You need access to both the node at the insertion position and its predecessor. Think about what
+  <code>prev</code> and <code>curr</code> should represent when the traversal stops. Be especially careful
+  about position <code>0</code> and <code>pos == size()</code>.
 </div>
 
 <h2 id="taskD">Task D &mdash; <code>removeValue()</code></h2>
@@ -409,10 +409,9 @@
 </ul>
 <div class="hint">
   <span class="label">Hint</span>
-  The search loop has to stop one node <em>before</em> the target, because that is the node whose
-  <code>next</code> you will rewrite &mdash; so test <code>prev-&gt;next-&gt;data</code>, not
-  <code>prev-&gt;data</code>. Then bypass the node, and only after that free it. If you free it first, the
-  pointer you need in order to bypass it is no longer yours to read.
+  As in <code>insertAt()</code>, it is useful to keep track of both the current node and its predecessor.
+  Remember the order: unhook the node &rarr; delete it. What is different when the node being removed is the
+  first node?
 </div>
 
 <h2 id="taskE">Task E &mdash; <code>reverse()</code></h2>
@@ -445,8 +444,8 @@
 </p>
 <div class="hint">
   <span class="label">Why it is worth doing</span>
-  <code>removeAt()</code> is Task C's walk combined with Task D's bypass-then-free. Writing it is the
-  fastest way to find out whether you understood both, and it is the shape of the code you will need for
+  <code>removeAt()</code> is Task C's walk combined with Task D's bypass-then-free. Writing it is a
+  good way to check whether you understood both, and it is the shape of the code you will need for
   the Stack and Queue in the next two classes.
 </div>
 
@@ -459,8 +458,8 @@
   <tr><th>Case</th><th>What is special</th><th>What breaks if you forget</th></tr>
   <tr><td>The empty list</td><td>no node exists; <code>head_</code> is what changes</td><td>dereferencing <code>nullptr</code> &mdash; a crash</td></tr>
   <tr><td>A one-node list</td><td>the first node is also the last</td><td>a loop that assumes a successor</td></tr>
-  <tr><td>Position <code>0</code></td><td>there is no predecessor node</td><td>a crash, or the whole list leaked</td></tr>
-  <tr><td>The last node</td><td><code>prev-&gt;next</code> must become <code>nullptr</code></td><td>a dangling <code>next</code></td></tr>
+  <tr><td>Insert at position <code>0</code> / remove the first node</td><td>there is no predecessor node</td><td>a crash, or the whole list leaked</td></tr>
+  <tr><td>The last node</td><td><code>prev-&gt;next</code> must become <code>nullptr</code></td><td>the predecessor may still point to freed memory</td></tr>
   <tr><td>Value absent / position out of range</td><td>the walk runs off the end</td><td>dereferencing <code>nullptr</code>, or a leaked node</td></tr>
 </table>
 
@@ -478,16 +477,16 @@
 </table>
 <div class="note">
   <span class="label">About the memory-safety points</span>
-  That last row is graded by running every operation thousands of times under Valgrind. It is scored
+  That last row is graded by running the operations under Valgrind to check for memory leaks and invalid
+  memory accesses. It is scored
   separately from the behavioral tests on purpose: a leaked node produces completely correct output, so
   it is possible to pass Tasks A&ndash;E and still lose those points. Run
   <code>valgrind --leak-check=full ./demo</code> on the lab machines before you submit.
 </div>
 <div class="hint">
   <span class="label">A note on Task order</span>
-  The tests for Tasks D and E build their lists using <code>prepend()</code>, since that is the only way
-  to put nodes in a list. If Task A is not working, those tasks report that instead of a list of
-  confusing failures &mdash; so write <code>prepend()</code> first.
+  The tests for Tasks D and E build their lists using <code>prepend()</code>. Therefore, if Task A is not
+  working, those tasks may also fail. Implement and test <code>prepend()</code> first.
 </div>
 
 <h2 id="expected">Expected Behavior</h2>
@@ -611,9 +610,9 @@ LinkedList::LinkedList() : head_(nullptr) {
 
 LinkedList::~LinkedList() {
     while (head_ != nullptr) {
-        Node* doomed = head_;     // remember the node to free
+        Node* toDelete = head_;   // remember the node to free
         head_ = head_-&gt;next;      // advance FIRST, while we still can
-        delete doomed;            // now it is safe to free it
+        delete toDelete;          // now it is safe to free it
     }
 }
 
