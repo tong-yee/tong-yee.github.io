@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 5: Stacks and Queues</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: .55rem;
+    right: .6rem;
+    z-index: 2;
+    font: 600 .78rem/1 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--navy);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(30,39,97,.08);
+  }
+  .copy-btn:hover { background: #f0f2f8; border-color: var(--navy-light); }
+  .copy-btn:focus-visible { outline: 2px solid var(--navy-light); outline-offset: 2px; }
+  .copy-btn.done { color: #2e7d32; border-color: #2e7d32; }
+  .copy-btn.failed { color: #b3261e; border-color: #b3261e; }
+  @media print { .copy-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 5 &mdash; Stacks and Queues</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Due: Thursday, October 8, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#warmup">Warm-Up &mdash; Trace by Hand (not graded)</a></li>
+    <li><a href="#taskA">Task A &mdash; <code>Stack::push()</code></a></li>
+    <li><a href="#taskB">Task B &mdash; <code>Stack::pop()</code> and <code>top()</code></a></li>
+    <li><a href="#taskC">Task C &mdash; <code>Queue::enqueue()</code></a></li>
+    <li><a href="#taskD">Task D &mdash; <code>Queue::dequeue()</code> and <code>front()</code></a></li>
+    <li><a href="#taskE">Task E &mdash; <code>balanced()</code></a></li>
+    <li><a href="#taskF">Task F &mdash; <code>reverseQueue()</code> (optional practice)</a></li>
+    <li><a href="#edges">Edge Cases to Test</a></li>
+    <li><a href="#grading">Grading</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>
+  This exercise is Classes 9 and 10 in code form. By the end of it you should be able to:
+</p>
+<ul>
+  <li>implement a link-based <strong>stack</strong>, recognizing <code>push</code> and <code>pop</code> as
+      Class 8's <code>prepend</code> and <code>removeFront</code> under new names;</li>
+  <li>implement a link-based <strong>queue</strong>, and explain why a <code>back_</code> pointer makes
+      <code>enqueue</code> <em>O</em>(1), while a tail pointer is not needed for <em>O</em>(1) stack operations;</li>
+  <li>handle the transitions a two-pointer structure breaks on &mdash; <strong>empty to one item</strong>
+      and <strong>one item back to empty</strong>;</li>
+  <li>use a stack to solve a problem that counting cannot solve, because the answer depends on
+      <strong>order</strong> rather than on totals;</li>
+  <li>respect a documented <strong>precondition</strong>: check <code>empty()</code> before you call
+      <code>top()</code> or <code>front()</code>.</li>
+</ul>
+<div class="note">
+  <span class="label">One contract, two implementations</span>
+  Both classes here are the <em>linked</em> versions. The array-based stack and the circular-buffer queue
+  from lecture satisfy the same contracts, and nothing that <em>uses</em> a stack or a queue would have to
+  change if you swapped them in. That is the point of an ADT, and it is worth re-reading the Class 9 and
+  Class 10 slides with that in mind before you start.
+</div>
+
+<h2 id="files">Files</h2>
+<table>
+  <thead><tr><th>File</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>Stack.hpp</code></td><td>Provided. Do not modify, do not submit.</td></tr>
+    <tr><td><code>Queue.hpp</code></td><td>Provided. Do not modify, do not submit.</td></tr>
+    <tr><td><code>Stack.cpp</code></td><td><strong>Submit this.</strong> Tasks A, B and E.</td></tr>
+    <tr><td><code>Queue.cpp</code></td><td><strong>Submit this.</strong> Tasks C and D (and F, if you attempt it).</td></tr>
+    <tr><td><code>Ex5Demo.cpp</code></td><td>Provided. A program that exercises your code so you can see what it does. Do not submit.</td></tr>
+    <tr><td><code>demo_output.txt</code></td><td>What <code>Ex5Demo</code> prints when everything is correct.</td></tr>
+  </tbody>
+</table>
+<p>
+  All six files are available together as <code>ex5_starter.zip</code> on the course website and on
+  Brightspace, and every one of them is also listed in full at the
+  <a href="#listings">end of this handout</a>.
+</p>
+<p>
+  The constructors, destructors, <code>empty()</code>, <code>size()</code> and <code>toString()</code>
+  are already written for you in both <code>.cpp</code> files. Your work is the <code>TODO</code> sections.
+  <strong>Gradescope compiles your two <code>.cpp</code> files against the original headers</strong>, so any
+  change you make to a <code>.hpp</code> file is ignored &mdash; and if your code depended on that change,
+  it will not compile.
+</p>
+
+<h2 id="warmup">Warm-Up &mdash; Trace by Hand (not graded)</h2>
+<p>
+  Do this on paper, before you write any code. It takes five minutes and it is the difference between
+  implementing these classes and guessing at them. Nothing here is submitted or graded.
+</p>
+
+<p><strong>1. The stack.</strong> Fill in the contents after each operation, top item first.</p>
+<table>
+  <thead><tr><th>Operation</th><th>Returns</th><th>Contents afterwards (top first)</th></tr></thead>
+  <tbody>
+    <tr><td><code>push(5)</code></td><td>&mdash;</td><td><code>5</code></td></tr>
+    <tr><td><code>push(8)</code></td><td>&mdash;</td><td>&nbsp;</td></tr>
+    <tr><td><code>push(2)</code></td><td>&mdash;</td><td>&nbsp;</td></tr>
+    <tr><td><code>top()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>pop()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>pop()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>top()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+
+<p><strong>2. The queue.</strong> Same operations, opposite discipline. Contents front first.</p>
+<table>
+  <thead><tr><th>Operation</th><th>Returns</th><th>Contents afterwards (front first)</th></tr></thead>
+  <tbody>
+    <tr><td><code>enqueue(5)</code></td><td>&mdash;</td><td><code>5</code></td></tr>
+    <tr><td><code>enqueue(8)</code></td><td>&mdash;</td><td>&nbsp;</td></tr>
+    <tr><td><code>enqueue(2)</code></td><td>&mdash;</td><td>&nbsp;</td></tr>
+    <tr><td><code>front()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>dequeue()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>dequeue()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>front()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+
+<p>
+  <strong>3. The one that matters.</strong> Now trace the <em>pointers</em>, not the contents. For each step,
+  write what <code>front_</code> and <code>back_</code> hold &mdash; a node's value, or <code>nullptr</code>.
+</p>
+<table>
+  <thead><tr><th>Step</th><th><code>front_</code></th><th><code>back_</code></th></tr></thead>
+  <tbody>
+    <tr><td>a new, empty queue</td><td><code>nullptr</code></td><td><code>nullptr</code></td></tr>
+    <tr><td><code>enqueue(1)</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>dequeue()</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>enqueue(2)</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+<p>
+  Row 3 is the whole of Task D. If you wrote anything other than <code>nullptr</code> in both columns there,
+  look at what the node that held <code>1</code> has become by then.
+</p>
+
+<h2 id="taskA">Task A &mdash; <code>Stack::push()</code></h2>
+<p>
+  Put <code>value</code> on top of the stack. The top is the <em>front</em> of the chain, so this is one
+  familiar operation under a new name. Keep <code>size_</code> correct.
+</p>
+<p>
+  <code>push</code> returns <code>bool</code> and should always return <code>true</code>: a linked stack
+  cannot be full. The return type exists so that this class and an array-based stack present the same
+  interface &mdash; the array version <em>can</em> fail.
+</p>
+
+<h2 id="taskB">Task B &mdash; <code>Stack::pop()</code> and <code>top()</code></h2>
+<p>
+  <code>pop()</code> removes the top item and returns <code>false</code> if the stack is empty.
+  <code>top()</code> returns the top item and removes nothing.
+</p>
+<p>
+  <code>pop()</code> frees a node, so the order of your three statements is not a matter of taste.
+  Ask yourself which pointer you still need <em>after</em> the <code>delete</code>, and make sure you have
+  read it before then.
+</p>
+<div class="note">
+  <span class="label">A precondition is a promise the caller makes</span>
+  <code>top()</code> on an empty stack is <strong>undefined</strong> &mdash; the header says so. You do not
+  have to defend against it inside <code>top()</code>, and the tests never call it on an empty stack. What
+  you <em>do</em> have to do is honour that promise everywhere <em>you</em> call <code>top()</code>, which
+  matters in Task E.
+</div>
+
+<h2 id="taskC">Task C &mdash; <code>Queue::enqueue()</code></h2>
+<p>
+  Add <code>value</code> at the back. The new node always goes at the end, so it is the one whose
+  <code>next</code> is <code>nullptr</code>.
+</p>
+<p>
+  There are two cases, and they differ in <em>which pointer must change</em>. In one of them it is
+  <code>front_</code> and <code>back_</code> together; in the other it is a node's own <code>next</code>
+  field, and then <code>back_</code>. Work out which is which before you write either.
+</p>
+<p>
+  In the second case the two writes have a required order. Write them down in the wrong order and read what
+  the code says afterwards: which pointer still reaches the node you just allocated?
+</p>
+
+<h2 id="taskD">Task D &mdash; <code>Queue::dequeue()</code> and <code>front()</code></h2>
+<p>
+  <code>dequeue()</code> removes the item at the front and returns <code>false</code> if the queue is empty.
+  <code>front()</code> reads it without removing, and carries the same precondition as <code>top()</code>.
+</p>
+<p>
+  Start from <code>pop()</code>: the removal itself is identical. Then add the line this class needs and
+  a stack does not &mdash; the one you found in warm-up exercise 3.
+</p>
+
+<figure style="margin:1rem 0; text-align:center;">
+  <svg viewBox="0 0 470 190" role="img" aria-label="After removing the last node, front_ is correctly nullptr but back_ still points at the freed node." style="width:100%; height:auto; max-width:470px;">
+    <defs>
+      <marker id="arrQ" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#1E2761"/>
+      </marker>
+      <marker id="arrQbad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/>
+      </marker>
+    </defs>
+    <!-- the freed node -->
+    <rect x="190" y="52" width="52" height="40" fill="#fdecea" stroke="#b3261e" stroke-width="1.6"/>
+    <rect x="242" y="52" width="34" height="40" fill="#f9d6d2" stroke="#b3261e" stroke-width="1.6"/>
+    <text x="216" y="77" font-size="15" font-family="monospace" text-anchor="middle" fill="#b3261e">10</text>
+    <line x1="190" y1="52" x2="276" y2="92" stroke="#b3261e" stroke-width="2" stroke-opacity=".55"/>
+    <line x1="190" y1="92" x2="276" y2="52" stroke="#b3261e" stroke-width="2" stroke-opacity=".55"/>
+    <text x="233" y="40" font-size="12" font-family="monospace" text-anchor="middle" fill="#b3261e">delete</text>
+    <!-- front_ correctly nullptr -->
+    <text x="46" y="60" font-size="13" font-family="monospace" text-anchor="middle" fill="#1E2761">front_</text>
+    <line x1="46" y1="68" x2="46" y2="94" stroke="#1E2761" stroke-width="1.8" marker-end="url(#arrQ)"/>
+    <text x="46" y="112" font-size="12.5" font-family="monospace" text-anchor="middle" fill="#1E2761">nullptr</text>
+    <text x="46" y="131" font-size="11.5" text-anchor="middle" fill="#2e7d32">correct</text>
+    <!-- back_ dangling -->
+    <text x="372" y="146" font-size="13" font-family="monospace" text-anchor="middle" fill="#b3261e">back_</text>
+    <path d="M352,138 L282,98" stroke="#b3261e" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arrQbad)"/>
+    <text x="372" y="60" font-size="11.5" text-anchor="middle" fill="#b3261e">still pointing at</text>
+    <text x="372" y="76" font-size="11.5" text-anchor="middle" fill="#b3261e">memory that was</text>
+    <text x="372" y="92" font-size="11.5" text-anchor="middle" fill="#b3261e">freed</text>
+  </svg>
+  <figcaption style="font-size:.82rem; color:var(--muted); margin-top:.4rem;">
+    <code>empty()</code> checks <code>front_</code>, so the queue <em>looks</em> fine &mdash; until the next <code>enqueue()</code> writes through <code>back_</code>.
+  </figcaption>
+</figure>
+<div class="hint">
+  <span class="label">Why this one is worth the extra minute</span>
+  A queue with a stale <code>back_</code> passes every test you are likely to write by hand: it is empty when
+  it should be empty, and the size is right. The damage appears on the <em>next</em> <code>enqueue()</code>,
+  which writes into memory that has already been freed &mdash; and a program can run for a long time after
+  that before it crashes, somewhere unrelated. This is exactly the class of bug the memory-safety check is
+  for.
+</div>
+
+<h2 id="taskE">Task E &mdash; <code>balanced()</code></h2>
+<p>
+  Return <code>true</code> when every opening bracket in the string is closed by the matching closing
+  bracket, <em>in the correct order</em>. The three pairs are <code>()</code>, <code>[]</code> and
+  <code>{}</code>. Any other character is ignored completely. The exact cases are in the comment above the
+  declaration in <code>Stack.hpp</code>.
+</p>
+<p>
+  Counting brackets is not enough. <code>"([)]"</code> has two opening brackets and two closing brackets and is still
+  wrong, because when you reach <code>)</code> the most recent unmatched opening bracket is <code>[</code>, not
+  <code>(</code>. The phrase <em>most recent unmatched</em> is what tells you which container to use.
+</p>
+<p>
+  There are two ways to fail, and your function must catch both: a closing bracket that matches nothing, and an opening bracket
+  that is never closed. One of them is detected inside the loop; the other is only visible after the loop
+  ends. Decide what the stack should look like at that point.
+</p>
+<div class="hint">
+  <span class="label">The precondition again</span>
+  When you meet a closing bracket, you want to look at <code>top()</code>. But the string might be
+  <code>")("</code>, and then the stack is empty. Check <code>empty()</code> <strong>first</strong>. Getting
+  this wrong costs you Task E <em>and</em> the memory-safety points, because dereferencing a null
+  <code>head_</code> is an invalid read.
+</div>
+
+<h2 id="taskF">Task F &mdash; <code>reverseQueue()</code> (optional practice)</h2>
+<p>
+  <strong>Not graded.</strong> You may leave the empty body exactly as it is; it must stay there so the
+  program links.
+</p>
+<p>
+  Reverse a queue in place using a <code>Stack</code>: take everything out of the queue and push it, then
+  pop everything and put it back. It comes out in reverse order because of the stack's LIFO behavior. This is the Class 9 backup slide
+  (&ldquo;Reversing With a Stack&rdquo;) applied to a queue, and it is a good way to check whether you
+  understood both structures &mdash; it is the only place in this exercise where the two have to cooperate.
+</p>
+
+<h2 id="edges">Edge Cases to Test</h2>
+<table>
+  <thead><tr><th>Case</th><th>What must happen</th><th>What goes wrong if you miss it</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Any operation on an empty structure</td>
+      <td><code>pop()</code> and <code>dequeue()</code> return <code>false</code> and change nothing</td>
+      <td>a null dereference, or a <code>size_</code> that goes negative</td>
+    </tr>
+    <tr>
+      <td><code>enqueue</code> into an empty queue</td>
+      <td>both <code>front_</code> and <code>back_</code> must be set</td>
+      <td><code>back_->next</code> is written through a null pointer</td>
+    </tr>
+    <tr>
+      <td><code>dequeue</code> the last remaining item</td>
+      <td><code>back_</code> must be reset to <code>nullptr</code></td>
+      <td>the next <code>enqueue()</code> writes into freed memory</td>
+    </tr>
+    <tr>
+      <td>Refill after emptying</td>
+      <td>the structure behaves exactly as it did when new</td>
+      <td>a stale <code>back_</code> or a corrupted <code>head_</code></td>
+    </tr>
+    <tr>
+      <td><code>balanced("")</code></td>
+      <td><code>true</code> &mdash; there is nothing to mismatch</td>
+      <td>an empty-stack check written the wrong way round</td>
+    </tr>
+    <tr>
+      <td><code>balanced(")(")</code></td>
+      <td><code>false</code>, without crashing</td>
+      <td><code>top()</code> called on an empty stack</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="grading">Grading</h2>
+<table>
+  <thead><tr><th>Item</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td>Task A &mdash; <code>Stack::push()</code></td><td>10</td></tr>
+    <tr><td>Task B &mdash; <code>Stack::pop()</code> and <code>top()</code></td><td>15</td></tr>
+    <tr><td>Task C &mdash; <code>Queue::enqueue()</code></td><td>20</td></tr>
+    <tr><td>Task D &mdash; <code>Queue::dequeue()</code> and <code>front()</code></td><td>20</td></tr>
+    <tr><td>Task E &mdash; <code>balanced()</code></td><td>20</td></tr>
+    <tr><td>Memory safety across both structures</td><td>15</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>100</strong></td></tr>
+  </tbody>
+</table>
+<div class="note">
+  <span class="label">How the memory-safety points are earned</span>
+  Your code is graded by running both structures through a long sequence of operations under Valgrind,
+  checking for memory leaks and invalid memory accesses. The sequence deliberately empties and refills both
+  structures many times, so the transitions in the table above are all exercised.
+  <br><br>
+  A task earns credit only once its core behaviour works. Tests that happen to pass against an unfinished
+  function &mdash; a <code>pop()</code> that always returns <code>false</code> is correct on an empty stack,
+  after all &mdash; do not earn points on their own.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>
+  This is what <code>Ex5Demo</code> prints when all five graded tasks and the optional Task F are correct.
+  If you have not done Task F, the last two lines will be identical to each other, which is expected.
+</p>
+<pre><code>=== Task A: push ===
+  new stack      : (empty)   (size 0)
+  push 10,20,30  : 30 -&gt; 20 -&gt; 10   (size 3)
+  note the top is printed FIRST -- push() adds at the front
+
+=== Task B: pop and top ===
+  top()          : 30
+  after one pop  : 20 -&gt; 10   (size 2)
+  pop order      : 20 10 
+  now            : (empty)   (size 0)
+  pop() on empty : false
+
+=== Task C: enqueue ===
+  new queue      : (empty)   (size 0)
+  enq 10,20,30   : 10 -&gt; 20 -&gt; 30   (size 3)
+  note the OLDEST is printed first -- enqueue() adds at the back
+
+=== Task D: dequeue and front ===
+  front()        : 10
+  after one deq  : 20 -&gt; 30   (size 2)
+  dequeue order  : 20 30 
+  now            : (empty)   (size 0)
+
+  -- the case Task D is really about --
+  refilled       : 77 -&gt; 88   (size 2)
+  if this line is wrong, dequeue() did not reset back_
+
+=== Task E: balanced ===
+  balanced      &quot;&quot;
+  balanced      &quot;()&quot;
+  balanced      &quot;{[()]}&quot;
+  balanced      &quot;()[]{}&quot;
+  balanced      &quot;a(b)[c]&quot;
+  NOT balanced  &quot;([)]&quot;
+  NOT balanced  &quot;(()&quot;
+  NOT balanced  &quot;())&quot;
+  NOT balanced  &quot;)(&quot;
+  NOT balanced  &quot;{[}]&quot;
+  balanced      &quot;int f(int a[]) { return a[0]; }&quot;
+
+=== Task F (optional, not graded) ===
+  before reverse : 10 -&gt; 20 -&gt; 30 -&gt; 40 -&gt; 50   (size 5)
+  after reverse  : 50 -&gt; 40 -&gt; 30 -&gt; 20 -&gt; 10   (size 5)
+  (unchanged above means Task F is still empty -- that is fine)</code></pre>
+
+<h2 id="compile">Compile and Run</h2>
+<p>Put <code>Stack.hpp</code>, <code>Queue.hpp</code>, <code>Stack.cpp</code>, <code>Queue.cpp</code> and <code>Ex5Demo.cpp</code> in one directory, then:</p>
+<pre><code class="language-bash">g++ -std=c++17 -g Stack.cpp Queue.cpp Ex5Demo.cpp -o ex5demo
+./ex5demo</code></pre>
+<p>
+  If you have Valgrind available, run it before you submit &mdash; it is the same tool the autograder uses:
+</p>
+<pre><code class="language-bash">valgrind --leak-check=full ./ex5demo</code></pre>
+<p>
+  You are looking for two lines: <code>All heap blocks were freed -- no leaks are possible</code>, and
+  <code>ERROR SUMMARY: 0 errors</code>. Anything else is worth fixing before you submit, not after.
+</p>
+
+<h2 id="listings">Provided File Listings</h2>
+
+<h3>Stack.hpp &mdash; provided, do not modify</h3>
+<pre class="copyable" data-filename="Stack.hpp"><code class="language-cpp">// Stack.hpp
+// CSCI 235 -- Exercise 5: Stacks and Queues
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef STACK_HPP
+#define STACK_HPP
+
+#include &lt;string&gt;
+
+// A link-based stack of ints -- the LinkedStack from Class 9.
+//
+// The top of the stack is the FRONT of the chain, so push() is Class 8&#x27;s
+// prepend() and pop() is Class 8&#x27;s removeFront(). That is what makes every
+// operation O(1): you never walk the list.
+//
+// head_ points at the top node; the bottom node&#x27;s next is nullptr;
+// head_ == nullptr is the empty stack.
+class Stack {
+public:
+    Stack();       // provided -- head_ = nullptr, size_ = 0
+    ~Stack();      // provided -- deletes every remaining node
+
+    // Copying is disabled, for the same reason as in Exercise 4: without a
+    // deep copy, two stacks would share one chain and both destructors would
+    // delete each node. A compile error is better than a double free.
+    Stack(const Stack&amp; other) = delete;
+    Stack&amp; operator=(const Stack&amp; other) = delete;
+
+    // ---- Implement these in Stack.cpp ----
+    bool push(int value);   // Task A -- always returns true for a linked stack
+    bool pop();             // Task B -- false if the stack is empty
+    int  top() const;       // Task B -- PRECONDITION: !empty()
+
+    // ---- Provided observers ----
+    bool empty() const;            // head_ == nullptr
+    int  size() const;             // O(1): the stored count
+    std::string toString() const;  // &quot;30 -&gt; 20 -&gt; 10&quot; (top first), or &quot;(empty)&quot;
+
+private:
+    struct Node {
+        int   data;
+        Node* next;
+    };
+
+    Node* head_;
+    int   size_;
+};
+
+// ---- Task E: implement this in Stack.cpp ----
+//
+// Returns true when every opening bracket in `text` is closed by the matching
+// closing bracket, in the correct order. Characters that are not one of
+// ( ) [ ] { } are ignored entirely.
+//
+//   balanced(&quot;a(b)[c]&quot;)   -&gt; true
+//   balanced(&quot;{[()]}&quot;)    -&gt; true
+//   balanced(&quot;([)]&quot;)      -&gt; false   (closed in the wrong order)
+//   balanced(&quot;(()&quot;)       -&gt; false   (an opening bracket never closed)
+//   balanced(&quot;)(&quot;)        -&gt; false   (a closing bracket, nothing open)
+//   balanced(&quot;&quot;)          -&gt; true    (nothing to mismatch)
+//
+// Use a Stack. Counting brackets is not enough -- order is what matters.
+bool balanced(const std::string&amp; text);
+
+#endif</code></pre>
+
+<h3>Queue.hpp &mdash; provided, do not modify</h3>
+<pre class="copyable" data-filename="Queue.hpp"><code class="language-cpp">// Queue.hpp
+// CSCI 235 -- Exercise 5: Stacks and Queues
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef QUEUE_HPP
+#define QUEUE_HPP
+
+#include &lt;string&gt;
+
+// A link-based queue of ints -- the LinkedQueue from Class 10.
+//
+// Items join at the BACK and leave from the FRONT, so the class keeps two
+// pointers. front_ is where dequeue() removes; back_ is where enqueue() adds.
+// Both are nullptr when the queue is empty, and both point at the SAME node
+// when the queue holds exactly one item.
+//
+// That one-item case is where this class is usually gotten wrong. Read the
+// comments on enqueue() and dequeue() carefully.
+class Queue {
+public:
+    Queue();       // provided -- front_ = back_ = nullptr, size_ = 0
+    ~Queue();      // provided -- deletes every remaining node
+
+    Queue(const Queue&amp; other) = delete;
+    Queue&amp; operator=(const Queue&amp; other) = delete;
+
+    // ---- Implement these in Queue.cpp ----
+
+    // Task C. Adds `value` at the back. Always returns true.
+    //
+    // Two cases:
+    //   - the queue is empty: the new node is BOTH the front and the back.
+    //   - otherwise: hook it onto the current back, THEN advance back_.
+    //     (Advance first and back_-&gt;next = newNode becomes
+    //      newNode-&gt;next = newNode -- the new node points at itself and
+    //      is never connected to the queue.)
+    bool enqueue(int value);
+
+    // Task D. Removes the item at the front. Returns false if empty.
+    //
+    // This is Class 8&#x27;s removeFront() plus ONE extra line: when the queue
+    // becomes empty, back_ must be reset to nullptr as well. Otherwise back_
+    // is left pointing at memory you just freed, and the next enqueue()
+    // writes into it.
+    bool dequeue();
+
+    // Task D. Reads the front item. PRECONDITION: !empty()
+    int front() const;
+
+    // ---- Provided observers ----
+    bool empty() const;            // front_ == nullptr
+    int  size() const;             // O(1): the stored count
+    std::string toString() const;  // &quot;10 -&gt; 20 -&gt; 30&quot; (front first), or &quot;(empty)&quot;
+
+private:
+    struct Node {
+        int   data;
+        Node* next;
+    };
+
+    Node* front_;
+    Node* back_;
+    int   size_;
+};
+
+// ---- Task F (OPTIONAL PRACTICE -- not graded) ----
+//
+// Reverses `q` in place, so that the item that was at the back ends up at the
+// front. Use a Stack: dequeue everything into it, then pop everything back
+// into the queue. It comes out in reverse order because of the stack&#x27;s LIFO behavior.
+//
+// This is the Class 9 backup slide (&quot;Reversing With a Stack&quot;) applied to a
+// queue -- and it is a good way to check you understood both structures.
+void reverseQueue(Queue&amp; q);
+
+#endif</code></pre>
+
+<h3>Stack.cpp &mdash; complete the TODO sections and submit this file</h3>
+<pre class="copyable" data-filename="Stack.cpp"><code class="language-cpp">// Stack.cpp
+// CSCI 235 -- Exercise 5: Stacks and Queues
+//
+// SUBMIT THIS FILE (together with Queue.cpp).
+// Implement Task A, Task B and Task E below. Do not modify Stack.hpp.
+
+#include &quot;Stack.hpp&quot;
+
+#include &lt;sstream&gt;
+
+// ---------------------------------------------------------------- provided
+Stack::Stack() : head_(nullptr), size_(0) {}
+
+Stack::~Stack() {
+    while (head_ != nullptr) {
+        Node* toDelete = head_;
+        head_ = head_-&gt;next;
+        delete toDelete;
+    }
+    size_ = 0;
+}
+
+bool Stack::empty() const {
+    return head_ == nullptr;
+}
+
+int Stack::size() const {
+    return size_;
+}
+
+std::string Stack::toString() const {
+    if (head_ == nullptr) {
+        return &quot;(empty)&quot;;
+    }
+    std::ostringstream out;
+    for (Node* curr = head_; curr != nullptr; curr = curr-&gt;next) {
+        out &lt;&lt; curr-&gt;data;
+        if (curr-&gt;next != nullptr) {
+            out &lt;&lt; &quot; -&gt; &quot;;
+        }
+    }
+    return out.str();
+}
+
+// ================================================================== Task A
+// push(value): put `value` on top of the stack.
+//
+// The top is the front of the chain, so this is prepend(): make a new node
+// whose next is the current head_, then move head_ to it. Remember size_.
+//
+// Always returns true. (A linked stack cannot be full; push returns bool only
+// so that this class and an array-based stack share one interface.)
+bool Stack::push(int value) {
+    // TODO: your code here
+    return false;
+}
+
+// ================================================================== Task B
+// pop(): remove the top item. Returns false if the stack is empty.
+//
+// This is removeFront(). Save the node you are about to remove, move head_
+// past it, and only THEN delete the saved address -- reading head_-&gt;next
+// after the delete is reading freed memory.
+bool Stack::pop() {
+    // TODO: your code here
+    return false;
+}
+
+// top(): return the top item WITHOUT removing it.
+//
+// PRECONDITION: the stack is not empty. The caller checks empty() first; the
+// tests never call top() on an empty stack.
+int Stack::top() const {
+    // TODO: your code here
+    return 0;
+}
+
+// ================================================================== Task E
+// balanced(text): see the comment in Stack.hpp for the exact rules.
+//
+// The shape of the algorithm:
+//   for each character in text
+//       if it opens  -&gt; push it and move on
+//       if it closes -&gt; if the stack is empty, there is nothing to match: fail
+//                       otherwise look at top(), pop(), and check the pair
+//       anything else -&gt; ignore it
+//   at the end, the string is balanced only if the stack is empty
+//
+// Careful: check empty() BEFORE calling top(). top() has a precondition.
+bool balanced(const std::string&amp; text) {
+    // TODO: your code here
+    return false;
+}</code></pre>
+
+<h3>Queue.cpp &mdash; complete the TODO sections and submit this file</h3>
+<pre class="copyable" data-filename="Queue.cpp"><code class="language-cpp">// Queue.cpp
+// CSCI 235 -- Exercise 5: Stacks and Queues
+//
+// SUBMIT THIS FILE (together with Stack.cpp).
+// Implement Task C and Task D below. Task F is optional. Do not modify
+// Queue.hpp.
+
+#include &quot;Queue.hpp&quot;
+#include &quot;Stack.hpp&quot;   // only needed for Task F
+
+#include &lt;sstream&gt;
+
+// ---------------------------------------------------------------- provided
+Queue::Queue() : front_(nullptr), back_(nullptr), size_(0) {}
+
+Queue::~Queue() {
+    while (front_ != nullptr) {
+        Node* toDelete = front_;
+        front_ = front_-&gt;next;
+        delete toDelete;
+    }
+    back_ = nullptr;
+    size_ = 0;
+}
+
+bool Queue::empty() const {
+    return front_ == nullptr;
+}
+
+int Queue::size() const {
+    return size_;
+}
+
+std::string Queue::toString() const {
+    if (front_ == nullptr) {
+        return &quot;(empty)&quot;;
+    }
+    std::ostringstream out;
+    for (Node* curr = front_; curr != nullptr; curr = curr-&gt;next) {
+        out &lt;&lt; curr-&gt;data;
+        if (curr-&gt;next != nullptr) {
+            out &lt;&lt; &quot; -&gt; &quot;;
+        }
+    }
+    return out.str();
+}
+
+// ================================================================== Task C
+// enqueue(value): add `value` at the back. Always returns true.
+//
+// The new node always goes at the end, so its next is nullptr.
+//
+// Then two cases:
+//   empty queue     -&gt; the new node is both front_ and back_
+//   otherwise       -&gt; (1) back_-&gt;next = newNode;   hook it on
+//                      (2) back_ = newNode;         then advance
+//
+// Order matters in case 2. If you advance back_ first, then
+// back_-&gt;next = newNode is really newNode-&gt;next = newNode: the new node
+// points at itself. The old queue is still reachable from front_, but it
+// is no longer connected to back_.
+bool Queue::enqueue(int value) {
+    // TODO: your code here
+    return false;
+}
+
+// ================================================================== Task D
+// dequeue(): remove the front item. Returns false if the queue is empty.
+//
+// Start from removeFront(): save front_, advance front_, delete the saved
+// address. Then add the line this class needs:
+//
+//   if the queue has just become empty, back_ must be set to nullptr too.
+//
+// Skip that line and back_ still points at the node you just deleted.
+// empty() will look correct -- it checks front_ -- and the next enqueue()
+// will write through back_ into freed memory. Valgrind catches it here.
+bool Queue::dequeue() {
+    // TODO: your code here
+    return false;
+}
+
+// front(): return the front item WITHOUT removing it.
+//
+// PRECONDITION: the queue is not empty.
+int Queue::front() const {
+    // TODO: your code here
+    return 0;
+}
+
+// ================================================================== Task F
+// OPTIONAL PRACTICE -- not graded, and you may leave it exactly as it is.
+//
+// reverseQueue(q): reverse q in place using a Stack.
+//   dequeue everything from q, pushing each item onto a stack;
+//   then pop everything off the stack, enqueueing each item back into q.
+void reverseQueue(Queue&amp; q) {
+    // TODO (optional): your code here
+    (void)q;   // silences an unused-parameter warning while this is empty
+}</code></pre>
+
+<h3>Ex5Demo.cpp &mdash; provided, do not submit</h3>
+<pre class="copyable" data-filename="Ex5Demo.cpp"><code class="language-cpp">// Ex5Demo.cpp
+// CSCI 235 -- Exercise 5: Stacks and Queues
+//
+// Provided file -- do not submit this. It is here so you can run your own
+// code and see what it does. Build it with:
+//
+//     g++ -std=c++17 -g Stack.cpp Queue.cpp Ex5Demo.cpp -o ex5demo
+//     ./ex5demo
+//
+// The expected output is in demo_output.txt. Your output should match it
+// exactly once all five graded tasks are done.
+
+#include &quot;Stack.hpp&quot;
+#include &quot;Queue.hpp&quot;
+
+#include &lt;iomanip&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+// every label is printed in the same 14-character column
+static void label(const std::string&amp; text) {
+    std::cout &lt;&lt; &quot;  &quot; &lt;&lt; std::left &lt;&lt; std::setw(14) &lt;&lt; text &lt;&lt; &quot; : &quot;;
+}
+
+static void show(const std::string&amp; text, const Stack&amp; s) {
+    label(text);
+    std::cout &lt;&lt; s.toString() &lt;&lt; &quot;   (size &quot; &lt;&lt; s.size() &lt;&lt; &quot;)\n&quot;;
+}
+
+static void show(const std::string&amp; text, const Queue&amp; q) {
+    label(text);
+    std::cout &lt;&lt; q.toString() &lt;&lt; &quot;   (size &quot; &lt;&lt; q.size() &lt;&lt; &quot;)\n&quot;;
+}
+
+int main() {
+    std::cout &lt;&lt; &quot;=== Task A: push ===\n&quot;;
+    Stack s;
+    show(&quot;new stack&quot;, s);
+    s.push(10);
+    s.push(20);
+    s.push(30);
+    show(&quot;push 10,20,30&quot;, s);
+    std::cout &lt;&lt; &quot;  note the top is printed FIRST -- push() adds at the front\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task B: pop and top ===\n&quot;;
+    label(&quot;top()&quot;);
+    std::cout &lt;&lt; s.top() &lt;&lt; &quot;\n&quot;;
+    s.pop();
+    show(&quot;after one pop&quot;, s);
+    label(&quot;pop order&quot;);
+    while (!s.empty()) {
+        std::cout &lt;&lt; s.top() &lt;&lt; &quot; &quot;;
+        s.pop();
+    }
+    std::cout &lt;&lt; &quot;\n&quot;;
+    show(&quot;now&quot;, s);
+    label(&quot;pop() on empty&quot;);
+    std::cout &lt;&lt; (s.pop() ? &quot;true&quot; : &quot;false&quot;) &lt;&lt; &quot;\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task C: enqueue ===\n&quot;;
+    Queue q;
+    show(&quot;new queue&quot;, q);
+    q.enqueue(10);
+    q.enqueue(20);
+    q.enqueue(30);
+    show(&quot;enq 10,20,30&quot;, q);
+    std::cout &lt;&lt; &quot;  note the OLDEST is printed first -- enqueue() adds at the back\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task D: dequeue and front ===\n&quot;;
+    label(&quot;front()&quot;);
+    std::cout &lt;&lt; q.front() &lt;&lt; &quot;\n&quot;;
+    q.dequeue();
+    show(&quot;after one deq&quot;, q);
+    label(&quot;dequeue order&quot;);
+    while (!q.empty()) {
+        std::cout &lt;&lt; q.front() &lt;&lt; &quot; &quot;;
+        q.dequeue();
+    }
+    std::cout &lt;&lt; &quot;\n&quot;;
+    show(&quot;now&quot;, q);
+
+    std::cout &lt;&lt; &quot;\n  -- the case Task D is really about --\n&quot;;
+    q.enqueue(77);
+    q.enqueue(88);
+    show(&quot;refilled&quot;, q);
+    std::cout &lt;&lt; &quot;  if this line is wrong, dequeue() did not reset back_\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task E: balanced ===\n&quot;;
+    const std::string cases[] = {
+        &quot;&quot;, &quot;()&quot;, &quot;{[()]}&quot;, &quot;()[]{}&quot;, &quot;a(b)[c]&quot;,
+        &quot;([)]&quot;, &quot;(()&quot;, &quot;())&quot;, &quot;)(&quot;, &quot;{[}]&quot;,
+        &quot;int f(int a[]) { return a[0]; }&quot;
+    };
+    for (const std::string&amp; c : cases) {
+        std::cout &lt;&lt; &quot;  &quot; &lt;&lt; (balanced(c) ? &quot;balanced    &quot; : &quot;NOT balanced&quot;)
+                  &lt;&lt; &quot;  \&quot;&quot; &lt;&lt; c &lt;&lt; &quot;\&quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task F (optional, not graded) ===\n&quot;;
+    Queue r;
+    for (int i = 1; i &lt;= 5; ++i) {
+        r.enqueue(i * 10);
+    }
+    show(&quot;before reverse&quot;, r);
+    reverseQueue(r);
+    show(&quot;after reverse&quot;, r);
+    std::cout &lt;&lt; &quot;  (unchanged above means Task F is still empty -- that is fine)\n&quot;;
+
+    return 0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>
+  Submit <strong>exactly two files</strong> to Gradescope: <code>Stack.cpp</code> and <code>Queue.cpp</code>.
+</p>
+<ul>
+  <li>Do not rename them, and do not put them inside a folder or a zip with a folder in it.</li>
+  <li>Do not submit <code>Stack.hpp</code>, <code>Queue.hpp</code> or <code>Ex5Demo.cpp</code>.</li>
+  <li>Both files must compile together. If a function is declared in a header, it must be defined &mdash;
+      including the empty body of Task F.</li>
+</ul>
+<p>
+  You may submit as many times as you like before the deadline; the last submission is the one that counts.
+</p>
+
+</main>
+
+<footer>
+  CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026
+</footer>
+
+<script>hljs.highlightAll();</script>
+<script>
+// Add a "Copy" button to each provided header / demo listing.
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('pre.copyable').forEach(function (pre) {
+    var wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy ' + (pre.dataset.filename || 'code') + ' to clipboard');
+    btn.addEventListener('click', function () {
+      copyText(pre.textContent).then(function (ok) {
+        btn.textContent = ok ? 'Copied!' : 'Copy failed';
+        btn.classList.toggle('done', ok);
+        btn.classList.toggle('failed', !ok);
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('done', 'failed');
+        }, 1800);
+      });
+    });
+    wrap.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>
