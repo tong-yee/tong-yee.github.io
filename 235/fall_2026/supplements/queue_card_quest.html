@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Queue Card Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: one centered playing card under a slim status bar; the card shows the question, then turns into the feedback. */
+:root{
+  --bg:#edf0f6; --surface:#ffffff; --surface2:#f4f6fb; --ink:#14213d; --muted:#56607a; --line:#d5dbe8;
+  --front:#2f7a3e; --front-bg:#e4f2e6; --back:#2446b8; --back-bg:#e3e9fb;
+  --warn:#b4540a; --warn-bg:#fdecd9; --bad:#b3261e; --bad-bg:#fbe4e1; --good:#1e7a3a; --good-bg:#def3e3;
+  --code-bg:#fffbea; --code-ink:#2b2a22;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1424; --surface:#172036; --surface2:#1c2742; --ink:#e7ecf8; --muted:#9aa6c4; --line:#2c3857;
+  --front:#6fd083; --front-bg:#173222; --back:#8fa8ff; --back-bg:#1a2550;
+  --warn:#f0a35a; --warn-bg:#3a2813; --bad:#ff8f86; --bad-bg:#3c1b19; --good:#74d98f; --good-bg:#16311f;
+  --code-bg:#1f2236; --code-ink:#eceaf8; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e1424; --surface:#172036; --surface2:#1c2742; --ink:#e7ecf8; --muted:#9aa6c4; --line:#2c3857;
+  --front:#6fd083; --front-bg:#173222; --back:#8fa8ff; --back-bg:#1a2550;
+  --warn:#f0a35a; --warn-bg:#3a2813; --bad:#ff8f86; --bad-bg:#3c1b19; --good:#74d98f; --good-bg:#16311f;
+  --code-bg:#1f2236; --code-ink:#eceaf8; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:14px 40px}
+.wrap{max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.tab:focus-visible{outline:3px solid var(--back);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.25rem}
+.ring{width:30px;height:30px;flex:none}
+.stats{display:flex;gap:16px;font-variant-numeric:tabular-nums;font-size:.9rem;color:var(--muted)}
+.stats b{color:var(--ink);font-size:1.05rem}
+.prog{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--front);width:0;transition:width .4s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.tag{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pips{display:flex;gap:5px;align-items:center;font-size:.8rem;color:var(--muted)}
+.pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--front)}
+.pip.on{background:var(--front)}
+.mode{font-size:.78rem;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--surface2);border:1px solid var(--line)}
+.mode.prac{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.title{font-size:1.35rem}
+.q{font-size:1.02rem;min-width:0}
+.q p{margin:.4em 0}
+code,.mono{font-family:var(--mono);font-size:.9em}
+.q code,.fb code,.opt code{background:var(--surface2);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--mono);font-size:.84rem;line-height:1.45;background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0;overflow-x:auto;white-space:pre}
+.tabs{display:flex;gap:6px}
+.tab{border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:8px;padding:6px 12px;font-size:.88rem;font-weight:500}
+.tab[aria-selected="true"]{background:var(--back-bg);color:var(--back);border-color:var(--back)}
+textarea,input[type=text]{width:100%;font-family:var(--mono);font-size:.9rem;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:170px;resize:vertical;line-height:1.45}
+textarea.prose{font-family:var(--body);font-size:1rem;min-height:110px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.fields label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);min-width:0}
+.opt[aria-pressed="true"]{border-color:var(--back);background:var(--back-bg)}
+.opt .k{font-weight:700;color:var(--muted);font-family:var(--mono)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:9px;padding:9px 16px;font-weight:600}
+.btn.main{background:var(--back);border-color:var(--back);color:#fff}
+:root[data-theme="dark"] .btn.main{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.main{color:#0e1424}}
+.btn.go{background:var(--front);border-color:var(--front);color:#fff}
+:root[data-theme="dark"] .btn.go{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.go{color:#0e1424}}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.quiet{background:transparent}
+.hint{background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:.92rem}
+.verdict{border-radius:10px;padding:12px 14px;font-weight:600;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px}
+.verdict.ok{background:var(--good-bg);color:var(--good)}
+.verdict.no{background:var(--bad-bg);color:var(--bad)}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.checks li{display:flex;gap:9px;align-items:flex-start;font-size:.95rem}
+.checks .m{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;color:#fff;margin-top:1px}
+.checks .ok .m{background:var(--good)} .checks .no .m{background:var(--bad)}
+:root[data-theme="dark"] .checks .m{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .checks .m{color:#0e1424}}
+.tip{display:block;color:var(--muted);font-size:.86rem}
+.fb h3{font-size:1rem;margin-bottom:4px}
+.box{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.box p{margin:.3em 0}
+.draft{white-space:pre-wrap;font-family:var(--mono);font-size:.85rem;background:var(--surface2);border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.photo{display:flex;flex-direction:column;gap:10px}
+.photo img{max-width:100%;max-height:300px;border-radius:8px;border:1px solid var(--line);object-fit:contain;align-self:flex-start}
+.self label{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:.95rem}
+.self input{margin-top:4px;width:18px;height:18px;flex:none}
+.small{font-size:.86rem;color:var(--muted)}
+.hero{display:flex;flex-direction:column;gap:14px}
+.hero h2{font-size:1.9rem}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.how .box h3{font-size:.98rem;margin-bottom:4px}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.sumgrid .box{display:flex;flex-direction:column;gap:3px;font-size:.88rem}
+.sumgrid .box b{font-size:.92rem}
+.st{font-size:.76rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.st.first{color:var(--good)} .st.prac{color:var(--warn)} .st.skip{color:var(--bad)}
+@media (prefers-reduced-motion: no-preference){.card{animation:rise .25s ease-out}@keyframes rise{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap" id="app">
+  <div class="bar">
+    <div class="brand">
+      <svg class="ring" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="var(--line)" stroke-width="2"/><rect x="11" y="1.5" width="8" height="7" rx="2" fill="var(--front)"/><rect x="11" y="21.5" width="8" height="7" rx="2" fill="none" stroke="var(--back)" stroke-width="2" stroke-dasharray="3 2"/><rect x="1.5" y="11.5" width="7" height="7" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><rect x="21.5" y="11.5" width="7" height="7" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/></svg>
+      <span>Queue Card Quest</span>
+    </div>
+    <div class="stats" id="stats" hidden>
+      <span>Score <b id="sScore">0</b></span>
+      <span>Streak <b id="sStreak">0</b></span>
+      <span>Cards done <b id="sDone">0</b>/<span id="sTotal">20</span></span>
+    </div>
+  </div>
+  <div class="prog" id="progWrap" hidden><i id="prog"></i></div>
+  <main id="stage"></main>
+</div>
+<script>
+/* ---------- helpers ---------- */
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rnd(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const squash=raw=>raw.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'').replace(/\s+/g,'');
+const R=(label,re,tip)=>({label,re,tip});
+const mod=(a,m)=>((a%m)+m)%m;
+const L=(s)=>'<code>'+s+'</code>';
+const T=(prompt,rubric,explain,model,hint,need)=>({type:'text',prompt,rubric,explain,model,hint,need:need||rubric.length});
+const C=(prompt,labels,check,explain,model,hint)=>({type:'code',prompt,labels,check,explain,model,hint});
+const N=(prompt,fields,explain,hint)=>({type:'nums',prompt,fields,explain,hint});
+const M=(prompt,correct,wrongs,explain)=>({type:'mc',prompt,explain,options:shuffle([{t:correct,ok:true},...wrongs.map(t=>({t,ok:false}))])});
+
+/* ---------- code checkers (run on whitespace-free, comment-free code) ---------- */
+const ENQ_LABELS=['Creates the new node with new','Tests for the empty queue','Empty case makes the new node both front_ and back_','Non-empty case hooks it on with back_->next','The hook comes before back_ moves','Counts it with size_++','Returns true'];
+function enqCheck(c){
+  const m=c.match(/Node\*(\w+)=newNode/); const n=m?m[1]:'newNode';
+  const hook=c.indexOf('back_->next='+n+';'); const adv=c.lastIndexOf('back_='+n+';');
+  const cnt=(c.split('back_='+n+';').length-1);
+  return [!!m,
+    /if\((back_==nullptr|front_==nullptr|empty\(\)|size_==0|!back_|!front_)\)/.test(c),
+    c.includes('front_='+n+';')&&cnt>=2,
+    hook>=0, hook>=0&&adv>hook,
+    /size_\+\+|\+\+size_|size_\+=1|size_=size_\+1/.test(c),/returntrue;/.test(c)];
+}
+const DEQ_LABELS=['Returns false when the queue is empty','Saves front_ in a pointer (toDelete)','Advances front_ to front_->next','Resets back_ to nullptr when the queue becomes empty','Deletes the saved node after advancing','Counts it with size_--','Returns true'];
+function deqCheck(c){
+  const m=c.match(/Node\*(\w+)=front_;/); const t=m?m[1]:'toDelete';
+  const adv=c.search(/front_=(front_->next|\w+->next);/); const del=c.indexOf('delete'+t+';');
+  return [/if\((front_==nullptr|empty\(\)|size_==0|!front_)\)\{?returnfalse;/.test(c),!!m,adv>=0,
+    /if\((front_==nullptr|size_==1|size_==0|!front_|empty\(\))\)\{?back_=nullptr;/.test(c),
+    del>=0&&adv>=0&&del>adv,/size_--|--size_|size_-=1|size_=size_-1/.test(c),/returntrue;/.test(c)].concat([]).slice(0,7).filter((_,i)=>true);
+}
+const CENQ_LABELS=['Returns false when size_ == CAPACITY','Computes (front_ + size_) % CAPACITY','Stores value in data_ at that index','Counts it with size_++','Returns true'];
+function cenqCheck(c){return [/if\((size_==CAPACITY|size_>=CAPACITY|full\(\))\)\{?returnfalse;/.test(c),/\(front_\+size_\)%CAPACITY|\(size_\+front_\)%CAPACITY/.test(c),/data_\[(\w+|\(front_\+size_\)%CAPACITY)\]=value;/.test(c),/size_\+\+|\+\+size_|size_\+=1|size_=size_\+1/.test(c),/returntrue;/.test(c)];}
+const CDEQ_LABELS=['Returns false when the queue is empty','Moves front_ with (front_ + 1) % CAPACITY','Counts it with size_--','Returns true'];
+function cdeqCheck(c){return [/if\((size_==0|empty\(\)|size_<=0)\)\{?returnfalse;/.test(c),/front_=\(front_\+1\)%CAPACITY;/.test(c),/size_--|--size_|size_-=1|size_=size_-1/.test(c),/returntrue;/.test(c)];}
+
+const MODEL_ENQ=`bool LinkedQueue::enqueue(int value) {
+    Node* newNode = new Node{value, nullptr};
+    if (back_ == nullptr) {      // empty: new node is both ends
+        front_ = newNode;
+        back_  = newNode;
+    } else {
+        back_->next = newNode;   // 1. hook on
+        back_ = newNode;         // 2. then advance
+    }
+    size_++;
+    return true;
+}`;
+const MODEL_DEQ=`bool LinkedQueue::dequeue() {
+    if (front_ == nullptr) { return false; }
+    Node* toDelete = front_;
+    front_ = front_->next;
+    if (front_ == nullptr) { back_ = nullptr; }   // the extra line
+    delete toDelete;
+    size_--;
+    return true;
+}`;
+
+/* ---------- the 20 topics; each has written ("open") and multiple-choice ("mc") variants ---------- */
+const SKILLS=[
+/* 1 */{id:'fifo',title:'FIFO vs LIFO',open:[
+  ()=>{ // random op sequence on a stack and a queue
+    const vals=shuffle([10,20,30,40,50,60,70,80,90]);let ops=[],adds=0,rem=0,sz=0,v=0;
+    while(ops.length<7||rem<2){ if(sz>0&&rem<3&&Math.random()<.4||adds>=4){ if(sz>0){ops.push('r');rem++;sz--;continue;} }
+      if(adds<4){ops.push(vals[v++]);adds++;sz++;} else if(sz>0){ops.push('r');rem++;sz--;} else break; }
+    const st=[],qu=[],so=[],qo=[],trace=[];
+    ops.forEach(o=>{ if(o==='r'){so.push(st.pop());qo.push(qu.shift());trace.push('remove() &rarr; stack gives '+so[so.length-1]+', queue gives '+qo[qo.length-1]+' &nbsp; | stack ['+st.join(', ')+'] &nbsp; queue ['+qu.join(', ')+']');}
+      else{st.push(o);qu.push(o);trace.push('add('+o+') &nbsp; | stack ['+st.join(', ')+'] &nbsp; queue ['+qu.join(', ')+']');}});
+    return N('Run these calls on a <b>stack</b> and on a <b>queue</b>. List the values each one removes, in order, separated by commas.<pre>'+ops.map(o=>o==='r'?'remove();':'add('+o+');').join(' ')+'</pre>',
+      [{id:'s',label:'Stack removes (in order)',ans:so},{id:'q',label:'Queue removes (in order)',ans:qo}],
+      '<p>The stack always removes the <b>newest</b> item (LIFO). The queue always removes the <b>oldest</b> item (FIFO). Trace (the next item to leave is the <i>last</i> item of the stack list and the <i>first</i> item of the queue list):</p><p class="mono">'+trace.join('<br>')+'</p>',
+      'Stack: the last one added leaves first. Queue: the first one added leaves first.');},
+  ()=>T('What does <b>FIFO</b> stand for? Which end does <code>enqueue</code> use, and which end does <code>dequeue</code> use?',
+      [R('First In, First Out',/first[\s-]*in[\s,-]*first[\s-]*out|fifo/,'Spell out FIFO.'),R('enqueue adds at the back (rear/tail)',/(enqueue[^.]*(back|rear|tail|end))|((back|rear|tail)[^.]*enqueue)/,'Say which end enqueue uses.'),R('dequeue removes from the front (head)',/(dequeue[^.]*(front|head))|((front|head)[^.]*dequeue)/,'Say which end dequeue uses.')],
+      '<p><b>First In, First Out.</b> <code>enqueue(v)</code> adds at the <b>back</b>; <code>dequeue()</code> removes from the <b>front</b>. Like the line at the registrar: nobody who arrived later is served first.</p>',
+      'First In, First Out. enqueue adds at the back; dequeue removes from the front. Analogy: the line at the registrar.','Think of a line of people at a service window: where does a newcomer stand, and who is served?')],
+ mc:[()=>M('Which statement describes a queue?','The item that has waited longest is removed first',['The most recently added item is removed first','Items are always removed from the middle','Items are removed in sorted order'],'<p>A queue is <b>FIFO</b>: first in, first out. The stack is the one that removes the newest item.</p>'),
+     ()=>{const s=pick([['the undo button in a text editor','Stack'],['the browser back button','Stack'],['matching brackets in an expression','Stack'],['jobs waiting at a print spooler','Queue'],['the line at the registrar','Queue'],['keystrokes waiting to be processed','Queue'],['tasks waiting for the CPU','Queue']]);
+       return M('Which structure fits best: <b>'+s[0]+'</b>?',s[1],[s[1]==='Stack'?'Queue':'Stack'],'<p>When you hear "most recent", think <b>stack</b>. When you hear "in the order they arrived" or "fairly", think <b>queue</b>.</p>');}]},
+/* 2 */{id:'adt',title:'The queue contract',open:[
+  ()=>T('List the <b>five</b> operations of the queue ADT.',[R('enqueue',/enqueue/,''),R('dequeue',/dequeue/,''),R('front',/\bfront\b|peek/,'The read-the-front operation is front().'),R('empty',/empty/,''),R('size',/size|length|count/,'')],
+      '<p><code>enqueue(v)</code>, <code>dequeue()</code>, <code>front()</code>, <code>empty()</code>, <code>size()</code>. Same general interface as the stack ADT, but a queue uses <code>enqueue</code>, <code>dequeue</code>, and <code>front</code> instead of <code>push</code>, <code>pop</code>, and <code>top</code>.</p>',
+      'enqueue(v), dequeue(), front(), empty(), size()','Think of the stack ADT and swap push/pop/top for the queue versions.'),
+  ()=>T('According to the ADT, what happens on an <b>empty</b> queue for <code>dequeue()</code>, <code>front()</code>, <code>empty()</code> and <code>size()</code>?',
+      [R('dequeue() and front() are invalid operations',/invalid|precondition|undefined|illegal|error|not allowed|depends|should not|cannot/,'Say what is wrong with dequeue/front on an empty queue.'),R('empty() returns true',/empty[^.]*true|true/,''),R('size() returns 0',/size[^.]*(0|zero)|\b0\b|zero/,'')],
+      '<p><code>dequeue()</code> and <code>front()</code> are <b>invalid operations</b> on an empty queue (the behavior depends on the interface: Exercise 5 returns <code>false</code> from <code>dequeue()</code>, and <code>front()</code> has a precondition). <code>empty()</code> returns <code>true</code> and <code>size()</code> returns <code>0</code>.</p>',
+      'dequeue() and front(): invalid on an empty queue. empty() is true. size() is 0.','Two of the four are invalid; two are perfectly fine.')],
+ mc:[()=>M('Which operation looks at the front item <i>without</i> removing it?','<code>front()</code>',['<code>dequeue()</code>','<code>enqueue(v)</code>','<code>size()</code>'],'<p><code>front()</code> only reads. <code>dequeue()</code> removes (and, in our exercises, returns <code>true</code> or <code>false</code>).</p>')]},
+/* 3 */{id:'backptr',title:'Why a back_ pointer',open:[
+  ()=>T('Why does a <code>back_</code> pointer make <code>enqueue</code> $O(1)$ in a linked queue?'.replace(/\$O\(1\)\$/,'O(1)'),
+      [R('back_ points at the last node',/(points?|refers?|holds?)[^.]*(last|tail|end)|(last|tail)[^.]*node/,'Say where back_ points.'),R('so back_->next can be changed directly (no walking)',/next|walk|travers|loop|reach|directly|without/,'Say what enqueue changes and that no walk is needed.')],
+      '<p>A pointer lets you change the field <b>inside the node it points at</b>. <code>back_</code> points at the <i>last</i> node, so <code>back_-&gt;next = newNode;</code> changes the last node\'s own field. No walk from the front is needed.</p>',
+      'back_ points at the last node, so back_->next can be set directly: O(1), no traversal.','Which field of which node changes when you add at the back?'),
+  ()=>T('Tuesday: with a <code>tail_</code> pointer, a linked <b>stack</b> still cannot pop at the back in O(1). Why not?',
+      [R('pop needs the second-to-last node\'s next',/second|before|previous|prior|one earlier|node preceding/,'Which node\'s next must change?'),R('a singly linked list cannot go backwards, so you must walk from the front (O(n))',/walk|travers|loop|backward|from the (front|head)|o\(n\)|linear/,'Why can\'t you reach that node quickly?')],
+      '<p>Popping at the back must set the <b>second-to-last</b> node\'s <code>next</code> to <code>nullptr</code>. <code>tail_</code> points at the <i>last</i> node, not the one before it, and nodes only point forward, so you must walk from the front: $O(n)$.</p>'.replace('$O(n)$','O(n)'),
+      'Popping at the back needs the second-to-last node; you can only reach it by walking from the front: O(n).','The tail pointer reaches the last node. Which node would you need instead?')],
+ mc:[()=>M('A pointer lets you change which field?','The field inside the node it points at',['The field of the node before it','The field of the node after it','Any node\'s field in the list'],'<p>This is the rule from Class 8. It is why <code>back_</code> is enough for <code>enqueue</code> but not for popping at the back.</p>')]},
+/* 4 */{id:'enq',title:'Linked enqueue',open:[
+  ()=>C('Write <code>LinkedQueue::enqueue(int value)</code> for a linked queue with members <code>front_</code>, <code>back_</code> (both <code>Node*</code>) and <code>size_</code>. Handle the empty queue and the non-empty queue.',ENQ_LABELS,enqCheck,
+      '<p>Two cases. <b>Empty:</b> the new node is both ends. <b>Otherwise:</b> hook the new node onto the old last node <i>first</i>, then advance <code>back_</code>.</p>',MODEL_ENQ,'Case 1: both pointers must change. Case 2: which of the two pointer writes comes first?'),
+  ()=>C('This enqueue case is in the wrong order:<pre>back_ = newNode;\nback_->next = newNode;</pre>Rewrite just these two lines in the correct order.',['Hooks on with back_->next = newNode','Then advances with back_ = newNode','Hook comes first'],
+      c=>{const h=c.indexOf('back_->next=newNode;'),a=c.indexOf('back_=newNode;');return [h>=0,a>=0,h>=0&&a>h];},
+      '<p>Hook on, then advance. If you advance first, <code>back_-&gt;next = newNode</code> really means <code>newNode-&gt;next = newNode</code>.</p>','back_->next = newNode;\nback_ = newNode;','Use the old last node before you move back_.')],
+ mc:[()=>M('In the non-empty case of <code>enqueue</code>, which order is correct?','<code>back_-&gt;next = newNode;</code> then <code>back_ = newNode;</code>',['<code>back_ = newNode;</code> then <code>back_-&gt;next = newNode;</code>','<code>front_ = newNode;</code> then <code>back_ = newNode;</code>','Either order works'],'<p>Hook on while <code>back_</code> still points at the old last node, then advance.</p>')]},
+/* 5 */{id:'order',title:'Hook on, then advance',open:[
+  ()=>T('In <code>enqueue</code>, you accidentally write <code>back_ = newNode;</code> <b>before</b> <code>back_->next = newNode;</code>. What goes wrong?',
+      [R('the new node points at itself',/itself|self|newnode->next\s*=\s*newnode|its own/,'What does back_->next mean once back_ is newNode?'),R('the old nodes are no longer connected to the new node / back_',/(old|previous|existing)[^.]*(not|no longer|disconnect|unlinked|never)|not (linked|connected)|disconnect|never linked/,'What happens to the old queue?')],
+      '<p>Once <code>back_</code> is <code>newNode</code>, <code>back_-&gt;next = newNode</code> means <code>newNode-&gt;next = newNode</code>: the new node points at itself. The old nodes are still reachable from <code>front_</code> but not connected to the new node.</p><p>Same mistake as the Class 8 prepend bug: moving the pointer before using it.</p>',
+      'newNode->next = newNode (it points at itself), and the old queue is never linked to the new node.','After back_ = newNode, which node does back_ point at?')],
+ mc:[()=>M('After <code>back_ = newNode;</code> runs first, what does <code>back_-&gt;next = newNode;</code> set?','<code>newNode-&gt;next = newNode;</code> (it points at itself)',['The old last node\'s <code>next</code>','<code>front_-&gt;next</code>','Nothing, it is a no-op'],'<p>The pointer moved before it was used. Hook first, advance second.</p>')]},
+/* 6 */{id:'deq',title:'Linked dequeue',open:[
+  ()=>C('Write <code>LinkedQueue::dequeue()</code>. It is Class 8\'s <code>removeFront</code> plus one extra line. Return <code>false</code> on an empty queue.',DEQ_LABELS,deqCheck,
+      '<p>Save <code>front_</code>, advance it, <b>reset <code>back_</code> if the queue became empty</b>, delete the saved node, count it.</p>',MODEL_DEQ,'What is back_ pointing at after the last node leaves?'),
+  ()=>T('<code>dequeue()</code> is <code>removeFront</code> plus <b>one extra line</b>. What is that line, and why is it needed?',
+      [R('if front_ is nullptr (queue became empty), set back_ = nullptr',/back_\s*=\s*nullptr|reset back_|set back_/,'Write the line.'),R('otherwise back_ still points at the deleted node (dangling)',/dangl|stale|freed|deleted|points? at|still (holds|points)/,'Why is it needed?')],
+      '<p>When the last node leaves, <code>front_</code> becomes <code>nullptr</code> on its own, but <code>back_</code> must be reset by hand. Otherwise it points at the node you are about to <code>delete</code>.</p>',
+      'if (front_ == nullptr) { back_ = nullptr; }  because otherwise back_ points at freed memory.','Which of the two pointers is fixed for free when the last node leaves?')],
+ mc:[()=>M('Why must <code>dequeue()</code> set <code>back_ = nullptr</code> when the last node leaves?','Otherwise <code>back_</code> still points at the deleted node',['Otherwise <code>front_</code> would be wrong','Because <code>delete</code> does not free the node','Because <code>size_</code> would overflow'],'<p><code>front_</code> becomes <code>nullptr</code> on its own, but <code>back_</code> keeps the old address.</p>')]},
+/* 7 */{id:'states',title:'Empty, one, many',open:[
+  ()=>{const st=pick(['empty','exactly one item','many items']);
+    const a={'empty':['both are nullptr',/(both|front_?)[^.]*(null|nullptr)|nullptr[^.]*nullptr/],'exactly one item':['both point at the same (only) node',/same|only|single|one node|both point/],'many items':['front_ is the first node and back_ is the last node',/first[^.]*last|front[^.]*(first|head)|back[^.]*last/]}[st];
+    return T('A linked queue holds <b>'+st+'</b>. What are <code>front_</code> and <code>back_</code>?',[R(a[0],a[1],'Describe both pointers.')],
+      '<table class="mono small"><tr><td>Empty&nbsp;</td><td>front_ = nullptr&nbsp;</td><td>back_ = nullptr</td></tr><tr><td>One item&nbsp;</td><td>the only node&nbsp;</td><td>the same node</td></tr><tr><td>Many&nbsp;</td><td>first node&nbsp;</td><td>last node</td></tr></table><p>Two-pointer structures break where the two pointers coincide: test the empty-to-one and one-to-empty transitions first.</p>',
+      'Empty: both nullptr. One item: both point at the same node. Many: first node and last node.','Think about which node each pointer must reference.');},
+  ()=>T('Which two transitions of a two-pointer queue should you test first, and why?',
+      [R('empty to one item (enqueue into an empty queue)',/empty[^.]*(to|->|then)[^.]*(one|1)|into (an )?empty|first (item|enqueue)/,''),R('one item to empty (dequeue the last one)',/(one|1|last)[^.]*(to|->|then)[^.]*empty|dequeue (the )?(last|only)|last (node|item)/,''),R('the two pointers coincide there',/coincid|same node|both|equal|overlap/,'')],
+      '<p>Empty-to-one and one-to-empty are where <code>front_</code> and <code>back_</code> coincide. That is where both pointers must be set or reset by hand.</p>',
+      'Empty to one, and one to empty: that is where front_ and back_ coincide.','Where do both pointers refer to the same place?')],
+ mc:[()=>M('A linked queue holds exactly one item. Which is true?','<code>front_</code> and <code>back_</code> point at the same node',['<code>back_</code> is <code>nullptr</code>','<code>front_</code> is <code>nullptr</code>','They point at two different nodes'],'<p>With one node, that node is both the first and the last.</p>')]},
+/* 8 */{id:'valgrind',title:'The stale back_ bug',open:[
+  ()=>({type:'code',prompt:'Suppose <code>dequeue()</code> <b>forgets</b> to reset <code>back_</code>. Write the <b>shortest</b> sequence of calls that exposes the bug (for example <code>enqueue(5); enqueue(6);</code> is NOT it).',labels:['Starts by enqueuing one item','Dequeues so the queue becomes empty','Enqueues again afterwards'],
+    check:(c)=>{const toks=(c.match(/enqueue|dequeue/g)||[]);let sz=0,emptied=false,exposed=false;for(const t of toks){if(t==='enqueue'){if(emptied)exposed=true;sz++;}else{sz=Math.max(0,sz-1);if(sz===0)emptied=true;}}return [toks[0]==='enqueue',emptied,exposed];},
+    explain:'<p><code>enqueue(1); dequeue(); enqueue(2);</code> After <code>dequeue()</code>, <code>front_</code> is correctly <code>nullptr</code> but <code>back_</code> still holds the freed node\'s address. <code>empty()</code> looks right (it checks <code>front_</code>), so the bug hides. The next <code>enqueue</code> sees <code>back_ != nullptr</code> and writes <code>back_-&gt;next</code> into freed memory.</p>',model:'enqueue(1); dequeue(); enqueue(2);',hint:'The queue must become completely empty, and then you must add again.'}),
+  ()=>T('For that sequence, which function does Valgrind <b>report</b> the invalid write in, and which function does it say <b>freed</b> the memory?',
+      [R('invalid write reported in enqueue (the later call)',/enqueue/,''),R('memory was freed by dequeue (the delete)',/dequeue|delete/,'')],
+      '<p>Valgrind reports an <b>invalid write in the later <code>enqueue()</code></b>, and says the memory was previously <b>freed by the <code>delete</code> in <code>dequeue()</code></b>. The failure appears far from the mistake, and the report names both places.</p>',
+      'Invalid write in enqueue(); freed by the delete in dequeue().','The write and the free happen in two different functions.')],
+ mc:[()=>M('Why does the stale <code>back_</code> bug hide after the last <code>dequeue()</code>?','<code>empty()</code> checks <code>front_</code>, which is correct',['<code>empty()</code> checks <code>back_</code>','Valgrind fixes it automatically','The compiler rejects the code'],'<p>So the queue <i>looks</i> fine until the next <code>enqueue</code> writes through the stale pointer.</p>')]},
+/* 9 */{id:'shift',title:'Array queue: shifting',open:[
+  ()=>T('An array queue keeps the front at index 0, so <code>dequeue</code> shifts every remaining item left. What does <code>dequeue</code> cost? What is the obvious fix, and what new problem does it create?',
+      [R('shifting costs O(n)',/o\(n\)|linear|n\b|every (remaining )?item/,'State the cost.'),R('fix: keep front_ as an index and do front_++ (O(1))',/front_?\s*(\+\+|index|moves|advance)|index|move the front/,'What is the fix?'),R('new problem: the queue creeps to the right and runs off the end',/creep|drift|run off|end of the array|wasted|fall off|right/,'What goes wrong after many enqueue/dequeue pairs?')],
+      '<p>Shifting costs <b>O(n)</b>: every remaining item moves. Fix: do not shift; keep <code>front_</code> as an index and do <code>front_++</code>, which is O(1). New problem: the queue <i>creeps right</i>. After many enqueue/dequeue pairs you run off the end of the array while most of it sits empty.</p>',
+      'O(n). Fix: front_++ instead of shifting. New problem: the queue creeps right and runs off the end while most of the array is empty.','Cost, fix, and the new problem: three things.'),
+  ()=>{const n=rnd(4,9);return N('An array queue (front at index 0) holds <b>'+n+'</b> items. One <code>dequeue</code> shifts everything left. How many items must be <b>moved</b> by that shift?',[{id:'m',label:'Items moved',ans:[n-1]}],'<p>The front item is removed; each of the other <b>'+(n-1)+'</b> items moves one slot left. That is why shifting costs O(n).</p>','All but the one that was removed.');}],
+ mc:[()=>M('What is the new problem if <code>dequeue</code> just does <code>front_++</code> with no wrap-around?','The queue creeps to the right and runs off the end',['Dequeue becomes O(n)','Enqueue stops working immediately','Items are lost from the front'],'<p>Time is fixed, but space is not reused. The circular buffer fixes that.</p>')]},
+/* 10 */{id:'wrap',title:'Circular buffer indexing',open:[
+  ()=>{const C=rnd(5,10),f=rnd(0,C-1),s=rnd(1,C-1),a=mod(f+s,C);
+    return N('A circular queue has <code>CAPACITY = '+C+'</code>, <code>front_ = '+f+'</code> and <code>size_ = '+s+'</code>. At which index does the next <code>enqueue</code> store its item?',[{id:'i',label:'insertIndex',ans:[a]}],
+      '<p><code>insertIndex = (front_ + size_) % CAPACITY = ('+f+' + '+s+') % '+C+' = '+(f+s)+' % '+C+' = <b>'+a+'</b></code>.</p>'+(f+s>=C?'<p>The sum went past the end ('+(C-1)+'), so the index wraps to the start.</p>':'<p>No wrap this time: the sum stays below '+C+'.</p>'),'Walk size_ steps forward from front_, wrapping around.');},
+  ()=>{const C=rnd(4,9),i=C-1;return N('<code>CAPACITY = '+C+'</code>. You are standing on slot <code>i = '+i+'</code>, the last slot. Which slot comes next going forward?',[{id:'n',label:'(i + 1) % CAPACITY',ans:[0]}],'<p>The slot after the last slot is slot <b>0</b> again, so the array acts like a ring: <code>('+i+' + 1) % '+C+' = '+C+' % '+C+' = 0</code>.</p>','What is C mod C?');},
+  ()=>{const C=rnd(5,9),f=rnd(0,C-1),a=mod(f+1,C);return N('<code>CAPACITY = '+C+'</code>, <code>front_ = '+f+'</code>. After one <code>dequeue()</code>, what is <code>front_</code>?',[{id:'f',label:'new front_',ans:[a]}],'<p><code>front_ = (front_ + 1) % CAPACITY = ('+f+' + 1) % '+C+' = <b>'+a+'</b></code>.</p>','Move one slot forward and wrap if you pass the end.');}],
+ mc:[()=>M('What does the circular buffer do when an index reaches the last slot?','It wraps to slot 0 using <code>%</code>',['It stops and reports an error','It shifts all items left','It allocates a larger array'],'<p>The one operator that makes it work is <code>% CAPACITY</code>.</p>')]},
+/* 11 */{id:'trace',title:'Dequeue down to empty',open:[
+  ()=>{const C=rnd(4,6),f=rnd(0,C-1),b=mod(f+C-1,C);
+    return N('<code>CAPACITY = '+C+'</code>. A full queue has <code>front_ = '+f+'</code> and <code>back_ = '+b+'</code> (<code>back_</code> is the index of the <b>last item</b>). Dequeue all '+C+' items, moving only <code>front_</code>. What are <code>front_</code> and <code>back_</code> afterwards?',
+      [{id:'f',label:'front_',ans:[f]},{id:'b',label:'back_',ans:[b]}],
+      '<p><code>front_</code> moves '+C+' times around the ring and returns to <b>'+f+'</b>. <code>back_</code> never moves: it stays <b>'+b+'</b>.</p><p>The empty queue has the <b>same two index values as the full queue</b>. With only two ordinary indices you cannot tell empty from full; you need extra state (like <code>size_</code>) or a convention.</p>','dequeue moves only front_. back_ does not change.');},
+  ()=>{const C=rnd(5,7),f=rnd(0,C-1),b=mod(f+C-1,C),k=rnd(1,C-1),nf=mod(f+k,C);
+    return N('<code>CAPACITY = '+C+'</code>. A full queue has <code>front_ = '+f+'</code>, <code>back_ = '+b+'</code>. After <b>'+k+'</b> dequeues, give <code>front_</code> and the number of items left.',
+      [{id:'f',label:'front_',ans:[nf]},{id:'n',label:'items left',ans:[C-k]}],
+      '<p><code>front_ = ('+f+' + '+k+') % '+C+' = <b>'+nf+'</b></code> and items left = '+C+' &minus; '+k+' = <b>'+(C-k)+'</b>. <code>back_</code> stays '+b+'.</p>','front_ advances k times with wrap-around.');}],
+ mc:[()=>M('A full queue (<code>back_</code> = last item) is dequeued completely. Compared with the full queue, the indices are now:','The same (<code>front_</code> and <code>back_</code> unchanged)',['<code>front_ == back_</code>','<code>back_</code> is <code>-1</code>','<code>front_</code> is <code>CAPACITY</code>'],'<p>This is the full-versus-empty ambiguity: two ordinary indices alone cannot tell the two states apart.</p>')]},
+/* 12 */{id:'oneslot',title:'Leave one slot empty',open:[
+  ()=>{const C=rnd(5,8),f=rnd(0,C-1),k=rnd(0,C-1),b=mod(f+k-1,C);
+    return N('Convention: leave one slot empty; <code>back_</code> is the index of the last item. <code>CAPACITY = '+C+'</code>, <code>front_ = '+f+'</code>, <code>back_ = '+b+'</code>. How many items are in the queue?',
+      [{id:'n',label:'items',ans:[k]}],'<p><code>size = (back_ - front_ + 1 + CAPACITY) % CAPACITY = ('+b+' - '+f+' + 1 + '+C+') % '+C+' = <b>'+k+'</b></code>.</p><p>Empty is <code>(back_ + 1) % CAPACITY == front_</code>; full is <code>(back_ + 2) % CAPACITY == front_</code>.</p>','Use size = (back_ - front_ + 1 + CAPACITY) % CAPACITY.');},
+  ()=>{const C=rnd(5,8),f=rnd(0,C-1),k=rnd(1,C-1),b=mod(f+k-1,C);
+    return N('Convention: leave one slot empty; <code>back_</code> is the index of the last item. <code>CAPACITY = '+C+'</code>, <code>front_ = '+f+'</code>, and the queue holds <b>'+k+'</b> items. What is <code>back_</code>?',[{id:'b',label:'back_',ans:[b]}],'<p>The last item is '+(k-1)+' steps after the first: <code>back_ = (front_ + size - 1) % CAPACITY = ('+f+' + '+k+' - 1) % '+C+' = <b>'+b+'</b></code>.</p>','The first item is at front_; the last is size - 1 slots later.');}],
+ mc:[()=>{const C=rnd(5,8),f=rnd(0,C-1),k=pick([0,C-1,rnd(1,C-2)]),b=mod(f+k-1,C),ans=k===0?'empty':k===C-1?'full':'neither';
+    return M('Convention: leave one slot empty; <code>back_</code> = last item. <code>CAPACITY = '+C+'</code>, <code>front_ = '+f+'</code>, <code>back_ = '+b+'</code>. Is the queue empty, full, or neither?',ans,['empty','full','neither'].filter(x=>x!==ans),'<p>Empty: <code>(back_ + 1) % CAPACITY == front_</code> gives <code>('+b+'+1) % '+C+' = '+((b+1)%C)+'</code>. Full: <code>(back_ + 2) % CAPACITY == front_</code> gives <code>'+((b+2)%C)+'</code>. Front is '+f+', so the answer is <b>'+ans+'</b>.</p>');}]},
+/* 13 */{id:'cdeq',title:'Circular enqueue and dequeue',open:[
+  ()=>C('Write <code>ArrayQueue::enqueue(int value)</code> using members <code>data_</code>, <code>front_</code>, <code>size_</code> and the constant <code>CAPACITY</code>. There is no stored <code>back_</code>.',CENQ_LABELS,cenqCheck,
+      '<p>Guard first, compute the next free slot from <code>front_</code> and <code>size_</code>, store, then count.</p>',`bool ArrayQueue::enqueue(int value) {
+    if (size_ == CAPACITY) { return false; }
+    int insertIndex = (front_ + size_) % CAPACITY;
+    data_[insertIndex] = value;
+    size_++;
+    return true;
+}`,'Where is the next free slot, given front_ and size_?'),
+  ()=>C('Write <code>ArrayQueue::dequeue()</code> for the same class. It returns <code>false</code> when empty.',CDEQ_LABELS,cdeqCheck,
+      '<p><b>Nothing is erased.</b> The old value stays in the array but is outside the live range, so the next enqueue that lands there simply overwrites it.</p>',`bool ArrayQueue::dequeue() {
+    if (size_ == 0) { return false; }
+    front_ = (front_ + 1) % CAPACITY;
+    size_--;
+    return true;
+}`,'Two statements move the queue forward: one for front_, one for size_.')],
+ mc:[()=>M('After <code>dequeue()</code> in the circular queue, what happens to the old value in <code>data_</code>?','It stays in the array but is outside the live range',['It is set to 0','It is deleted with <code>delete</code>','It is moved to the back'],'<p>Erasing would be extra work for no benefit. <code>size_</code> says which slots belong to the queue.</p>')]},
+/* 14 */{id:'dataq',title:'Why data_ cannot tell you',open:[
+  ()=>T('With only <code>front_</code> and <code>back_</code> (no count), empty and full can look the same. Why can\'t you just look in <code>data_</code> to tell them apart?',
+      [R('an int has no special "empty" value',/no (special )?(empty|null|blank)|always (holds|has)|any (number|value)|can't be empty|cannot be empty|no such thing/,'What is special about an int slot?'),R('old values stay after dequeue, so a slot may hold a stale value',/old|stale|remain|stay|still (hold|contain)|left over|leftover/,'What is still in the array after a dequeue?')],
+      '<p>An <code>int</code> has <b>no special "empty" value</b>. Even after an item is dequeued, its old value may remain in the array, so looking at <code>data_[front_]</code> cannot tell you whether that slot currently belongs to the queue. There is no such thing as an empty <code>int</code>.</p>',
+      'An int has no empty value, and old values stay in the array after dequeue.','What does an int slot hold after its item is dequeued?')],
+ mc:[()=>M('After <code>dequeue()</code> removes 40, <code>data_[3]</code> still shows 40. What does that tell you?','Nothing: the old value just stays there',['40 is still in the queue','The dequeue failed','The queue is full'],'<p>Whether a slot belongs to the queue depends on <code>front_</code> and <code>size_</code>, not on what is stored in it.</p>')]},
+/* 15 */{id:'resolve',title:'Resolving full vs empty',open:[
+  ()=>T('Name <b>two ways</b> to resolve the full-versus-empty ambiguity of a circular queue.',
+      [R('keep a size_ count',/size_?|count|counter|number of items/,''),R('leave one slot empty',/(leave|keep|reserve|waste|sacrifice)\s+(one|a|1)\s+(slot|space|cell|element|position)|one (slot|space|cell|element|position)|never (fill|use)|(do not|don'?t) (fill|use)|unused|empty slot|waste/,'The second way gives something up: one slot is deliberately kept empty. (A special value like -1 is a valid third option, but this question asks for the two ways from class.)')],
+      '<p><b>1. Keep a <code>size_</code> count</b> (we use this): <code>empty()</code> is <code>size_ == 0</code>, full is <code>size_ == CAPACITY</code>. One extra <code>int</code>, and <code>size()</code> is free.</p><p><b>2. Leave one slot empty</b>: with <code>back_</code> as the last item, empty is <code>(back_ + 1) % CAPACITY == front_</code>, full is <code>(back_ + 2) % CAPACITY == front_</code>. (A third option, reserving <code>-1</code> to mean empty, is on a backup slide.)</p>',
+      '1. Keep a size_ count (we use this). 2. Leave one slot empty. (A third option, reserving -1 to mean empty, is on a backup slide.)','One adds a variable; the other gives something up.'),
+  ()=>T('Which resolution do we use in class, and why is it easier to write?',
+      [R('we keep front_ and size_',/size_?|count/,''),R('empty is size_ == 0, full is size_ == CAPACITY (every slot usable)',/size_?\s*==\s*0|capacity|every slot|all slots|no slot wasted|trivial|simple|free/,'Say how empty and full are tested.')],
+      '<p>We store <code>front_</code> and <code>size_</code>. Empty is <code>size_ == 0</code>, full is <code>size_ == CAPACITY</code>, every slot is usable, <code>size()</code> comes for free, and the next free slot is <code>(front_ + size_) % CAPACITY</code>.</p>',
+      'front_ and size_: empty is size_ == 0, full is size_ == CAPACITY, all slots usable.','Look at the class definition of ArrayQueue.')],
+ mc:[()=>M('Which resolution lets <b>every</b> slot of the array hold an item?','Keep a <code>size_</code> count',['Leave one slot empty','Compare <code>front_</code> to <code>CAPACITY</code>','Look inside <code>data_</code>'],'<p>Leaving one slot empty wastes a slot. Keeping <code>size_</code> costs one extra <code>int</code>.</p>')]},
+/* 16 */{id:'guard',title:'Why the full guard is safe',open:[
+  ()=>T('When the queue is full, <code>(front_ + size_) % CAPACITY</code> equals <code>front_</code> again. Why is that never a bug?',
+      [R('the guard if (size_ == CAPACITY) return false is checked first',/guard|checked first|first|before/,'What runs before the formula?'),R('enqueue never writes to data_[front_] in that state',/never (write|overwrit|reach)|doesn't (write|overwrit)|returns false|does not (write|reach)|not reached/,'What does enqueue do when full?')],
+      '<p>Because the guard <code>if (size_ == CAPACITY) return false;</code> is checked <b>first</b>. The queue <i>can</i> be full, but <code>enqueue</code> never writes to <code>data_[front_]</code> in that state. That is what a guard is for: make the ambiguous case harmless rather than interpreting it afterward.</p>',
+      'The full guard runs first and returns false, so enqueue never writes to data_[front_] when full.','What does enqueue do before it computes the index?')],
+ mc:[()=>M('In <code>ArrayQueue::enqueue</code>, why can the index never overwrite a live item?','The <code>size_ == CAPACITY</code> check returns before the index is used',['<code>%</code> prevents overwriting','<code>front_</code> is always 0','The compiler checks it'],'<p>A guard makes the ambiguous case unreachable.</p>')]},
+/* 17 */{id:'compare',title:'Linked vs array',open:[
+  ()=>{const d=pick([
+    ['capacity',[R('array: fixed size',/fixed|capacity|limit/,'Arrays have a fixed capacity.'),R('linked: limited only by memory',/memory|grow|unlimited|no (fixed )?limit|dynamic/,'')],'<p>Array queue: <b>fixed</b> capacity. Linked queue: limited <b>only by memory</b>.</p>','Array: fixed capacity. Linked: limited only by memory.'],
+    ['allocation',[R('array: no allocation',/no (alloc|new)|none|never|nothing/,''),R('linked: one new per enqueue',/new|one per|each enqueue|every enqueue|allocat/,'')],'<p>Array queue: <b>no allocation</b>, ever. Linked queue: <b>one <code>new</code> per <code>enqueue</code></b> (and a <code>delete</code> per dequeue).</p>','Array: none. Linked: one new per enqueue.'],
+    ['typical mistake',[R('array: the % arithmetic',/%|modulo|mod|wrap|index/,''),R('linked: back_ on the last dequeue',/back_|last (dequeue|node)|stale|dangl|nullptr/,'')],'<p>Array: getting the <b><code>%</code> arithmetic</b> wrong. Linked: forgetting to reset <b><code>back_</code> on the last <code>dequeue</code></b> (a stale pointer).</p>','Array: the % arithmetic. Linked: back_ on the last dequeue.']
+  ]);return T('Compare the circular-array queue and the linked queue on <b>'+d[0]+'</b>.',d[1],d[2],d[3],'One answer for each implementation.');},
+  ()=>T('How do the two implementations compare in <b>time</b> per operation, and does that decide which to use?',
+      [R('both are O(1)',/o\(1\)|constant/,''),R('so speed does not decide; capacity, memory and likely mistakes do',/not|doesn't|capacity|memory|mistake|neither|no difference|same/,'')],
+      '<p>Both give <b>O(1)</b> for every operation, so speed does not decide. Capacity, memory per item, and the mistakes you are likely to make do.</p>','Both O(1); choose by capacity, memory, and which mistakes you can handle.','Look at the time row of the comparison table.')],
+ mc:[()=>M('Which implementation can leak memory from its own storage if there is no destructor?','The linked queue',['The circular-array queue','Both equally','Neither'],'<p>The linked queue allocates a node per <code>enqueue</code> with <code>new</code>. The array queue never allocates.</p>')]},
+/* 18 */{id:'apps',title:'Spotting a queue',open:[
+  ()=>T('How do you recognize a problem that wants a queue? Give <b>four</b> examples of where queues show up.',
+      [R('print spooler',/print|spool/,''),R('task / CPU scheduling',/schedul|operating system|\bos\b|process|cpu|task/,''),R('buffering (keystrokes, network packets, video)',/buffer|keystroke|packet|stream|video/,''),R('breadth-first search',/bfs|breadth/,''),R('a line of customers / waiting list',/line|waiting|customer|registrar|ticket|call center|order/,'')],
+      '<p>When you hear yourself say <i>"in the order they arrived"</i> or <i>"fairly"</i>, you have found a queue (for a stack: <i>"most recent"</i>). Examples: print spooler; OS task scheduling; buffering (keystrokes, network packets, video); breadth-first search, where the queue enforces "one step at a time."</p>',
+      'Print spooler, task scheduling, buffering (keystrokes, packets, video), breadth-first search, lines of customers.','Think: in what order should things be served?',4)],
+ mc:[()=>{const s=pick([['a list of tasks waiting their turn on the CPU','Queue'],['reversing a string character by character','Stack'],['checking that brackets match','Stack'],['serving requests in the order they arrived','Queue'],['exploring a maze one step at a time in all directions (BFS)','Queue'],['undoing the last edit','Stack']]);
+    return M('Which structure fits: <b>'+s[0]+'</b>?',s[1],[s[1]==='Stack'?'Queue':'Stack'],'<p>"Most recent" means stack. "In the order they arrived" or "fairly" means queue.</p>');}]},
+/* 19 */{id:'bfs',title:'BFS vs DFS',open:[
+  ()=>T('The DFS and BFS loops are otherwise identical (same visited marking). What single change turns DFS into BFS, and what does BFS guarantee?',
+      [R('change the container of discovered cells: stack for DFS, queue for BFS',/stack[^.]*queue|queue[^.]*stack|container|frontier|replace|swap|change/,'What is the one thing you change?'),R('BFS finds the shortest path (fewest edges) in an unweighted maze',/shortest|fewest|minimum|least/,'What does BFS guarantee?')],
+      '<p>Change the container that holds discovered cells: <b>stack &rArr; DFS</b>, <b>queue &rArr; BFS</b>. BFS spreads like a flood and finds the <b>shortest path by number of edges</b> (unweighted maze). DFS finds <i>a</i> path.</p>',
+      'Replace the stack by a queue. BFS gives the shortest path by number of edges.','One word in the loop changes.'),
+  ()=>T('In BFS, should a cell be marked visited when it is <b>discovered</b> (enqueued) or when it is <b>removed</b> from the queue? Why?',
+      [R('mark when it is discovered / enqueued',/discover|enqueu|push|when (it is )?(added|found|put)/,''),R('so the same cell is never enqueued twice',/twice|duplicate|again|more than once|multiple|repeat/,'')],
+      '<p>Mark visited when a cell is <b>discovered</b>, not when it is removed, so it is never enqueued twice.</p>','Mark on discovery so a cell is never enqueued twice.','What could happen if two neighbors both discover the same cell before it is removed?')],
+ mc:[()=>M('Which container makes the search explore cells in order of distance from the start?','A queue',['A stack','A sorted array','Recursion with no container'],'<p>The queue gives the earliest discovered cell first: breadth-first.</p>')]},
+/* 20 */{id:'stdq',title:'std::queue for Project 2',open:[
+  ()=>T('In Project 2 you use <code>std::queue&lt;Coord&gt;</code>. What are the standard names for our <code>enqueue</code>, <code>dequeue</code> and <code>front</code>? What is the catch with <code>pop</code>?',
+      [R('enqueue is push',/push/,''),R('dequeue is pop',/pop/,''),R('front is front',/front/,''),R('pop returns nothing; read front() first, then pop()',/nothing|void|doesn't return|does not return|returns no|read[^.]*front|front[^.]*(first|before)/,'What does pop return?')],
+      '<table class="mono small"><tr><td>enqueue(v)&nbsp;</td><td>q.push(v)</td></tr><tr><td>dequeue()&nbsp;</td><td>q.pop()</td></tr><tr><td>front()&nbsp;</td><td>q.front()</td></tr><tr><td>empty()&nbsp;</td><td>q.empty()</td></tr></table><p><b>Catch:</b> <code>pop()</code> returns nothing. Read <code>q.front()</code> first, then call <code>q.pop()</code>. <code>front()</code> on an empty queue is undefined: check <code>empty()</code> first.</p>',
+      'push, pop, front. pop() returns nothing: read q.front() first, then q.pop().','The standard names differ for two of the three.'),
+  ()=>C('Given <code>std::queue&lt;int&gt; q;</code> that is not empty, write two lines that store the front value in <code>int x</code> and then remove it from the queue.',['Reads the front with q.front()','Removes it with q.pop()','Reads before it pops'],
+      c=>{const f=c.indexOf('q.front()'),p=c.indexOf('q.pop()');return [f>=0,p>=0,f>=0&&p>f];},
+      '<p><code>pop()</code> returns nothing, so read <code>q.front()</code> <b>first</b>, then call <code>q.pop()</code>.</p>','int x = q.front();\nq.pop();','pop() does not give you the value.')],
+ mc:[()=>M('What does <code>std::queue::pop()</code> return?','Nothing (<code>void</code>)',['The removed front item','The new front item','<code>true</code> if it worked'],'<p>Read <code>q.front()</code> first, then call <code>q.pop()</code>.</p>')]}
+];
+</script>
+<script>
+/* ---------- optional Claude (viewer's own account; the game works without it) ---------- */
+let SAMPLE=null,SAMPLE_IMG=false;
+try{ if(window.claude&&claude.use){ claude.use('sample').then(async s=>{ if(!s)return; SAMPLE=s; try{const l=await s.limits(); SAMPLE_IMG=!!(l&&l.images);}catch(e){} }).catch(()=>{}); } }catch(e){}
+
+/* ---------- state ---------- */
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+let G=null;
+const TOTAL=SKILLS.length;
+const byId=id=>SKILLS.find(s=>s.id===id);
+const norm=s=>String(s).toLowerCase().replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+const plain=h=>{const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/\s+/g,' ').trim();};
+const ints=s=>(String(s).match(/-?\d+/g)||[]).map(Number);
+
+function newGame(){
+  G={score:0,streak:0,best:0,order:shuffle(SKILLS.map(s=>s.id)),res:{},fmt:{},lastv:{},practice:null,cur:null,count:0,log:[]};
+  SKILLS.forEach(s=>G.res[s.id]={status:'new',first:null,pr:0,att:0});
+  $('stats').hidden=false;$('progWrap').hidden=false;
+  updateStats();deal();
+}
+function doneCount(){return SKILLS.filter(s=>G.res[s.id].status==='done').length;}
+function updateStats(){
+  $('sScore').textContent=G.score;$('sStreak').textContent=G.streak;$('sDone').textContent=doneCount();$('sTotal').textContent=TOTAL;
+  $('prog').style.width=(100*doneCount()/TOTAL)+'%';
+}
+function nextSkill(){
+  if(G.practice&&G.res[G.practice].status==='practice')return G.practice;
+  G.practice=null;
+  let id=G.order.find(i=>G.res[i].status==='new');
+  if(!id){id=G.order.find(i=>G.res[i].status==='skipped'); if(id){G.res[id].status='practice';G.res[id].pr=0;G.practice=id;}}
+  return id||null;
+}
+function deal(){
+  const sid=nextSkill(); if(!sid){summary();return;}
+  const sk=byId(sid),fmt=G.fmt[sid]||'open';
+  const pool=fmt==='mc'?sk.mc:sk.open;
+  let vi=rnd(0,pool.length-1); const key=sid+fmt;
+  if(pool.length>1&&vi===G.lastv[key])vi=(vi+1)%pool.length;
+  G.lastv[key]=vi;
+  G.count++;
+  G.cur={sid,fmt,q:pool[vi](),hint:false,mode:'type',sel:null,file:null,answered:false};
+  renderQuestion();
+}
+
+/* ---------- screens ---------- */
+function intro(){
+  stage.innerHTML=`<section class="card hero">
+    <span class="tag">CSCI 235 &middot; Class 10 &middot; Queues</span>
+    <h2>Twenty cards. Answer them yourself.</h2>
+    <p>Each card asks a question about queues. You write the answer: a sentence, a few numbers, or code you type yourself. You can also write on paper and upload a photo. After every answer you get a check, an explanation and the model solution.</p>
+    <div class="how">
+      <div class="box"><h3>Cards come in random order</h3><p class="small">Get one right on the first try and that card is done.</p></div>
+      <div class="box"><h3>Miss one? Practice it</h3><p class="small">You get fresh, similar problems until you answer <b>three</b> correctly. Numbers change each time.</p></div>
+      <div class="box"><h3>Stuck on the type?</h3><p class="small">Switch between written answers and multiple choice, or skip a topic and come back later.</p></div>
+    </div>
+    <div class="row"><button class="btn main" data-act="start">Deal the first card</button><span class="small">Your progress lives in this tab only. Reloading restarts the game.</span></div>
+  </section>`;
+}
+function pipsHtml(n){return '<span class="pips" aria-label="'+n+' of 3 practice answers correct">'+[0,1,2].map(i=>'<i class="pip'+(i<n?' on':'')+'"></i>').join('')+'</span>';}
+function header(){
+  const c=G.cur,r=G.res[c.sid],sk=byId(c.sid);
+  const mode=r.status==='practice'?'<span class="mode prac">Practice</span>'+pipsHtml(r.pr):'<span class="mode">New card</span>';
+  return `<div class="top"><span class="tag">Card ${SKILLS.indexOf(sk)+1} of ${TOTAL}</span><span class="row" style="gap:8px">${mode}</span></div><h3 class="title">${esc(sk.title)}</h3>`;
+}
+function renderQuestion(){
+  const c=G.cur,q=c.q,sk=byId(c.sid);
+  let body='';
+  if(q.type==='mc'){
+    body='<div class="opts" id="opts">'+q.options.map((o,i)=>`<button class="opt" data-act="pick" data-i="${i}" aria-pressed="false"><span class="k">${'ABCD'[i]}</span><span>${o.t}</span></button>`).join('')+'</div>';
+  }else{
+    const tabs=`<div class="tabs" role="tablist"><button class="tab" role="tab" data-act="mode" data-m="type" aria-selected="${c.mode==='type'}">Type my answer</button><button class="tab" role="tab" data-act="mode" data-m="photo" aria-selected="${c.mode==='photo'}">Answer on paper</button></div>`;
+    let area='';
+    if(c.mode==='type'){
+      if(q.type==='nums')area='<div class="fields">'+q.fields.map(f=>`<label for="f_${f.id}">${esc(f.label)}<input type="text" id="f_${f.id}" autocomplete="off" inputmode="text"></label>`).join('')+'</div>';
+      else if(q.type==='code')area='<textarea id="ans" data-code="1" spellcheck="false" autocapitalize="off" aria-label="Your code" placeholder="Type your C++ here. Tab inserts four spaces."></textarea>';
+      else area='<textarea id="ans" class="prose" aria-label="Your answer" placeholder="Write your answer in your own words."></textarea>';
+    }else{
+      area=`<div class="photo"><p class="small">Write your answer on paper, then take a photo and choose it here. Make sure the writing is dark and the whole answer is in the frame.</p><input type="file" id="photo" accept="image/*" capture="environment" aria-label="Photo of your written answer"><div id="pv"></div><div class="row" id="photoBtns"></div></div>`;
+    }
+    body=tabs+area;
+  }
+  const other=c.fmt==='mc'?'Write it out instead':'Switch to multiple choice';
+  stage.innerHTML=`<section class="card">${header()}<div class="q">${q.prompt}</div>${body}
+    <div id="hintbox"></div>
+    <div class="row">${(q.type==='mc'||c.mode==='type')?'<button class="btn main" data-act="check" id="checkBtn"'+(q.type==='mc'?' disabled':'')+'>Check my answer</button>':''}
+    <button class="btn quiet" data-act="hint">Show a hint</button>
+    <button class="btn quiet" data-act="switch">${other}</button>
+    <button class="btn quiet" data-act="skip">Skip this topic</button></div></section>`;
+  if(c.mode==='photo'&&q.type!=='mc')wirePhoto();
+  const ta=$('ans'); if(ta&&ta.dataset.code)wireTab(ta);
+}
+function wireTab(ta){
+  let free=false;
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){free=true;return;}
+    if(e.key==='Tab'&&!free&&!e.shiftKey){e.preventDefault();const s=ta.selectionStart,t=ta.selectionEnd;ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(t);ta.selectionStart=ta.selectionEnd=s+4;}
+    else if(e.key!=='Tab')free=false;
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter')check();
+  });
+}
+function wirePhoto(){
+  const inp=$('photo');
+  inp.addEventListener('change',()=>{
+    const f=inp.files&&inp.files[0]; if(!f)return;
+    G.cur.file=f;
+    const url=URL.createObjectURL(f);
+    $('pv').innerHTML='<img alt="Your photo" src="'+url+'">';
+    const canClaude=SAMPLE&&SAMPLE_IMG;
+    $('photoBtns').innerHTML=(canClaude?'<button class="btn main" data-act="claudePhoto">Grade my photo with Claude</button>':'')+'<button class="btn '+(canClaude?'':'main')+'" data-act="selfcheck">'+(canClaude?'Self-check instead':'Show the model answer and self-check')+'</button>'+(canClaude?'<span class="small">Claude uses your own claude.ai account.</span>':'');
+  });
+}
+
+/* ---------- grading ---------- */
+function gradeTyped(q,raw){
+  if(q.type==='mc')return null;
+  if(q.type==='nums'){
+    const items=q.fields.map(f=>{const got=ints(document.getElementById('f_'+f.id).value);const ok=got.length===f.ans.length&&got.every((v,i)=>v===f.ans[i]);
+      return {ok,label:f.label+': '+f.ans.join(', '),tip:ok?'':'You wrote: '+(got.length?got.join(', '):'nothing')};});
+    return {items,pass:items.every(i=>i.ok),user:q.fields.map(f=>f.label+' = '+document.getElementById('f_'+f.id).value).join('\n')};
+  }
+  if(q.type==='code'){
+    if(!raw.trim())return {items:q.labels.map(l=>({ok:false,label:l})),pass:false,user:raw};
+    let res;try{res=q.check(squash(raw));}catch(e){res=q.labels.map(()=>false);}
+    const items=q.labels.map((l,i)=>({ok:!!res[i],label:l}));
+    return {items,pass:items.every(i=>i.ok),user:raw};
+  }
+  const n=norm(raw); const m=q.rubric.map(r=>r.re.test(n));
+  const got=m.filter(Boolean).length;
+  let items;
+  if(q.need<q.rubric.length){
+    items=q.rubric.filter((r,i)=>m[i]).map(r=>({ok:true,label:r.label}));
+    items.push({ok:got>=q.need,label:'Name at least '+q.need+' (you named '+got+')',tip:got>=q.need?'':'Think about where order of arrival matters.'});
+    return {items,pass:got>=q.need,user:raw};
+  }
+  items=q.rubric.map((r,i)=>({ok:m[i],label:r.label,tip:m[i]?'':r.tip}));
+  return {items,pass:got>=q.need&&n.length>0,user:raw};
+}
+function check(){
+  const c=G.cur;if(!c||c.answered)return;
+  const q=c.q;
+  if(q.type==='mc'){
+    if(c.sel===null)return;
+    const ok=q.options[c.sel].ok;
+    const items=[{ok,label:'You chose: '+plain(q.options[c.sel].t)}];
+    if(!ok)items.push({ok:true,label:'Correct choice: '+plain(q.options.find(o=>o.ok).t)});
+    finish({items,pass:ok,user:'',mc:true});return;
+  }
+  const raw=q.type==='nums'?'':($('ans')?$('ans').value:'');
+  if(q.type!=='nums'&&!raw.trim()){$('hintbox').innerHTML='<div class="hint">Type something first, even a partial answer. A wrong attempt teaches more than a blank.</div>';return;}
+  finish(gradeTyped(q,raw));
+}
+function selfLabels(q){return q.type==='text'?q.rubric.map(r=>r.label):q.type==='code'?q.labels:q.fields.map(f=>f.label+' matches: '+f.ans.join(', '));}
+function selfCheck(){
+  const c=G.cur,q=c.q,labels=selfLabels(q);
+  const model=q.type==='nums'?'':'<h3>Model answer</h3>'+(q.type==='code'?'<pre>'+esc(q.model)+'</pre>':'<div class="box">'+esc(q.model)+'</div>');
+  $('photoBtns').innerHTML='';
+  $('pv').insertAdjacentHTML('beforeend','<div class="fb">'+model+'<h3 style="margin-top:10px">Compare your paper answer. Tick each point you really had.</h3><div class="self">'+labels.map((l,i)=>`<label><input type="checkbox" class="sc" data-i="${i}"><span>${esc(l)}</span></label>`).join('')+'</div><div class="row"><button class="btn main" data-act="submitSelf">Submit my self-check</button></div></div>');
+}
+function submitSelf(){
+  const q=G.cur.q,labels=selfLabels(q);
+  const ticks=[...document.querySelectorAll('.sc')].map(x=>x.checked);
+  const items=labels.map((l,i)=>({ok:ticks[i],label:l,tip:ticks[i]?'':'Not in your paper answer yet.'}));
+  finish({items,pass:items.every(i=>i.ok),user:'(answered on paper)',self:true});
+}
+async function claudePhoto(){
+  const c=G.cur,q=c.q;if(!SAMPLE||!c.file)return;
+  const labels=selfLabels(q);
+  $('photoBtns').innerHTML='<span class="small" id="thk">Claude is reading your photo...</span>';
+  const prompt='You are grading a student\'s handwritten answer (photo attached) to a data-structures flashcard about queues in C++.\nQuestion: '+plain(q.prompt)+'\nReference answer: '+(q.model?q.model:plain(q.explain))+'\nChecklist:\n'+labels.map((l,i)=>(i+1)+'. '+l).join('\n')+'\nFor each checklist item decide whether the photo clearly shows it. Be fair about wording and handwriting. Reply with only JSON: {"parts":[{"ok":true,"note":"short reason"}],"feedback":"2 or 3 kind, specific sentences"} with one part per checklist item in order. If the photo is unreadable, set every ok to false and say so in feedback.';
+  try{
+    const out=await SAMPLE.json(prompt,{images:c.file,modelTier:'default'});
+    const parts=out.parts||[];
+    const items=labels.map((l,i)=>({ok:!!(parts[i]&&parts[i].ok),label:l,tip:parts[i]&&parts[i].note||''}));
+    finish({items,pass:items.every(i=>i.ok),user:'(photo)',claudeNote:out.feedback||''});
+  }catch(e){
+    $('photoBtns').innerHTML='<span class="small">Claude could not grade the photo ('+esc(e.code||'error')+'). You can self-check instead.</span> <button class="btn main" data-act="selfcheck">Self-check</button>';
+  }
+}
+async function askClaude(){
+  const c=G.cur,q=c.q,box=$('claudeBox');if(!SAMPLE||!box)return;
+  box.innerHTML='<p class="small">Claude is reading your answer...</p>';
+  const ref=q.model?q.model:plain(q.explain);
+  const prompt='You are a kind teaching assistant for a college data-structures class (C++, queues). A student answered a flashcard.\nQuestion: '+plain(q.prompt)+'\nReference solution: '+ref+'\nStudent answer:\n'+String(c.user||'').slice(0,4000)+'\nIn 3 to 5 short sentences: say what is right, what is missing or wrong (be specific, and point to the exact line or idea), and give one tip. Do not rewrite the whole solution.';
+  try{
+    await SAMPLE(prompt,{modelTier:'quick',onText:({text})=>{box.innerHTML='<h3>Claude\'s review</h3><p style="white-space:pre-wrap">'+esc(text)+'</p>';}});
+  }catch(e){box.innerHTML='<p class="small">Claude could not review this answer ('+esc(e.code||'error')+'). The model solution above still applies.</p>';}
+}
+
+/* ---------- feedback and progression ---------- */
+function finish(g){
+  const c=G.cur,q=c.q,r=G.res[c.sid];
+  c.answered=true;c.user=g.user;r.att++;
+  const wasNew=r.status==='new';
+  let pts=0,note='';
+  if(g.pass){
+    pts=(wasNew?10:6)+Math.min(G.streak,5)-(c.hint?3:0);pts=Math.max(pts,3);
+    G.streak++;G.best=Math.max(G.best,G.streak);G.score+=pts;
+    if(wasNew){r.status='done';r.first=true;note='Done: first try.';}
+    else{r.pr++;if(r.pr>=3){r.status='done';G.practice=null;note='Topic mastered after practice.';}else note='Practice '+r.pr+' of 3.';}
+  }else{
+    G.streak=0;
+    if(wasNew){r.status='practice';r.first=false;r.pr=0;G.practice=c.sid;note='This card goes to practice: you need three correct answers.';}
+    else note='Practice stays at '+r.pr+' of 3.';
+  }
+  updateStats();
+  const sk=byId(c.sid);
+  const checks='<ul class="checks">'+g.items.map(i=>`<li class="${i.ok?'ok':'no'}"><span class="m" aria-hidden="true">${i.ok?'&#10003;':'&#10005;'}</span><span>${esc(i.label)}${i.tip?'<span class="tip">'+esc(i.tip)+'</span>':''}</span></li>`).join('')+'</ul>';
+  const user=(!g.mc&&!g.self&&g.user&&q.type!=='nums')?'<div><h3>Your answer</h3><div class="draft">'+esc(g.user)+'</div></div>':(q.type==='nums'&&g.user?'<div><h3>Your answer</h3><div class="draft">'+esc(g.user)+'</div></div>':'');
+  const model=q.type==='code'?'<div><h3>Model solution</h3><pre>'+esc(q.model)+'</pre></div>':(q.type==='text'?'<div><h3>Model answer</h3><div class="box">'+esc(q.model)+'</div></div>':'');
+  let btns='';
+  const practiceNow=G.practice===c.sid&&r.status==='practice';
+  if(g.pass)btns='<button class="btn go" data-act="next" id="nextBtn">'+(practiceNow?'Next practice problem':'Next card')+'</button>';
+  else btns='<button class="btn main" data-act="next" id="nextBtn">Try a similar problem</button>';
+  btns+=(!g.pass?'<button class="btn" data-act="switch2">'+(c.fmt==='mc'?'Write it out instead':'Switch to multiple choice')+'</button>':'')+(r.status==='practice'?'<button class="btn quiet" data-act="skip2">Skip this topic for now</button>':'');
+  const askBtn=(SAMPLE&&!g.mc&&!g.self&&!g.claudeNote&&String(c.user||'').trim()&&c.user!=='(photo)')?'<button class="btn" data-act="askclaude">Ask Claude to review my answer</button>':'';
+  stage.innerHTML=`<section class="card fb">${header()}
+    <div class="verdict ${g.pass?'ok':'no'}"><span>${g.pass?'Correct':'Not yet'} &middot; ${g.items.filter(i=>i.ok).length} of ${g.items.length} parts</span><span>${g.pass?'+'+pts+' points':'0 points'}</span></div>
+    <p class="small" style="margin:0">${esc(note)}</p>
+    ${checks}${user}
+    ${g.claudeNote?'<div class="box"><h3>Claude\'s feedback</h3><p style="white-space:pre-wrap;margin:0">'+esc(g.claudeNote)+'</p></div>':''}
+    <div><h3>Why</h3><div class="box">${q.explain}</div></div>${model}
+    <div id="claudeBox" class="box" ${askBtn?'':'hidden'}></div>
+    <div class="row">${btns}${askBtn}</div></section>`;
+  if(askBtn)$('claudeBox').hidden=true;
+  const nb=$('nextBtn');if(nb)nb.focus({preventScroll:true});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function summary(){
+  $('prog').style.width='100%';
+  const rs=SKILLS.map(s=>({s,r:G.res[s.id]}));
+  const first=rs.filter(x=>x.r.first===true).length;
+  const prac=rs.filter(x=>x.r.first===false&&x.r.status==='done').length;
+  const open=rs.filter(x=>x.r.status!=='done').length;
+  stage.innerHTML=`<section class="card"><span class="tag">Round complete</span><h2>You finished the deck.</h2>
+    <p><b>${G.score}</b> points &middot; best streak <b>${G.best}</b> &middot; ${first} cards right on the first try &middot; ${prac} mastered through practice${open?' &middot; '+open+' still open':''}.</p>
+    <div class="sumgrid">${rs.map(({s,r})=>`<div class="box"><b>${esc(s.title)}</b><span class="st ${r.status==='done'?(r.first?'first':'prac'):'skip'}">${r.status==='done'?(r.first?'First try':'Practiced, mastered'):'Not finished'}</span><span class="small">${r.att} attempt${r.att===1?'':'s'}</span></div>`).join('')}</div>
+    <div class="row"><button class="btn main" data-act="start">Play again with a new shuffle</button></div></section>`;
+}
+
+/* ---------- events ---------- */
+stage.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,c=G&&G.cur;
+  if(a==='start'){newGame();return;}
+  if(a==='pick'){c.sel=+b.dataset.i;document.querySelectorAll('.opt').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));$('checkBtn').disabled=false;return;}
+  if(a==='check'){check();return;}
+  if(a==='mode'){if(c.mode!==b.dataset.m){c.mode=b.dataset.m;renderQuestion();}return;}
+  if(a==='hint'){const h=c.q.hint||'Re-read the question and take it one step at a time.';c.hint=true;$('hintbox').innerHTML='<div class="hint"><b>Hint</b> (costs 3 points): '+esc(h)+'</div>';return;}
+  if(a==='switch'||a==='switch2'){G.fmt[c.sid]=c.fmt==='mc'?'open':'mc';deal();return;}
+  if(a==='skip'||a==='skip2'){const r=G.res[c.sid];if(r.status==='practice'){r.status='skipped';}if(r.status==='new'||r.status==='skipped'){G.order=G.order.filter(i=>i!==c.sid).concat(c.sid);}if(G.practice===c.sid)G.practice=null;G.streak=0;updateStats();deal();return;}
+  if(a==='next'){deal();return;}
+  if(a==='selfcheck'){selfCheck();return;}
+  if(a==='submitSelf'){submitSelf();return;}
+  if(a==='claudePhoto'){claudePhoto();return;}
+  if(a==='askclaude'){$('claudeBox').hidden=false;b.disabled=true;askClaude();return;}
+});
+intro();
+</script>
+
+</body>
+</html>
