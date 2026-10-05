@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSCI 235 – P2: Maze – DFS Step Visualizer</title>
+<style>
+  :root {
+    --wall: #2b2b2b;
+    --open: #f5f5f5;
+    --onstack: #a9d6f5;
+    --current: #ff9f43;
+    --dead: #e5c9c9;
+    --route: #b7e4a0;
+    --hit: #38b000;
+    --unexplored: #eeeeee;
+    --ink: #1a1a1a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: var(--ink);
+    margin: 0;
+    padding: 24px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; text-align: center; }
+  .sub { color: #666; font-size: 0.9rem; margin-bottom: 18px; text-align: center; max-width: 820px; }
+  #mainRow { display: flex; gap: 26px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  #controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
+  button {
+    font: inherit; font-size: 0.85rem; padding: 7px 14px; border-radius: 6px;
+    border: 1px solid #ccc; background: white; cursor: pointer;
+  }
+  button.primary { background: #1d3557; color: white; border-color: #1d3557; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button.active { background: #1d3557; color: white; border-color: #1d3557; }
+  #stepInfo { font-size: 0.85rem; color: #555; margin-bottom: 8px; }
+  #grid { display: grid; gap: 3px; margin-bottom: 14px; background: #ddd; padding: 3px; border-radius: 6px; }
+  .cell {
+    width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 0.85rem; border-radius: 3px; position: relative;
+  }
+  .cell.unexplored {
+    background-image: repeating-linear-gradient(45deg, #ddd, #ddd 4px, #f5f5f5 4px, #f5f5f5 8px);
+  }
+  .cell.missing { background: transparent; }
+  .rowLabel, .colLabel, .corner {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 600; color: #777;
+  }
+  .colLabel { padding: 3px 0; }
+  .rowLabel { padding: 0 3px; }
+  .cell .badge {
+    position: absolute; top: 2px; left: 3px; font-size: 0.68rem; font-weight: 600; color: rgba(0,0,0,0.5);
+  }
+  #caption {
+    max-width: 640px; text-align: center; font-size: 1rem; min-height: 3.2em;
+    display: flex; align-items: center; justify-content: center; padding: 0 8px;
+  }
+  #result { font-weight: bold; margin-top: 4px; min-height: 1.4em; text-align: center; }
+  #result.true { color: #2b8a00; }
+  #result.false { color: #c1121f; }
+  #treeWrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; max-width: 100%; }
+  #treeLabel { font-size: 0.85rem; font-weight: bold; color: #333; margin-bottom: 6px; text-align: center; max-width: 320px; }
+  #treeSvg { background: white; border: 1px solid #ddd; border-radius: 6px; max-width: 100%; }
+  #treeSvg text { font-size: 12px; font-weight: 600; font-family: inherit; }
+  #sideWrap { width: 300px; flex-shrink: 0; max-width: 100%; }
+  #stacksRow { display: flex; gap: 12px; margin-bottom: 14px; }
+  .stackCol { flex: 1; min-width: 0; }
+  .stackLabel { font-size: 0.8rem; font-weight: bold; color: #333; margin-bottom: 6px; text-align: center; }
+  .stackBox {
+    background: white; border: 1px solid #ddd; border-radius: 6px; padding: 8px 8px 6px;
+    min-height: 100px; max-height: 300px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .sSlot {
+    position: relative; border: 2px solid #999; border-radius: 4px; padding: 3px 0;
+    text-align: center; font-size: 0.72rem; font-weight: 700;
+  }
+  .sSlot.top { border-color: #1d3557; border-width: 3px; }
+  .sSlot .tag { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 0.55rem; color: #1d3557; }
+  .sEmpty { color: #999; font-size: 0.8rem; text-align: center; padding: 6px 2px; }
+  .stackCap { font-size: 0.68rem; color: #777; text-align: center; margin-top: 4px; }
+  #stepsLogLabel { font-size: 0.85rem; font-weight: bold; color: #333; margin-bottom: 6px; text-align: center; }
+  #stepsLog {
+    max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ddd;
+    border-radius: 6px; padding: 10px 12px; margin: 0; font-size: 0.8rem; line-height: 1.7;
+    list-style: none; counter-reset: steps;
+  }
+  #stepsLog li { counter-increment: steps; }
+  #stepsLog li::before { content: "(" counter(steps) ") "; font-weight: 600; color: #777; }
+  #stepsLog li.current { font-weight: bold; background: #fff3d6; border-radius: 4px; padding: 1px 4px; margin-left: -4px; }
+  #legend { font-size: 0.75rem; color: #555; margin-top: 14px; text-align: center; max-width: 620px; line-height: 1.5; }
+  .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: middle; margin: 0 3px 0 10px; }
+  #hint { font-size: 0.78rem; color: #888; margin-top: 18px; text-align: center; }
+  code { background: #eee; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+</style>
+</head>
+<body>
+
+<h1>P2: Maze — DFS Step Visualizer</h1>
+<div class="sub">
+  Traces the recursive helper behind <code>DFS_Solver::getPath()</code>: each call marks its cell visited,
+  then tries the neighbors in the order <strong>left, right, up, down</strong>. A call that reaches the end
+  pushes it on the <em>answer stack</em>; every caller that then sees a non-empty answer stack pushes its own cell.
+  A call that finds no way forward <em>returns without adding anything</em>.
+</div>
+
+<div id="controls">
+  <button class="mazeBtn" data-key="1">Example 1 (4×4, handout)</button>
+  <button class="mazeBtn" data-key="2">Example 2 (ragged default)</button>
+  <button class="mazeBtn" data-key="3">Example 3 (open room)</button>
+  <button class="mazeBtn" data-key="4">Example 4 (no path)</button>
+  <span style="width:1px;background:#ccc;"></span>
+  <button id="btnPrev">← Prev</button>
+  <button id="btnNext" class="primary">Next (Space) →</button>
+  <button id="btnRestart">Restart</button>
+</div>
+
+<div id="stepInfo"></div>
+
+<div id="mainRow">
+  <div id="grid"></div>
+  <div id="treeWrap">
+    <div id="treeLabel">DFS call tree (parent call → child call; an edge appears when the child call begins)</div>
+    <svg id="treeSvg"></svg>
+  </div>
+  <div id="sideWrap">
+    <div id="stacksRow">
+      <div class="stackCol">
+        <div class="stackLabel">Recursion (call) stack</div>
+        <div class="stackBox" id="recBox"></div>
+        <div class="stackCap">newest call on top</div>
+      </div>
+      <div class="stackCol">
+        <div class="stackLabel">Answer stack (what getPath() returns)</div>
+        <div class="stackBox" id="ansBox"></div>
+        <div class="stackCap">last pushed on top</div>
+      </div>
+    </div>
+    <div id="stepsLogLabel">Step-by-step trace</div>
+    <ol id="stepsLog"></ol>
+  </div>
+</div>
+
+<div id="caption"></div>
+<div id="result"></div>
+
+<div id="legend">
+  <span class="swatch" style="background:var(--current)"></span>cell involved in this step
+  <span class="swatch" style="background:var(--onstack)"></span>waiting on the recursion stack
+  <span class="swatch" style="background:var(--dead)"></span>dead end (returned, nothing pushed)
+  <span class="swatch" style="background:var(--route)"></span>on the route (pushed on answer stack)
+  <span class="swatch" style="background:var(--hit)"></span>destination reached
+  <span class="swatch" style="background:var(--wall)"></span>wall
+  <span class="swatch cell unexplored" style="width:11px;height:11px;display:inline-block;"></span>never visited
+  <br><span style="display:inline-block; margin-top:6px;">The small number in a corner of a cell is its recursion depth (the start call is depth 1). A blank cell with no border (ragged maze) is not part of the maze: that row is simply shorter there.</span>
+  <br><span style="display:inline-block; margin-top:2px;">On a return step the call has already left the recursion stack, but its cell stays highlighted so you can see which call just finished. This visualizer's JavaScript helper returns <code>true</code>/<code>false</code> internally, while the C++ helper signals success by leaving the answer stack non-empty; both produce exactly the same trace.</span>
+  <br><span style="display:inline-block; margin-top:2px;">Notice that dead-end cells are never pushed on the answer stack, so they cannot appear in the final route. Only the cells that were still waiting on the recursion stack when the destination was reached end up in the answer.</span>
+</div>
+
+<div id="hint">Press <strong>Space</strong> or <strong>→</strong> to step forward, <strong>←</strong> to step back, <strong>R</strong> to restart, <strong>1</strong>–<strong>4</strong> to switch example.</div>
+
+<script>
+// Maze: 0 = open, 1 = wall. Rows may have different lengths (ragged).
+const EXAMPLES = {
+  1: { label: "Example 1 (4×4, handout)",
+       grid: [[0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0]],
+       start: {row:0,col:0}, target: {row:3,col:3} },
+  2: { label: "Example 2 (ragged default maze)",
+       grid: [[0,0,0],[1,0,0],[0,0]],
+       start: {row:0,col:0}, target: {row:2,col:1} },
+  3: { label: "Example 3 (open 3×3 room)",
+       grid: [[0,0,0],[0,0,0],[0,0,0]],
+       start: {row:1,col:1}, target: {row:0,col:1} },
+  4: { label: "Example 4 (no path)",
+       grid: [[0,0,1,0],[0,0,1,0],[0,0,1,0]],
+       start: {row:0,col:0}, target: {row:2,col:3} },
+};
+
+// Same order as DFS_Solver.cpp: left, right, up, down.
+const DIRS = [[0,-1,"left"],[0,1,"right"],[-1,0,"up"],[1,0,"down"]];
+
+let currentKey = 1, frames = [], frameIndex = 0, built = null;
+
+const toIdx = (r,c,n) => r*n + c;
+const toRC  = (i,n) => [Math.floor(i/n), i % n];
+
+function computeFrames(ex) {
+  const { grid, start, target } = ex;
+  const R = grid.length;
+  const C = Math.max(1, ...grid.map(r => r.length));
+  const N = R*C;
+  // Mirrors Maze_Solver::isOpen: bounds are checked against the cell's OWN row.
+  const isOpen = (r,c) => r >= 0 && r < R && c >= 0 && c < grid[r].length && grid[r][c] === 0;
+  const name = i => { const [r,c] = toRC(i,C); return `(${r},${c})`; };
+
+  const visited = new Array(N).fill(false);
+  const depthOf = new Array(N).fill(0);
+  const dead = new Set(), route = new Set();
+  const rec = [], ans = [];
+  const parent = new Array(N).fill(-1);
+  const children = {};
+  const out = [];
+
+  const snap = (extra) => out.push(Object.assign({
+    visited: visited.slice(), dead: new Set(dead), route: new Set(route),
+    rec: rec.slice(), ans: ans.slice(), current: null, hit: false,
+    note: "", stepText: "", phase: "step", newNode: -1,
+  }, extra));
+
+  const sIdx = toIdx(start.row, start.col, C), tIdx = toIdx(target.row, target.col, C);
+
+  // getPath() validates the endpoints before any recursion starts.
+  if (!isOpen(start.row, start.col) || !isOpen(target.row, target.col)) {
+    snap({ phase: "empty",
+      note: `<code>getPath()</code> first checks that the start and end cells are open. At least one of them is a wall or outside the maze, so it returns an empty stack <strong>without calling the helper at all</strong>.`,
+      stepText: `Start or end is not open: return an empty stack immediately.` });
+    return { frames: out, found: false, R, C, depthOf,
+             tree: { pos: {}, parent, root: -1, leaves: 1, maxDepth: 0 } };
+  }
+
+  snap({ phase: "init",
+    note: `<code>getPath()</code> checks that the start and end cells are open, creates the visited table and an empty answer stack, then calls the recursive helper on the start cell ${name(sIdx)}.`,
+    stepText: `Call the helper on the start ${name(sIdx)} with an empty answer stack.` });
+
+  function call(cell, from, dirName, depth) {
+    const [r,c] = toRC(cell,C);
+    visited[cell] = true; depthOf[cell] = depth;
+    rec.push(cell);
+    if (from >= 0) { parent[cell] = from; (children[from] = children[from] || []).push(cell); }
+    const how = from >= 0 ? `, reached from ${name(from)} by going ${dirName}` : "";
+    if (cell === tIdx) {
+      snap({ current: cell, newNode: cell, phase: "enter",
+        note: `Call on ${name(cell)}${how}: mark it visited. It is the <strong>destination</strong>, so the base case fires immediately (no neighbors are tried).`,
+        stepText: `Call on ${name(cell)} — the destination. Base case: push ${name(cell)} onto the answer stack and return.` });
+      rec.pop(); ans.push(cell); route.add(cell);
+      snap({ current: cell, hit: true, phase: "hit",
+        note: `The destination ${name(cell)} is pushed onto the answer stack and its call returns. The answer stack is now non-empty, which signals success to every caller still waiting.`,
+        stepText: `Pushed ${name(cell)}; the call returns with the answer stack non-empty.` });
+      return true;
+    }
+    snap({ current: cell, newNode: cell, phase: "enter",
+      note: `Call on ${name(cell)}${how}: mark it visited, then try left, right, up, down. Recursion depth ${depth}.`,
+      stepText: `Call on ${name(cell)}${from>=0 ? " (going " + dirName + " from " + name(from) + ")" : " (the start)"}; mark visited.` });
+
+    for (const [dr,dc,dn] of DIRS) {
+      const nr = r+dr, nc = c+dc;
+      if (isOpen(nr,nc) && !visited[toIdx(nr,nc,C)]) {
+        const child = toIdx(nr,nc,C);
+        const ok = call(child, cell, dn, depth+1);
+        if (ok) {
+          ans.push(cell); route.add(cell); rec.pop();
+          snap({ current: cell, phase: "unwind",
+            note: `Back in the call on ${name(cell)}: the answer stack is non-empty, so this cell is on the route. It pushes ${name(cell)} and returns.`,
+            stepText: `Back in ${name(cell)}: answer stack non-empty, so push ${name(cell)} and return.` });
+          return true;
+        }
+        // child failed: we are back in this call, which now tries its next direction
+        snap({ current: cell, phase: "resume",
+          note: `<strong>&#8630; Backtrack.</strong> Back in the call on ${name(cell)}: the answer stack is still empty, so the ${dn} branch failed. Nothing is undone; the loop just continues with the next direction.`,
+          stepText: `&#8630; Backtrack: back in ${name(cell)}, the ${dn} branch failed; try the next direction.` });
+      }
+    }
+    rec.pop(); dead.add(cell);
+    snap({ current: cell, phase: "dead",
+      note: `<strong>&#8630; Backtrack.</strong> ${name(cell)} has no unvisited open neighbor left: dead end. The call <strong>returns without adding anything</strong>, which hands control back to the caller.`,
+      stepText: `&#8630; Backtrack: ${name(cell)} is a dead end — return without pushing anything.` });
+    return false;
+  }
+
+  const found = call(sIdx, -1, "", 1);
+  if (found) {
+    const path = ans.slice().reverse().map(name).join(" → ");
+    snap({ current: null, phase: "done",
+      note: `The recursion is finished. <code>getPath()</code> returns the answer stack with the start on top: ${path}.`,
+      stepText: `Done: getPath() returns the ${ans.length}-cell path ${path}.` });
+  } else {
+    snap({ current: null, phase: "empty",
+      note: `The first call returned without pushing anything, so the answer stack is empty. <code>getPath()</code> returns an empty stack: there is no path.`,
+      stepText: `Done: the answer stack is empty, so getPath() returns an empty stack (no path).` });
+  }
+
+  // tree layout (leaf slots left to right, parents centered over children)
+  const pos = {}; let nextX = 0, maxDepth = 0;
+  (function place(node, d) {
+    maxDepth = Math.max(maxDepth, d);
+    const kids = children[node] || [];
+    if (!kids.length) { pos[node] = { x: nextX++, depth: d }; return; }
+    kids.forEach(k => place(k, d+1));
+    const xs = kids.map(k => pos[k].x);
+    pos[node] = { x: (Math.min(...xs)+Math.max(...xs))/2, depth: d };
+  })(sIdx, 0);
+
+  return { frames: out, found, R, C, depthOf, tree: { pos, parent, root: sIdx, leaves: Math.max(nextX,1), maxDepth } };
+}
+
+function loadExample(key) {
+  currentKey = key;
+  built = computeFrames(EXAMPLES[key]);
+  frameIndex = 0;
+  document.querySelectorAll(".mazeBtn").forEach(b => b.classList.toggle("active", Number(b.dataset.key) === key));
+  document.getElementById("grid").style.gridTemplateColumns = `26px repeat(${built.C}, 54px)`;
+  render();
+}
+
+function render() {
+  const ex = EXAMPLES[currentKey];
+  const { grid: g, start, target } = ex;
+  const { R, C, frames: fr } = built;
+  const f = fr[frameIndex];
+  const last = frameIndex === fr.length - 1;
+  const el = document.getElementById("grid");
+  el.innerHTML = "";
+
+  el.appendChild(Object.assign(document.createElement("div"), { className: "corner" }));
+  for (let c = 0; c < C; c++) el.appendChild(Object.assign(document.createElement("div"), { className: "colLabel", textContent: c }));
+
+  for (let r = 0; r < R; r++) {
+    el.appendChild(Object.assign(document.createElement("div"), { className: "rowLabel", textContent: r }));
+    for (let c = 0; c < C; c++) {
+      const i = toIdx(r,c,C);
+      const d = document.createElement("div");
+      d.className = "cell";
+      if (c >= g[r].length) { d.classList.add("missing"); el.appendChild(d); continue; }
+
+      let bg = "var(--open)";
+      const onRec = f.rec.includes(i);
+      if (g[r][c] === 1) bg = "var(--wall)";
+      else if (last && !f.visited[i]) d.classList.add("unexplored");
+      else if (f.current === i && f.hit) bg = "var(--hit)";
+      else if (f.route.has(i) && f.current !== i) bg = "var(--route)";
+      else if (f.current === i && f.phase !== "done" && f.phase !== "empty") bg = "var(--current)";
+      else if (f.dead.has(i)) bg = "var(--dead)";
+      else if (onRec) bg = "var(--onstack)";
+      else if (f.route.has(i)) bg = "var(--route)";
+      if (!d.classList.contains("unexplored")) d.style.background = bg;
+
+      if (g[r][c] === 0 && f.visited[i]) {
+        const b = document.createElement("span");
+        b.className = "badge"; b.textContent = built.depthOf[i];
+        d.appendChild(b);
+      }
+      let label = "";
+      if (r === start.row && c === start.col) label = "S";
+      if (r === target.row && c === target.col) label = "T";
+      if (label) {
+        const s = document.createElement("span");
+        s.textContent = label;
+        s.style.color = label === "S" ? "#1d3557" : "#9d0208";
+        d.appendChild(s);
+        d.style.outline = label === "S" ? "3px solid #1d3557" : "3px solid #9d0208";
+        d.style.outlineOffset = "-3px";
+      }
+      el.appendChild(d);
+    }
+  }
+
+  document.getElementById("stepInfo").textContent = `${ex.label} — Step ${frameIndex+1} / ${fr.length}`;
+  document.getElementById("caption").innerHTML = f.note;
+  const res = document.getElementById("result");
+  if (last) {
+    res.textContent = built.found ? `getPath() returns a ${f.ans.length}-cell stack` : "getPath() returns an empty stack";
+    res.className = built.found ? "true" : "false";
+  } else { res.textContent = ""; res.className = ""; }
+  document.getElementById("btnPrev").disabled = frameIndex === 0;
+  document.getElementById("btnNext").disabled = last;
+
+  renderTree(f);
+  renderStacks(f);
+  renderLog();
+}
+
+function colorFor(i, f) {
+  if (f.current === i && f.hit) return "#38b000";
+  if (f.route.has(i)) return "#b7e4a0";
+  if (f.dead.has(i)) return "#e5c9c9";
+  if (f.rec.includes(i)) return "#a9d6f5";
+  return "#f5f5f5";
+}
+
+function stackBox(id, items, f, topIsLast) {
+  const box = document.getElementById(id);
+  box.innerHTML = "";
+  if (!items.length) { box.appendChild(Object.assign(document.createElement("div"), { className: "sEmpty", textContent: "(empty)" })); return; }
+  const list = items.slice();
+  if (topIsLast) list.reverse();          // newest first, drawn at the top
+  list.forEach((idx, k) => {
+    const [r,c] = toRC(idx, built.C);
+    const s = document.createElement("div");
+    s.className = "sSlot" + (k === 0 ? " top" : "");
+    s.style.background = colorFor(idx, f);
+    s.textContent = `(${r},${c})`;
+    if (k === 0) s.appendChild(Object.assign(document.createElement("span"), { className: "tag", textContent: "TOP" }));
+    box.appendChild(s);
+  });
+}
+function renderStacks(f) {
+  stackBox("recBox", f.rec, f, true);
+  stackBox("ansBox", f.ans, f, true);
+}
+
+function renderLog() {
+  const log = document.getElementById("stepsLog");
+  log.innerHTML = "";
+  for (let i = 0; i <= frameIndex; i++) {
+    const li = document.createElement("li");
+    li.innerHTML = built.frames[i].stepText;
+    if (i === frameIndex) li.className = "current";
+    log.appendChild(li);
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+const NS = "http://www.w3.org/2000/svg", NODE_R = 15, XS = 46, YS = 54, M = 26;
+const svgEl = (t,a) => { const e = document.createElementNS(NS,t); for (const k in a) e.setAttribute(k,a[k]); return e; };
+
+function renderTree(f) {
+  const { start, target } = EXAMPLES[currentKey];
+  const { pos, parent, root, leaves, maxDepth } = built.tree;
+  const svg = document.getElementById("treeSvg");
+  svg.innerHTML = "";
+  const w = M*2 + (leaves-1)*XS + NODE_R*2, h = M*2 + maxDepth*YS + NODE_R*2;
+  svg.setAttribute("width", w); svg.setAttribute("height", h); svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  const px = n => M + NODE_R + pos[n].x*XS, py = n => M + NODE_R + pos[n].depth*YS;
+
+  for (let n in pos) {
+    n = Number(n);
+    if (n === root || !f.visited[n]) continue;
+    const p = parent[n];
+    const dx = px(n)-px(p), dy = py(n)-py(p), len = Math.hypot(dx,dy) || 1, ux = dx/len, uy = dy/len;
+    svg.appendChild(svgEl("line", { x1: px(p)+ux*NODE_R, y1: py(p)+uy*NODE_R, x2: px(n)-ux*NODE_R, y2: py(n)-uy*NODE_R,
+      stroke: f.route.has(n) && f.route.has(p) ? "#4a9d2e" : "#bbb", "stroke-width": f.route.has(n) && f.route.has(p) ? 2.6 : 1.6 }));
+  }
+  for (let n in pos) {
+    n = Number(n);
+    if (!f.visited[n]) continue;
+    const [r,c] = toRC(n, built.C);
+    const isCur = f.current === n && !f.hit && f.phase !== "done" && f.phase !== "empty";
+    const isHit = f.current === n && f.hit;
+    let stroke = "#555", sw = 1.2, op = 1;
+    if (isHit) { stroke = "#1b6b0a"; sw = 2.5; }
+    else if (isCur) { stroke = "#e8590c"; sw = 3; }
+    else if (f.dead.has(n)) { stroke = "#aaa"; sw = 1; op = 0.7; }
+    svg.appendChild(svgEl("circle", { cx: px(n), cy: py(n), r: NODE_R, fill: colorFor(n,f), "fill-opacity": op, stroke, "stroke-width": sw }));
+    let ring = null;
+    if (r === start.row && c === start.col) ring = "#1d3557";
+    if (r === target.row && c === target.col) ring = "#9d0208";
+    if (ring) svg.appendChild(svgEl("circle", { cx: px(n), cy: py(n), r: NODE_R+4, fill: "none", stroke: ring, "stroke-width": 2 }));
+    const t = svgEl("text", { x: px(n), y: py(n)+3, "text-anchor": "middle", fill: f.dead.has(n) ? "#888" : "#1a1a1a" });
+    t.textContent = `${r},${c}`;
+    svg.appendChild(t);
+  }
+}
+
+const next = () => { if (frameIndex < built.frames.length-1) { frameIndex++; render(); } };
+const prev = () => { if (frameIndex > 0) { frameIndex--; render(); } };
+const restart = () => { frameIndex = 0; render(); };
+document.getElementById("btnNext").addEventListener("click", next);
+document.getElementById("btnPrev").addEventListener("click", prev);
+document.getElementById("btnRestart").addEventListener("click", restart);
+document.querySelectorAll(".mazeBtn").forEach(b => b.addEventListener("click", () => loadExample(Number(b.dataset.key))));
+window.addEventListener("keydown", e => {
+  if (e.code === "Space" || e.code === "ArrowRight") { e.preventDefault(); next(); }
+  else if (e.code === "ArrowLeft") { e.preventDefault(); prev(); }
+  else if (e.key === "r" || e.key === "R") restart();
+  else if (["1","2","3","4"].includes(e.key)) loadExample(Number(e.key));
+});
+loadExample(1);
+</script>
+</body>
+</html>
