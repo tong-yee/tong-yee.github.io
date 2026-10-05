@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSCI 235 Project 2: Maze Solver</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+<style>
+:root{
+  --bg:#ffffff; --fg:#1d2330; --muted:#586174; --rule:#d7dce6; --band:#14213d; --band-fg:#f4f6fb;
+  --note-bg:#eef4ff; --note-bar:#2a6fdb; --warn-bg:#fff6e5; --warn-bar:#d98a00; --tip-bg:#eefaf1; --tip-bar:#2d9d5c;
+  --th:#eef1f7; --code-bg:#f6f8fa; --a:#1f6feb; --b:#c2410c; --c:#0f766e; --d:#7c3aed; --e:#b4234a;
+  --cell:#f7f9fc; --wall:#2b3345; --axis:#7a8396; --dfs:#d9730d; --bfs:#2a6fdb;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10141c; --fg:#e6e9f0; --muted:#a3adc2; --rule:#2d3548; --band:#0a0f1c; --band-fg:#f4f6fb;
+    --note-bg:#14213a; --note-bar:#5b9bff; --warn-bg:#2b2412; --warn-bar:#f0b429; --tip-bg:#112619; --tip-bar:#4cc38a;
+    --th:#1b2232; --code-bg:#0d1117; --a:#6ea8ff; --b:#fb9255; --c:#4fd1c5; --d:#b79cff; --e:#ff7a9c;
+    --cell:#2b3552; --wall:#06080d; --axis:#98a2b8; --dfs:#ffa04d; --bfs:#6ea8ff;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--band);color:var(--band-fg);padding:34px 16px 28px}
+header .in,main{max-width:920px;margin:0 auto}
+header .course{font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+header h1{margin:6px 0 4px;font-size:2.1rem;line-height:1.2}
+header .sub{opacity:.9}
+header .due{display:inline-block;margin-top:12px;padding:3px 12px;border:1px solid rgba(255,255,255,.45);border-radius:999px;font-size:.9rem}
+main{padding:8px 16px 60px}
+h2{margin:2.2em 0 .4em;font-size:1.5rem;padding-top:.6em;border-top:2px solid var(--rule)}
+h3{margin:1.8em 0 .4em;font-size:1.25rem}
+h3.ta{color:var(--a)} h3.tb{color:var(--b)} h3.tc{color:var(--c)} h3.td{color:var(--d)} h3.te{color:var(--e)}
+h4{margin:1.3em 0 .3em;font-size:1.02rem}
+p{margin:.6em 0}
+a{color:var(--a)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--code-bg);padding:.08em .35em;border-radius:4px}
+pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:.88rem;line-height:1.5}
+pre code{background:none;padding:0;border-radius:0}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88rem}
+.box{border-left:5px solid var(--note-bar);background:var(--note-bg);padding:10px 16px;border-radius:0 8px 8px 0;margin:1em 0}
+.box.warn{border-color:var(--warn-bar);background:var(--warn-bg)}
+.box.tip{border-color:var(--tip-bar);background:var(--tip-bg)}
+.box p:first-child{margin-top:0} .box p:last-child{margin-bottom:0}
+.box .ttl{font-weight:700}
+table{border-collapse:collapse;width:100%;margin:.8em 0;font-size:.93rem}
+th,td{border:1px solid var(--rule);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--th)}
+.scroll{overflow-x:auto}
+tr.bt td{background:var(--warn-bg)} tr.ok td{background:var(--tip-bg)}
+table.tests td:first-child{white-space:nowrap;font-weight:600}
+table.tests td:last-child{text-align:right;white-space:nowrap}
+.figs{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin:1em 0}
+svg.mz{width:250px;max-width:100%;height:auto}
+svg .cell{fill:var(--cell);stroke:var(--rule)} svg .wall{fill:var(--wall);stroke:var(--rule)}
+svg .ax{fill:var(--axis);font:11px system-ui,sans-serif}
+svg .cap{fill:var(--fg);font:12px system-ui,sans-serif}
+svg .pt{fill:var(--bg);stroke:var(--fg);stroke-width:2} svg .pl{fill:var(--fg);font:bold 13px system-ui,sans-serif}
+svg .pdfs{stroke:var(--dfs);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2 11;opacity:.95}
+svg .pbfs{stroke:var(--bfs);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+svg.uml{width:100%;height:auto}
+svg.uml rect{fill:var(--cell);stroke:var(--fg);stroke-width:1.5}
+svg.uml .abs{fill:var(--note-bg)}
+svg.uml text{fill:var(--fg);font:13px ui-monospace,Menlo,Consolas,monospace}
+svg.uml text.t{font:bold 14px ui-monospace,Menlo,Consolas,monospace}
+svg.uml text.s{font:12px system-ui,sans-serif;fill:var(--muted)}
+svg.uml path,svg.uml line{stroke:var(--fg);stroke-width:1.6;fill:none}
+svg.uml .tri{fill:var(--bg)}
+.grid{font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.25;background:var(--code-bg);border:1px solid var(--rule);border-radius:8px;padding:10px 14px;display:inline-block;white-space:pre}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);padding-top:12px;margin-top:40px}
+@media (max-width:560px){header h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="course">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026</div>
+  <h1>Project 2: Maze Solver</h1>
+  <div class="sub">Inheritance, polymorphism, depth-first search and breadth-first search</div>
+  <div class="due">Due: see Gradescope</div>
+</div></header>
+<main>
+
+<h2 id="overview">Overview</h2>
+<p>Imagine you are dropped into a corn maze with a map in your hand. How do you find the exit? There are two classic strategies, and in this project you will build both of them as C++ classes that share one interface.</p>
+<ul>
+  <li><strong>Depth-first search (DFS)</strong> is the <em>ball of string</em> strategy. You walk down a corridor as far as it goes. At a dead end you walk back to the last junction and try a different turn. You find <em>a</em> way out, but not necessarily a short one.</li>
+  <li><strong>Breadth-first search (BFS)</strong> is the <em>ripples in a pond</em> strategy. You check every cell 1 step from the start, then every cell 2 steps away, then 3, and so on, like a ripple spreading outward. The first time the ripple touches the exit, you have found a <em>shortest</em> way out.</li>
+</ul>
+<p>Along the way you will practice three ideas from lecture: an <strong>abstract base class</strong> with a pure virtual function, <strong>polymorphism</strong> (code written once in the base class that automatically runs your DFS or your BFS, depending on the object), and the data structures that power the two searches, <strong>recursion</strong> (the call stack) for DFS and a <strong>queue</strong> for BFS.</p>
+
+<h2 id="design">The Big Picture: Class Design</h2>
+<svg class="uml" viewBox="0 0 640 296" role="img" aria-label="Class diagram: DFS_Solver and BFS_Solver both derive from the abstract class Maze_Solver">
+  <rect class="abs" x="90" y="12" width="460" height="144" rx="6"/>
+  <text class="t" x="320" y="34" text-anchor="middle">Maze_Solver  (abstract)</text>
+  <line x1="90" y1="42" x2="550" y2="42"/>
+  <text x="106" y="62">maze_, start_, end_   (private)</text>
+  <text x="106" y="80">getMaze(), getStart(), getEnd()</text>
+  <text x="106" y="98">static isOpen(maze, cell)</text>
+  <text x="106" y="116">reachable()  { return !getPath().empty(); }</text>
+  <text x="106" y="134">toString()   prints the board and the path</text>
+  <text x="106" y="150" class="s">getPath() = 0   (pure virtual: the one function every solver must supply)</text>
+  <path class="tri" d="M320 156 L308 178 L332 178 Z"/>
+  <line x1="320" y1="178" x2="320" y2="202"/>
+  <line x1="150" y1="202" x2="490" y2="202"/>
+  <line x1="150" y1="202" x2="150" y2="218"/>
+  <line x1="490" y1="202" x2="490" y2="218"/>
+  <rect x="20" y="218" width="260" height="66" rx="6"/>
+  <text class="t" x="150" y="240" text-anchor="middle">DFS_Solver</text>
+  <text x="34" y="260">getPath()  toString()</text>
+  <text class="s" x="34" y="276">recursion + visited table</text>
+  <rect x="360" y="218" width="260" height="66" rx="6"/>
+  <text class="t" x="490" y="240" text-anchor="middle">BFS_Solver</text>
+  <text x="374" y="260">getPath()  toString()</text>
+  <text class="s" x="374" y="276">std::queue + parent table</text>
+</svg>
+
+<p><code>Maze_Solver</code> holds the maze and does the work that every solver shares: it answers <code>reachable()</code> and prints the board with the path. The one thing it cannot do is <em>find</em> a path, because that depends on the strategy. So it declares <code>getPath()</code> as <em>pure virtual</em> (the <code>= 0</code> in the header). That means two things: you cannot create a plain <code>Maze_Solver</code> object, and a derived class must implement (or inherit an implementation of) <code>getPath()</code> before you can create objects of that class. In this project both <code>DFS_Solver</code> and <code>BFS_Solver</code> supply their own. It is like a remote control: every TV (DFS or BFS) has a <em>Find the exit</em> button, but pressing it makes each TV do something different inside.</p>
+<p>Look at how little <code>Maze_Solver::reachable()</code> says: <em>a path exists exactly when <code>getPath()</code> returns a non-empty stack</em>. That code was written before your solvers existed, yet when it runs on a <code>BFS_Solver</code> it uses <em>your</em> BFS. What makes this work is that <strong><code>getPath()</code> is virtual</strong>: when <code>reachable()</code> calls <code>getPath()</code>, the call goes to the version belonging to the <em>actual object</em>. (<code>reachable()</code> itself does not have to be virtual for this to happen.) The same is true when you call through a base-class pointer or reference:</p>
+<pre><code class="language-cpp">BFS_Solver bfs(maze, start, end);   // an ordinary local object
+Maze_Solver* solver = &amp;bfs;         // a base-class pointer to it
+std::stack&lt;Coord&gt; path = solver-&gt;getPath();   // runs BFS_Solver::getPath()
+bool ok = solver-&gt;reachable();                  // base-class code, which calls BFS_Solver::getPath()</code></pre>
+<p>A side note on cleanup: if you create a solver with <code>new</code> and later <code>delete</code> it through a <code>Maze_Solver*</code>, it is the <strong>virtual destructor</strong> in <code>Maze_Solver</code> that makes C++ run the derived class's destructor as well. You will not need <code>new</code> in this project, but the rule is worth remembering.</p>
+
+<h3>How a maze is represented</h3>
+<ul>
+  <li>A maze is a <code>std::vector&lt;std::vector&lt;int&gt;&gt;</code>. A <code>0</code> is an open cell and a <code>1</code> is a wall.</li>
+  <li><strong>Rows may have different lengths.</strong> Never assume the maze is a perfect rectangle.</li>
+  <li>A cell is a <code>Coord</code> with a <code>row</code> and a <code>col</code>. The start and the end are <code>Coord</code>s too.</li>
+  <li><code>Maze_Solver::isOpen(maze, cell)</code> answers one question: <em>is this cell inside the maze and open?</em> It returns <code>false</code> for walls and for cells outside the maze, so you never need to check bounds yourself. Use it for every neighbor.</li>
+  <li>You may move one step <strong>left, right, up, or down</strong> (no diagonals). The four neighbors are left <code>(row, col-1)</code>, right <code>(row, col+1)</code>, up <code>(row-1, col)</code>, and down <code>(row+1, col)</code>. <strong>DFS must check neighbors in the order left, right, up, down.</strong> BFS may use any neighbor order; the worked example uses the same order as DFS.</li>
+</ul>
+
+<h3>How a path is returned</h3>
+<p><code>getPath()</code> returns a <code>std::stack&lt;Coord&gt;</code>, like a pile of plates. The <strong>start cell is on top</strong> and the <strong>end cell is at the bottom</strong>, so popping repeatedly reads the route in walking order. If there is no path, return an <em>empty</em> stack.</p>
+
+<h2 id="algorithms">Algorithm Reference</h2>
+
+<h3>Depth-first search</h3>
+<p>DFS is naturally <em>recursive</em>. A call that is handed a cell first marks it visited. If that cell is the end, the search has succeeded. Otherwise the call tries each unvisited open neighbor in turn, and as soon as one neighbor's call succeeds, this call succeeds too. If every neighbor fails, this call fails and control returns to the caller, which then tries <em>its</em> next neighbor. That return is the &ldquo;walk back to the last junction&rdquo; step. Your <em>visited</em> table must live outside the recursive function (pass it by reference), so that all the calls share it.</p>
+<p>How a call tells its caller &ldquo;I succeeded&rdquo; is up to you. One option is a <code>bool</code> return value. Another is to let the recursion fill the answer stack you are going to return: the call that reaches the end puts the end on it, and each caller that finds the stack non-empty after a recursive call knows its own cell belongs to the route. The trace in Task A uses the second option, so you can watch the route being built while the recursion unwinds, from the end of the maze back toward the start.</p>
+
+<h3>Breadth-first search</h3>
+<p>BFS keeps a <code>std::queue&lt;Coord&gt;</code>, a line of cells waiting to be explored. Cells leave from the front of the line, and newly discovered neighbors join the back. That first-in, first-out order is exactly what makes the search spread in rings: every cell 1 step away is ahead of every cell 2 steps away.</p>
+<div class="box"><p><span class="ttl">Key idea &mdash; mark a cell visited when you put it in the queue, not when you take it out.</span></p>
+<p>If you wait until a cell leaves the queue, the same cell can be waiting in line several times (once for each neighbor that discovered it), and each copy then adds its neighbors again. Marking cells when they are discovered prevents duplicate queue entries and repeated processing: each cell enters the queue at most once.</p>
+<p><span class="ttl">A small example.</span> Suppose cells 1 and 2 are the same distance from the start, and both are neighbors of cell 3. When cell 1 is processed, cell 3 is pushed onto the queue. If cell 3 has not been marked yet, then when cell 2 is processed next, cell 3 is pushed a <em>second</em> time. Marking cell 3 the moment it is first pushed makes cell 2 skip it.</p></div>
+<p>To recover the route, BFS also remembers each cell's <strong>parent</strong>, the cell that discovered it. A second table with the same shape as the maze works well. When the end is found, you follow parents from the end back to the start. Because the stack reverses order, pushing cells in that end-to-start order leaves the start on top.</p>
+
+<h3>Complexity Analysis</h3>
+<p>Let <em>n</em> be the number of cells in the maze (the total number of entries in all rows).</p>
+<div class="scroll"><table>
+<thead><tr><th>Resource</th><th>DFS</th><th>BFS</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Time</td><td>O(n)</td><td>O(n)</td><td>Every cell is marked visited at most once, and each visited cell looks at only its four neighbors, a constant amount of work. Total work is proportional to the number of cells.</td></tr>
+<tr><td>Space</td><td>O(n)</td><td>O(n)</td><td>The visited table has one entry per cell. DFS may also hold up to <em>n</em> recursive calls at once (a long winding corridor). BFS may hold up to <em>n</em> cells in the queue and in the parent table.</td></tr>
+</tbody></table></div>
+<div class="box"><p>Both searches have the same Big-O, yet they behave very differently. DFS can wander a long way around before it stumbles on the exit. BFS promises the <em>fewest steps</em> but needs the extra parent table to remember the route. Big-O tells you how the work <em>grows</em>; it does not tell you which answer you get.</p></div>
+
+<h2 id="provided">What Is Provided</h2>
+<ul>
+  <li><code>Maze_Solver.hpp</code> and <code>Maze_Solver.cpp</code>: the abstract base class, already complete (<code>reachable()</code>, <code>toString()</code> and <code>isOpen()</code> are written). <strong>Do not modify these.</strong> The autograder always uses its own copy.</li>
+  <li><code>DFS_Solver.hpp</code> and <code>BFS_Solver.hpp</code>: the class declarations (listed at the bottom of this page). They declare only <code>getPath()</code> and <code>toString()</code>, because <code>reachable()</code> is inherited.</li>
+  <li>The constructors and <code>toString()</code> of both solvers. Each <code>toString()</code> just puts a heading line in front of the base-class output. Colors in the printed board are only for your terminal and are ignored by the autograder.</li>
+  <li>A <code>main.cpp</code> you can freely edit to try your own mazes.</li>
+</ul>
+<p><strong>You write</strong> <code>getPath()</code> in <code>DFS_Solver.cpp</code> and in <code>BFS_Solver.cpp</code>. Use <code>std::queue</code> from the standard library for BFS (you do not need your own queue class). Name your traversal variable <code>curr</code>.</p>
+<div class="box warn"><p><span class="ttl">Helper-function name clash.</span> If you write a free helper function (a recursive DFS helper, for example) and <code>DFS_Solver.cpp</code> and <code>BFS_Solver.cpp</code> each define a helper with the same name and parameters, the linker will stop with <em>multiple definition</em>. Give each helper a distinctive name, or declare it <code>static</code> (or put it inside an anonymous <code>namespace</code>) so that it is private to its file.</p></div>
+
+<h2 id="example">A Worked Example</h2>
+<p>We will follow both searches on this 4 &times; 4 maze. Start at <code>(0,0)</code>, end at <code>(3,3)</code>. The autograder uses additional mazes, so this example is yours to study.</p>
+<div class="grid">col    0  1  2  3 
+row 0  S  .  .  . 
+row 1  .  #  #  . 
+row 2  #  #  .  . 
+row 3  .  .  .  E </div>
+<div class="figs"><svg viewBox="0 0 236 260" role="img" aria-label="DFS finds a 9-cell path" class="mz"><text x="14" y="53.0" class="ax" text-anchor="middle">0</text><text x="14" y="99.0" class="ax" text-anchor="middle">1</text><text x="14" y="145.0" class="ax" text-anchor="middle">2</text><text x="14" y="191.0" class="ax" text-anchor="middle">3</text><text x="49.0" y="17" class="ax" text-anchor="middle">0</text><text x="95.0" y="17" class="ax" text-anchor="middle">1</text><text x="141.0" y="17" class="ax" text-anchor="middle">2</text><text x="187.0" y="17" class="ax" text-anchor="middle">3</text><rect x="26" y="26" width="46" height="46" class="cell"/><rect x="72" y="26" width="46" height="46" class="cell"/><rect x="118" y="26" width="46" height="46" class="cell"/><rect x="164" y="26" width="46" height="46" class="cell"/><rect x="26" y="72" width="46" height="46" class="cell"/><rect x="72" y="72" width="46" height="46" class="wall"/><rect x="118" y="72" width="46" height="46" class="wall"/><rect x="164" y="72" width="46" height="46" class="cell"/><rect x="26" y="118" width="46" height="46" class="wall"/><rect x="72" y="118" width="46" height="46" class="wall"/><rect x="118" y="118" width="46" height="46" class="cell"/><rect x="164" y="118" width="46" height="46" class="cell"/><rect x="26" y="164" width="46" height="46" class="cell"/><rect x="72" y="164" width="46" height="46" class="cell"/><rect x="118" y="164" width="46" height="46" class="cell"/><rect x="164" y="164" width="46" height="46" class="cell"/><polyline points="49.0,49.0 95.0,49.0 141.0,49.0 187.0,49.0 187.0,95.0 187.0,141.0 141.0,141.0 141.0,187.0 187.0,187.0" class="pdfs" fill="none"/><circle cx="49.0" cy="49.0" r="12" class="pt"/><text x="49.0" y="53.0" class="pl" text-anchor="middle">S</text><circle cx="187.0" cy="187.0" r="12" class="pt"/><text x="187.0" y="191.0" class="pl" text-anchor="middle">E</text><text x="118.0" y="254" class="cap" text-anchor="middle">DFS finds a 9-cell path</text></svg><svg viewBox="0 0 236 260" role="img" aria-label="BFS finds a 7-cell path" class="mz"><text x="14" y="53.0" class="ax" text-anchor="middle">0</text><text x="14" y="99.0" class="ax" text-anchor="middle">1</text><text x="14" y="145.0" class="ax" text-anchor="middle">2</text><text x="14" y="191.0" class="ax" text-anchor="middle">3</text><text x="49.0" y="17" class="ax" text-anchor="middle">0</text><text x="95.0" y="17" class="ax" text-anchor="middle">1</text><text x="141.0" y="17" class="ax" text-anchor="middle">2</text><text x="187.0" y="17" class="ax" text-anchor="middle">3</text><rect x="26" y="26" width="46" height="46" class="cell"/><rect x="72" y="26" width="46" height="46" class="cell"/><rect x="118" y="26" width="46" height="46" class="cell"/><rect x="164" y="26" width="46" height="46" class="cell"/><rect x="26" y="72" width="46" height="46" class="cell"/><rect x="72" y="72" width="46" height="46" class="wall"/><rect x="118" y="72" width="46" height="46" class="wall"/><rect x="164" y="72" width="46" height="46" class="cell"/><rect x="26" y="118" width="46" height="46" class="wall"/><rect x="72" y="118" width="46" height="46" class="wall"/><rect x="118" y="118" width="46" height="46" class="cell"/><rect x="164" y="118" width="46" height="46" class="cell"/><rect x="26" y="164" width="46" height="46" class="cell"/><rect x="72" y="164" width="46" height="46" class="cell"/><rect x="118" y="164" width="46" height="46" class="cell"/><rect x="164" y="164" width="46" height="46" class="cell"/><polyline points="49.0,49.0 95.0,49.0 141.0,49.0 187.0,49.0 187.0,95.0 187.0,141.0 187.0,187.0" class="pbfs" fill="none"/><circle cx="49.0" cy="49.0" r="12" class="pt"/><text x="49.0" y="53.0" class="pl" text-anchor="middle">S</text><circle cx="187.0" cy="187.0" r="12" class="pt"/><text x="187.0" y="191.0" class="pl" text-anchor="middle">E</text><text x="118.0" y="254" class="cap" text-anchor="middle">BFS finds a 7-cell path</text></svg></div>
+<p>Both searches reach the exit, but DFS returns 9 cells while BFS returns 7. Why? At <code>(2,3)</code> DFS tries <em>left</em> before <em>down</em>, so it steps into <code>(2,2)</code> and then <code>(3,2)</code>. From <code>(3,2)</code> it tries left first and explores the dead end through <code>(3,1)</code> and <code>(3,0)</code>, backs out to <code>(3,2)</code>, and only then reaches <code>(3,3)</code>. The cells <code>(2,2)</code> and <code>(3,2)</code> stay in its final route, which is why that route is two cells longer than necessary. BFS never commits to one direction, so it goes straight down from <code>(2,3)</code>.</p>
+
+<h2 id="tasks">The Four Tasks</h2>
+
+<h3 class="ta" id="taskA">Task A &mdash; <code>DFS_Solver::getPath()</code> (22 points)</h3>
+<p><strong>What to implement.</strong> Return the route found by depth-first search as a stack with the start on top, or an empty stack if there is no path. Your DFS <strong>must try the neighbors in the order left, right, up, down</strong>. Because a maze can have several routes, this fixed order is what makes the answer unique, and the autograder compares your route cell by cell with the one that order produces. Make a visited table the same shape as the maze (remember rows can differ in length) and search recursively as described above.</p>
+<h4>Key idea: tracing DFS by hand</h4>
+<p>The table shows two stacks after each step: the recursion (call) stack, oldest call on the left, and the answer stack that <code>getPath()</code> will return, bottom on the left. Neighbors are tried left, right, up, down. Yellow rows are dead ends: the call <strong>returns without adding anything</strong> to the answer stack. Green rows are the unwinding after success: the call at the destination pushes the destination, and each caller that then sees a non-empty answer stack pushes its own cell.</p>
+<div class="scroll"><table><thead><tr><th>Step</th><th>What happens</th><th>Recursion stack after the step</th><th>Answer stack after the step (bottom &rarr; top)</th></tr></thead><tbody>
+<tr class=""><td>1</td><td>call on (0,0): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0)</td><td class="mono">&mdash;</td></tr><tr class=""><td>2</td><td>call on (0,1): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1)</td><td class="mono">&mdash;</td></tr><tr class=""><td>3</td><td>call on (0,2): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2)</td><td class="mono">&mdash;</td></tr><tr class=""><td>4</td><td>call on (0,3): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3)</td><td class="mono">&mdash;</td></tr><tr class=""><td>5</td><td>call on (1,3): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3)</td><td class="mono">&mdash;</td></tr><tr class=""><td>6</td><td>call on (2,3): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3)</td><td class="mono">&mdash;</td></tr><tr class=""><td>7</td><td>call on (2,2): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2)</td><td class="mono">&mdash;</td></tr><tr class=""><td>8</td><td>call on (3,2): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2)</td><td class="mono">&mdash;</td></tr><tr class=""><td>9</td><td>call on (3,1): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2) &rarr; (3,1)</td><td class="mono">&mdash;</td></tr><tr class=""><td>10</td><td>call on (3,0): marks it visited, then tries left, right, up, down</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2) &rarr; (3,1) &rarr; (3,0)</td><td class="mono">&mdash;</td></tr><tr class="bt"><td>11</td><td>(3,0) has no unvisited open neighbor: it returns without adding anything to the answer stack</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2) &rarr; (3,1)</td><td class="mono">&mdash;</td></tr><tr class="bt"><td>12</td><td>(3,1) has no unvisited open neighbor: it returns without adding anything to the answer stack</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2)</td><td class="mono">&mdash;</td></tr><tr class="ok"><td>13</td><td>call on (3,3): marks it visited. It is the destination, so the base case fires at once: it pushes (3,3) onto the answer stack and returns</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2)</td><td class="mono">(3,3)</td></tr><tr class="ok"><td>14</td><td>back in the call on (3,2): the answer stack is non-empty, so this cell is on the route. It pushes (3,2) and returns</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2)</td><td class="mono">(3,3) &rarr; (3,2)</td></tr><tr class="ok"><td>15</td><td>back in the call on (2,2): the answer stack is non-empty, so this cell is on the route. It pushes (2,2) and returns</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3)</td><td class="mono">(3,3) &rarr; (3,2) &rarr; (2,2)</td></tr><tr class="ok"><td>16</td><td>back in the call on (2,3): the answer stack is non-empty, so this cell is on the route. It pushes (2,3) and returns</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3)</td><td class="mono">(3,3) &rarr; (3,2) &rarr; (2,2) &rarr; (2,3)</td></tr><tr class="ok"><td>17</td><td>back in the call on (1,3): the answer stack is non-empty, so this cell is on the route. It pushes (1,3) and returns</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3)</td><td class="mono">(3,3) &rarr; (3,2) &rarr; (2,2) &rarr; (2,3) &rarr; (1,3)</td></tr><tr class="ok"><td>18</td><td>back in the call on (0,3): the answer stack is non-empty, so this cell is on the route. It pushes (0,3) and returns</td><td class="mono">(0,0) &rarr; (0,1) &rarr; (0,2)</td><td class="mono">(3,3) &rarr; (3,2) &rarr; (2,2) &rarr; (2,3) &rarr; (1,3) &rarr; (0,3)</td></tr><tr class="ok"><td>19</td><td>back in the call on (0,2): the answer stack is non-empty, so this cell is on the route. It pushes (0,2) and returns</td><td class="mono">(0,0) &rarr; (0,1)</td><td class="mono">(3,3) &rarr; (3,2) &rarr; (2,2) &rarr; (2,3) &rarr; (1,3) &rarr; (0,3) &rarr; (0,2)</td></tr><tr class="ok"><td>20</td><td>back in the call on (0,1): the answer stack is non-empty, so this cell is on the route. It pushes (0,1) and returns</td><td class="mono">(0,0)</td><td class="mono">(3,3) &rarr; (3,2) &rarr; (2,2) &rarr; (2,3) &rarr; (1,3) &rarr; (0,3) &rarr; (0,2) &rarr; (0,1)</td></tr><tr class="ok"><td>21</td><td>back in the call on (0,0): the answer stack is non-empty, so this cell is on the route. It pushes (0,0) and returns</td><td class="mono">&mdash;</td><td class="mono">(3,3) &rarr; (3,2) &rarr; (2,2) &rarr; (2,3) &rarr; (1,3) &rarr; (0,3) &rarr; (0,2) &rarr; (0,1) &rarr; (0,0)</td></tr>
+</tbody></table></div>
+<p>Notice steps 9&ndash;12: from <code>(3,2)</code> the search tries <em>left</em> first, wanders into <code>(3,1)</code> and then <code>(3,0)</code>, finds a dead end, and returns two calls back to <code>(3,2)</code>. That is the ball of string being wound back up. Nothing was added to the answer stack for those two cells, so they are not part of the route. Step 13 then reaches the destination, where the base case fires immediately: the call does not look at any neighbors.</p>
+<p>In steps 14&ndash;21 every call on the recursion stack finds the answer stack non-empty and pushes its own cell. When the recursion is finished, the answer stack holds <code>(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2) &rarr; (3,3)</code> with the start on top, which is exactly what <code>getPath()</code> must return.</p>
+<div class="box tip"><p><span class="ttl">Try it yourself.</span> Step through the recursion call by call with the <a href="p2_maze_dfs_stepper.html">DFS step visualizer</a>. It shows the recursion stack, the answer stack, and the call tree, using the maze above and three others. Your DFS <strong>must</strong> try the neighbors in the order left, right, up, down, and the visualizer follows that order.</p></div>
+<h4>Edge cases and what to return</h4>
+<ul>
+  <li>If the start cell or the end cell is a wall <strong>or outside the maze</strong> (a negative row or column, a row past the last one, or a column past the end of that particular row), return an empty stack immediately. <code>isOpen()</code> answers all of these for you.</li>
+  <li>If the maze has no rows at all, there is no path: return an empty stack.</li>
+  <li>If the start equals the end <strong>and that cell is open</strong>, the path is that single cell.</li>
+  <li>The start must be on <strong>top</strong> of the stack and the end at the <strong>bottom</strong>.</li>
+  <li>Mazes can contain loops. If you forget to mark cells visited, your program recurses forever and crashes.</li>
+  <li>Rows can have different lengths, so size each row of your visited table from that row.</li>
+  <li>With the specified traversal order and opposite-corner endpoints, the 30 &times; 30 open-room test exercises deep recursion. Pass the maze, visited table, and answer stack by reference.</li>
+</ul>
+<h4>Unit tests</h4>
+<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>A1</td><td>Straight corridor</td><td>path found by left-right-up-down depth-first search, start on top of the stack</td><td>2</td></tr><tr><td>A2</td><td>Corridor with corners</td><td>path found by left-right-up-down depth-first search, start on top of the stack</td><td>2</td></tr><tr><td>A3</td><td>Dead end that must be backed out of</td><td>path found by left-right-up-down depth-first search, start on top of the stack</td><td>2</td></tr><tr><td>A4</td><td>Open 3x3 room, start in the middle</td><td>path found by left-right-up-down depth-first search, start on top of the stack</td><td>2</td></tr><tr><td>A5</td><td>Two routes of different length</td><td>path found by left-right-up-down depth-first search, start on top of the stack</td><td>2</td></tr><tr><td>A6</td><td>Open room with loops, end walled in</td><td>getPath() returns an empty stack</td><td>2</td></tr><tr><td>A7</td><td>Start is a wall, outside the maze, or the maze is empty</td><td>getPath() returns an empty stack</td><td>2</td></tr><tr><td>A8</td><td>End is a wall or outside the maze</td><td>getPath() returns an empty stack</td><td>2</td></tr><tr><td>A9</td><td>Start equals end</td><td>path found by left-right-up-down depth-first search, start on top of the stack</td><td>2</td></tr><tr><td>A10</td><td>Rows of different lengths</td><td>path found by left-right-up-down depth-first search, start on top of the stack</td><td>2</td></tr><tr><td>A11</td><td>Large open room (30 x 30), opposite corners</td><td>path found by left-right-up-down depth-first search (deep recursion)</td><td>2</td></tr></tbody></table></div>
+
+<h3 class="tb" id="taskB">Task B &mdash; <code>BFS_Solver::getPath()</code> (33 points)</h3>
+<p><strong>What to implement.</strong> Return a <strong>shortest</strong> route as a stack with the start on top, or an empty stack if there is no path. When several routes tie for shortest, any one of them is accepted. The autograder checks that your route is legal (starts at the start, ends at the end, every step moves to an adjacent open cell, no cell repeated) and that it has the minimum number of cells. You need a queue, a visited table, and a parent table.</p>
+<h4>Key idea: tracing BFS by hand</h4>
+<p>Each row below dequeues one cell, looks at its neighbors in the order left, right, up, down (BFS may use any neighbor order; this worked example uses the same order as DFS), and queues the new ones. The queue is shown front to back. When a neighbor turns out to be the end, we record its parent and stop; the end is never put on the queue, which is why step 7 shows only <code>(2,2)</code> waiting.</p>
+<div class="scroll"><table><thead><tr><th>Step</th><th>Dequeued (<code>curr</code>)</th><th>Newly discovered</th><th>Queue after the step (front &rarr; back)</th></tr></thead><tbody>
+<tr><td>1</td><td class="mono">(0,0)</td><td class="mono">(0,1) (parent (0,0)), (1,0) (parent (0,0))</td><td class="mono">(0,1) (1,0)</td></tr><tr><td>2</td><td class="mono">(0,1)</td><td class="mono">(0,2) (parent (0,1))</td><td class="mono">(1,0) (0,2)</td></tr><tr><td>3</td><td class="mono">(1,0)</td><td class="mono">&mdash; (nothing new)</td><td class="mono">(0,2)</td></tr><tr><td>4</td><td class="mono">(0,2)</td><td class="mono">(0,3) (parent (0,2))</td><td class="mono">(0,3)</td></tr><tr><td>5</td><td class="mono">(0,3)</td><td class="mono">(1,3) (parent (0,3))</td><td class="mono">(1,3)</td></tr><tr><td>6</td><td class="mono">(1,3)</td><td class="mono">(2,3) (parent (1,3))</td><td class="mono">(2,3)</td></tr><tr><td>7</td><td class="mono">(2,3)</td><td class="mono">(2,2) (parent (2,3)), (3,3) (parent (2,3))</td><td class="mono">(2,2)</td></tr>
+</tbody></table></div>
+<p>The cell <code>(1,0)</code> in step 3 has no unvisited open neighbor, so it simply disappears from the line. BFS does not &ldquo;backtrack&rdquo;; it just keeps serving the next cell in line.</p>
+<h4>Key idea: remember who discovered each cell</h4>
+<p>Whenever you discover a new cell, record its parent: the cell you were standing on. This includes the destination, which your code records but does not need to enqueue. Nothing else is needed to rebuild the route. In the example, following parents from the end gives</p>
+<p class="mono">(3,3) &larr; (2,3) &larr; (1,3) &larr; (0,3) &larr; (0,2) &larr; (0,1) &larr; (0,0)</p>
+<p>Pushing these onto a stack in the order <span class="mono">(3,3), (2,3), (1,3), (0,3), (0,2), (0,1), (0,0)</span> leaves <code>(0,0)</code> on top. Cells like <code>(1,0)</code> that were visited but led nowhere have parent chains of their own, but they do not appear in the <em>destination's</em> parent chain, so they are not in the answer.</p>
+<div class="box tip"><p><span class="ttl">Try it yourself.</span> Step through a BFS one dequeue at a time with the <a href="p2_maze_bfs_stepper.html">BFS step visualizer</a>. It draws the queue and the BFS tree as they grow. Its mazes are different from the one above, and it checks neighbors in the order up, down, left, right. <strong>DFS must use left, right, up, down. BFS may use any neighbor order</strong>; the autograder accepts any legal shortest path, regardless of which equally short route the neighbor order produces.</p></div>
+<div class="box tip"><p><span class="ttl">Why does BFS give the shortest route?</span> Cells leave the queue in order of distance from the start: all the 1-step cells, then all the 2-step cells, and so on. The first time the end is discovered, no shorter route can exist, since a shorter one would have been discovered in an earlier ring.</p></div>
+<h4>Edge cases and what to return</h4>
+<ul>
+  <li>No path, a wall at the start or end, an endpoint outside the maze, or a maze with no rows: an empty stack.</li>
+  <li>Start equals end <strong>and that cell is open</strong>: a stack with that one cell. (Check this before the queue loop starts.)</li>
+  <li>Choose an initial &ldquo;no parent&rdquo; value that can never be a real cell (for example a negative row), so you know where to stop when walking back.</li>
+  <li>Do not forget to remove each cell from the queue after you take it from the front.</li>
+  <li>Open rooms with loops: marking when you enqueue keeps this fast. Tests are cut off after 5 seconds.</li>
+</ul>
+<h4>Unit tests</h4>
+<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>B1</td><td>Straight corridor</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B2</td><td>Corridor with corners</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B3</td><td>Dead end that must be backed out of</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B4</td><td>Open 3x3 room, start in the middle</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B5</td><td>Two routes of different length</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B6</td><td>Open room with loops, end walled in</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B7</td><td>Start is a wall, outside the maze, or the maze is empty</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B8</td><td>End is a wall or outside the maze</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B9</td><td>Start equals end</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B10</td><td>Rows of different lengths</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B11</td><td>Large open room (30 x 30), opposite corners</td><td>legal path with the minimum number of cells (59)</td><td>3</td></tr></tbody></table></div>
+
+<h3 class="tc" id="taskC">Task C &mdash; Integration check: the inherited <code>reachable()</code> (20 points)</h3>
+<p><strong>What to implement.</strong> Nothing new: this is an integration check of Tasks A and B. <code>Maze_Solver::reachable()</code> is already written, and it simply asks <code>getPath()</code> whether the answer is non-empty. This task checks that it works correctly <em>on both of your solvers</em>. Each test builds a <code>DFS_Solver</code> and a <code>BFS_Solver</code>, stores them as <code>Maze_Solver*</code>, and calls <code>reachable()</code> without ever naming the derived type.</p>
+<div class="box tip"><p><span class="ttl">Task progression.</span> Tasks A and B are two different ways to solve the same problem. Task C shows the payoff of the shared interface: the base class wrote <code>reachable()</code> once, and it works for both searches. Your <code>getPath()</code> functions therefore also have to be correct about the <em>empty</em> stack: when there is no path (or the start or end is a wall), return an empty stack, never a stack holding one leftover cell.</p></div>
+<h4>Unit tests</h4>
+<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>C1</td><td>Straight corridor</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C2</td><td>Corridor with corners</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C3</td><td>Dead end that must be backed out of</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C4</td><td>Open 3x3 room, start in the middle</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C5</td><td>Two routes of different length</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C6</td><td>Open room with loops, end walled in</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C7</td><td>Start is a wall, outside the maze, or the maze is empty</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C8</td><td>End is a wall or outside the maze</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C9</td><td>Start equals end</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C10</td><td>Rows of different lengths</td><td>both solvers: reachable() returns true</td><td>2</td></tr></tbody></table></div>
+
+<h3 class="td" id="taskD">Task D &mdash; Integration check: polymorphism through <code>Maze_Solver*</code> (25 points)</h3>
+<p><strong>What to implement.</strong> Nothing new: this is an integration check of everything so far. Task D checks that your two solvers work when they are handled only through the base-class pointer, which is the entire point of polymorphism. The test code stores a <code>DFS_Solver</code> and a <code>BFS_Solver</code> as <code>Maze_Solver*</code> (or <code>std::unique_ptr&lt;Maze_Solver&gt;</code>) and calls <code>getPath()</code> and <code>toString()</code>. Try the same thing in your own <code>main.cpp</code>:</p>
+<pre><code class="language-cpp">std::vector&lt;std::vector&lt;int&gt;&gt; room = {{0, 0, 0},
+                                       {0, 0, 0},
+                                       {0, 0, 0}};
+Coord start{1, 1};     // the middle of the room
+Coord end{0, 1};       // the top middle
+DFS_Solver dfs(room, start, end);
+BFS_Solver bfs(room, start, end);
+Maze_Solver* solvers[]{&amp;dfs, &amp;bfs};
+for (const Maze_Solver* curr : solvers) {
+  std::cout &lt;&lt; curr-&gt;toString() &lt;&lt; '\n';   // one loop, two different searches
+}</code></pre>
+<p>Run it and compare the two printed routes: DFS takes four cells, BFS takes two. That is polymorphism in action. The derived <code>toString()</code> adds a heading and then calls the base-class version, which in turn calls the <code>getPath()</code> of whichever object it is running on. Keep every function marked <code>override</code> in the headers; the compiler will then catch a misspelled signature for you.</p>
+<h4>Unit tests</h4>
+<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>D1</td><td>Default-constructed solvers used through Maze_Solver*</td><td>both are reachable; the DFS path and the BFS path have the sizes each search should produce</td><td>5</td></tr><tr><td>D2</td><td>Same maze, same interface, different paths</td><td>through Maze_Solver*: DFS path has 4 cells, BFS path has 2</td><td>5</td></tr><tr><td>D3</td><td>DFS toString() through Maze_Solver*</td><td>first line says Use Depth First Search, and the path is printed start to end</td><td>5</td></tr><tr><td>D4</td><td>BFS toString() through Maze_Solver*</td><td>first line says Use Breadth First Search, and the path is printed start to end</td><td>5</td></tr><tr><td>D5</td><td>toString() when there is no path</td><td>both solvers print No path. and no path listing</td><td>5</td></tr></tbody></table></div>
+
+<h2 id="grading">Grading and Submission</h2>
+<div class="scroll"><table>
+<thead><tr><th>Task</th><th>What is graded</th><th>Tests</th><th>Points</th></tr></thead>
+<tbody>
+<tr><td>A</td><td><code>DFS_Solver::getPath()</code></td><td>11</td><td>22</td></tr><tr><td>B</td><td><code>BFS_Solver::getPath()</code></td><td>11</td><td>33</td></tr><tr><td>C</td><td>Inherited <code>reachable()</code> on both solvers</td><td>10</td><td>20</td></tr><tr><td>D</td><td>Polymorphism through <code>Maze_Solver*</code></td><td>5</td><td>25</td></tr>
+<tr><th colspan="2">Total</th><th>37</th><th>100</th></tr>
+</tbody></table></div>
+<ul>
+  <li><strong>What to upload to Gradescope:</strong> <code>DFS_Solver.hpp</code>, <code>DFS_Solver.cpp</code>, <code>BFS_Solver.hpp</code>, <code>BFS_Solver.cpp</code>. Any other file you upload (including <code>main.cpp</code>) is ignored, and the autograder uses its own copy of <code>Maze_Solver.*</code>, so changes to those files have no effect on grading. Your four submitted files must work with the provided <code>Maze_Solver.hpp</code> and <code>Maze_Solver.cpp</code>, without depending on additional student files.</li>
+  <li><strong>The autograder uses additional mazes</strong> beyond the examples on this page (some small examples, such as the Task D room, are among its cases). Printing an answer you copied from a handout earns nothing; the algorithm has to be right.</li>
+  <li><strong>Each test runs separately</strong> with a 5-second limit, so a crash or an endless loop does not prevent the remaining tests from running. The partial-credit rule below still applies. The feedback names the failing scenario. For DFS routes it prints yours next to the expected route; for BFS routes it tells you whether yours is legal and how its length compares with the minimum.</li>
+  <li><strong>A &ldquo;no path&rdquo; test only counts once at least one test of the same task that expects a path has passed.</strong> A function that always answers &ldquo;no&rdquo; therefore earns nothing.</li>
+  <li><strong>Compile it yourself first:</strong> <code>g++ -std=c++17 -Wall -Wextra main.cpp Maze_Solver.cpp DFS_Solver.cpp BFS_Solver.cpp -o maze</code>. Fix every warning. Also run <code>valgrind ./maze</code> before you submit; professional code does not leak memory.</li>
+  <li>Build in the order of the tasks, and test each solver on your own small mazes before you submit.</li>
+</ul>
+
+<h2 id="starter">Starter Code (Headers)</h2>
+<p>These three files are provided with the project. Read the declarations and the comments in them carefully before you start coding.</p>
+<h4>Maze_Solver.hpp</h4><pre><code class="language-cpp">// Maze_Solver.hpp
+#ifndef MAZE_SOLVER_HPP
+#define MAZE_SOLVER_HPP
+#include &lt;vector&gt;
+#include &lt;stack&gt;
+#include &lt;string&gt;
+
+struct Coord {
+  int row;
+  int col;
+};
+
+class Maze_Solver {
+  public:
+    Maze_Solver();
+    Maze_Solver(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; start, const Coord&amp; end);
+
+    std::vector&lt;std::vector&lt;int&gt;&gt; getMaze() const;
+    Coord getStart() const;
+    Coord getEnd() const;
+
+    virtual bool reachable() const;
+    virtual std::stack&lt;Coord&gt; getPath() const = 0;
+    virtual std::string toString() const;
+
+    virtual ~Maze_Solver() = default;
+
+    // helper function, check whether a Coord object is a valid cell in the maze and is accessable (value = 0)
+    static bool isOpen(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; cell);
+
+  private:
+    std::vector&lt;std::vector&lt;int&gt;&gt; maze_;
+    Coord start_;
+    Coord end_;
+};
+#endif
+</code></pre><h4>DFS_Solver.hpp</h4><pre><code class="language-cpp">// DFS_Solver.hpp
+#ifndef DFS_SOLVER_HPP
+#define DFS_SOLVER_HPP
+
+#include &quot;Maze_Solver.hpp&quot;
+
+class DFS_Solver : public Maze_Solver {
+  public:
+    DFS_Solver();
+    DFS_Solver(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; start, const Coord&amp; end);
+    
+    // No need to declare reachable since we use the version directly from super class. 
+    std::stack&lt;Coord&gt; getPath() const override;
+    std::string toString() const override; 
+};
+#endif
+</code></pre><h4>BFS_Solver.hpp</h4><pre><code class="language-cpp">// BFS_Solver.hpp
+#ifndef BFS_SOLVER_HPP
+#define BFS_SOLVER_HPP
+#include &quot;Maze_Solver.hpp&quot;
+
+class BFS_Solver : public Maze_Solver {
+  public:
+    BFS_Solver();
+    BFS_Solver(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; start, const Coord&amp; end);
+
+    // No need to declare reachable since we use the version directly from super class. 
+    std::stack&lt;Coord&gt; getPath() const override;
+    std::string toString() const override;
+};
+#endif
+</code></pre>
+
+<footer>CSCI 235 &middot; Fall 2026 &middot; Project 2: Maze Solver</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>if (window.hljs) { hljs.highlightAll(); }</script>
+</body>
+</html>
