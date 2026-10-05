@@ -142,6 +142,21 @@ bool ok = solver-&gt;reachable();                  // base-class code, which cal
 <p>DFS is naturally <em>recursive</em>. A call that is handed a cell first marks it visited. If that cell is the end, the search has succeeded. Otherwise the call tries each unvisited open neighbor in turn, and as soon as one neighbor's call succeeds, this call succeeds too. If every neighbor fails, this call fails and control returns to the caller, which then tries <em>its</em> next neighbor. That return is the &ldquo;walk back to the last junction&rdquo; step. Your <em>visited</em> table must live outside the recursive function (pass it by reference), so that all the calls share it.</p>
 <p>How a call tells its caller &ldquo;I succeeded&rdquo; is up to you. One option is a <code>bool</code> return value. Another is to let the recursion fill the answer stack you are going to return: the call that reaches the end puts the end on it, and each caller that finds the stack non-empty after a recursive call knows its own cell belongs to the route. The trace in Task A uses the second option, so you can watch the route being built while the recursion unwinds, from the end of the maze back toward the start.</p>
 
+<div class="box tip"><p><span class="ttl">Where is the backtracking?</span> In a recursive DFS there is no line of code that says &ldquo;backtrack.&rdquo; Each call on the recursion stack is a junction you have not finished with. <strong>When a recursive call fails, returning to its caller lets the search try the next neighbor. This is backtracking.</strong> Control comes back to the line right after the recursive call, you are standing on that junction again, and the loop simply moves on to the next neighbor. <strong>When a call succeeds, the callers instead build the answer stack as they return.</strong> The call stack is the ball of string.</p>
+<pre><code>helper(cell):
+    mark cell visited
+    if cell is the end:  push it, return          // success
+    for each neighbor, in order:
+        if neighbor is open and not visited:
+            helper(neighbor)                      // go forward
+            if the answer stack is now non-empty: // success came back up
+                push cell, return
+            // otherwise the call returned empty-handed.
+            // THIS is the backtrack: the loop continues with the next neighbor.
+    // falling off the end means every neighbor failed:
+    // returning here backtracks to our caller</code></pre>
+<p>Two things to notice. First, the cell is <strong>not</strong> un-marked when you backtrack: it stays visited, so no other path wastes time re-exploring the same dead end. Second, nothing is removed from the answer stack when you backtrack, because a failed call never put anything there. No explicit removal from the answer stack is needed in this implementation. The <a href="p2_maze_dfs_stepper.html">DFS visualizer</a> flags every backtrack step so you can watch it happen.</p></div>
+
 <h3>Breadth-first search</h3>
 <p>BFS keeps a <code>std::queue&lt;Coord&gt;</code>, a line of cells waiting to be explored. Cells leave from the front of the line, and newly discovered neighbors join the back. That first-in, first-out order is exactly what makes the search spread in rings: every cell 1 step away is ahead of every cell 2 steps away.</p>
 <div class="box"><p><span class="ttl">Key idea &mdash; mark a cell visited when you put it in the queue, not when you take it out.</span></p>
