@@ -78,7 +78,7 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);padd
   <div class="course">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026</div>
   <h1>Project 2: Maze Solver</h1>
   <div class="sub">Inheritance, polymorphism, depth-first search and breadth-first search</div>
-  <div class="due">Due: see Gradescope</div>
+  <div class="due">Due: Sunday, October 25, 2026 &middot; <a href="../../fall2026_schedule.html" style="color:inherit;text-decoration:underline;">course schedule</a></div>
 </div></header>
 <main>
 
@@ -117,7 +117,7 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);padd
 </svg>
 
 <p><code>Maze_Solver</code> holds the maze and does the work that every solver shares: it answers <code>reachable()</code> and prints the board with the path. The one thing it cannot do is <em>find</em> a path, because that depends on the strategy. So it declares <code>getPath()</code> as <em>pure virtual</em> (the <code>= 0</code> in the header). That means two things: you cannot create a plain <code>Maze_Solver</code> object, and a derived class must implement (or inherit an implementation of) <code>getPath()</code> before you can create objects of that class. In this project both <code>DFS_Solver</code> and <code>BFS_Solver</code> supply their own. It is like a remote control: every TV (DFS or BFS) has a <em>Find the exit</em> button, but pressing it makes each TV do something different inside.</p>
-<p>Look at how little <code>Maze_Solver::reachable()</code> says: <em>a path exists exactly when <code>getPath()</code> returns a non-empty stack</em>. That code was written before your solvers existed, yet when it runs on a <code>BFS_Solver</code> it uses <em>your</em> BFS. What makes this work is that <strong><code>getPath()</code> is virtual</strong>: when <code>reachable()</code> calls <code>getPath()</code>, the call goes to the version belonging to the <em>actual object</em>. (<code>reachable()</code> itself does not have to be virtual for this to happen.) The same is true when you call through a base-class pointer or reference:</p>
+<p>Look at how little <code>Maze_Solver::reachable()</code> says: <em>a path exists exactly when <code>getPath()</code> returns a non-empty stack</em>. That code was written before your solvers existed, yet when it runs on a <code>BFS_Solver</code> it uses <em>your</em> BFS. What makes this work is that <strong><code>getPath()</code> is virtual</strong>: when <code>reachable()</code> calls <code>getPath()</code>, the call goes to the version belonging to the <em>actual object</em>. (<code>reachable()</code> itself is an ordinary, non-virtual function: it never needs to change, because it only asks <code>getPath()</code>.) The same is true when you call through a base-class pointer or reference:</p>
 <pre><code class="language-cpp">BFS_Solver bfs(maze, start, end);   // an ordinary local object
 Maze_Solver* solver = &amp;bfs;         // a base-class pointer to it
 std::stack&lt;Coord&gt; path = solver-&gt;getPath();   // runs BFS_Solver::getPath()
@@ -242,13 +242,13 @@ row 3  .  .  .  E </div>
   <li>Open rooms with loops: marking when you enqueue keeps this fast. Tests are cut off after 5 seconds.</li>
 </ul>
 <h4>Unit tests</h4>
-<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>B1</td><td>Straight corridor</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B2</td><td>Corridor with corners</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B3</td><td>Dead end that must be backed out of</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B4</td><td>Open 3x3 room, start in the middle</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B5</td><td>Two routes of different length</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B6</td><td>Open room with loops, end walled in</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B7</td><td>Start is a wall, outside the maze, or the maze is empty</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B8</td><td>End is a wall or outside the maze</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B9</td><td>Start equals end</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B10</td><td>Rows of different lengths</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B11</td><td>Large open room (30 x 30), opposite corners</td><td>legal path with the minimum number of cells (59)</td><td>3</td></tr></tbody></table></div>
+<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>B1</td><td>Straight corridor</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B2</td><td>Corridor with corners</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B3</td><td>Maze containing a dead end</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B4</td><td>Open 3x3 room, start in the middle</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B5</td><td>Two routes of different length</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B6</td><td>Open room with loops, end walled in</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B7</td><td>Start is a wall, outside the maze, or the maze is empty</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B8</td><td>End is a wall or outside the maze</td><td>getPath() returns an empty stack</td><td>3</td></tr><tr><td>B9</td><td>Start equals end</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B10</td><td>Rows of different lengths</td><td>legal path with the minimum number of cells, start on top of the stack</td><td>3</td></tr><tr><td>B11</td><td>Large open room (30 x 30), opposite corners</td><td>legal path with the minimum number of cells (59)</td><td>3</td></tr></tbody></table></div>
 
 <h3 class="tc" id="taskC">Task C &mdash; Integration check: the inherited <code>reachable()</code> (20 points)</h3>
 <p><strong>What to implement.</strong> Nothing new: this is an integration check of Tasks A and B. <code>Maze_Solver::reachable()</code> is already written, and it simply asks <code>getPath()</code> whether the answer is non-empty. This task checks that it works correctly <em>on both of your solvers</em>. Each test builds a <code>DFS_Solver</code> and a <code>BFS_Solver</code>, stores them as <code>Maze_Solver*</code>, and calls <code>reachable()</code> without ever naming the derived type.</p>
 <div class="box tip"><p><span class="ttl">Task progression.</span> Tasks A and B are two different ways to solve the same problem. Task C shows the payoff of the shared interface: the base class wrote <code>reachable()</code> once, and it works for both searches. Your <code>getPath()</code> functions therefore also have to be correct about the <em>empty</em> stack: when there is no path (or the start or end is a wall), return an empty stack, never a stack holding one leftover cell.</p></div>
 <h4>Unit tests</h4>
-<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>C1</td><td>Straight corridor</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C2</td><td>Corridor with corners</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C3</td><td>Dead end that must be backed out of</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C4</td><td>Open 3x3 room, start in the middle</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C5</td><td>Two routes of different length</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C6</td><td>Open room with loops, end walled in</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C7</td><td>Start is a wall, outside the maze, or the maze is empty</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C8</td><td>End is a wall or outside the maze</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C9</td><td>Start equals end</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C10</td><td>Rows of different lengths</td><td>both solvers: reachable() returns true</td><td>2</td></tr></tbody></table></div>
+<div class="scroll"><table class="tests"><thead><tr><th>#</th><th>Scenario</th><th>What is checked</th><th>Pts</th></tr></thead><tbody><tr><td>C1</td><td>Straight corridor</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C2</td><td>Corridor with corners</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C3</td><td>Maze containing a dead end</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C4</td><td>Open 3x3 room, start in the middle</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C5</td><td>Two routes of different length</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C6</td><td>Open room with loops, end walled in</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C7</td><td>Start is a wall, outside the maze, or the maze is empty</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C8</td><td>End is a wall or outside the maze</td><td>both solvers: reachable() returns false</td><td>2</td></tr><tr><td>C9</td><td>Start equals end</td><td>both solvers: reachable() returns true</td><td>2</td></tr><tr><td>C10</td><td>Rows of different lengths</td><td>both solvers: reachable() returns true</td><td>2</td></tr></tbody></table></div>
 
 <h3 class="td" id="taskD">Task D &mdash; Integration check: polymorphism through <code>Maze_Solver*</code> (25 points)</h3>
 <p><strong>What to implement.</strong> Nothing new: this is an integration check of everything so far. Task D checks that your two solvers work when they are handled only through the base-class pointer, which is the entire point of polymorphism. The test code stores a <code>DFS_Solver</code> and a <code>BFS_Solver</code> as <code>Maze_Solver*</code> (or <code>std::unique_ptr&lt;Maze_Solver&gt;</code>) and calls <code>getPath()</code> and <code>toString()</code>. Try the same thing in your own <code>main.cpp</code>:</p>
@@ -306,13 +306,13 @@ class Maze_Solver {
     Coord getStart() const;
     Coord getEnd() const;
 
-    virtual bool reachable() const;
+    bool reachable() const;
     virtual std::stack&lt;Coord&gt; getPath() const = 0;
     virtual std::string toString() const;
 
     virtual ~Maze_Solver() = default;
 
-    // helper function, check whether a Coord object is a valid cell in the maze and is accessable (value = 0)
+    // helper function, check whether a Coord object is a valid cell in the maze and is open (value = 0)
     static bool isOpen(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; cell);
 
   private:
@@ -332,7 +332,7 @@ class DFS_Solver : public Maze_Solver {
     DFS_Solver();
     DFS_Solver(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; start, const Coord&amp; end);
     
-    // No need to declare reachable since we use the version directly from super class. 
+    // reachable() is inherited from Maze_Solver.
     std::stack&lt;Coord&gt; getPath() const override;
     std::string toString() const override; 
 };
@@ -347,7 +347,7 @@ class BFS_Solver : public Maze_Solver {
     BFS_Solver();
     BFS_Solver(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; start, const Coord&amp; end);
 
-    // No need to declare reachable since we use the version directly from super class. 
+    // reachable() is inherited from Maze_Solver.
     std::stack&lt;Coord&gt; getPath() const override;
     std::string toString() const override;
 };
