@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recursion Card Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: one centered playing card under a slim status bar; the card shows the question, then turns into the feedback. */
+:root{
+  --bg:#edf0f6; --surface:#ffffff; --surface2:#f4f6fb; --ink:#14213d; --muted:#56607a; --line:#d5dbe8;
+  --front:#2f7a3e; --front-bg:#e4f2e6; --back:#2446b8; --back-bg:#e3e9fb;
+  --warn:#b4540a; --warn-bg:#fdecd9; --bad:#b3261e; --bad-bg:#fbe4e1; --good:#1e7a3a; --good-bg:#def3e3;
+  --code-bg:#fffbea; --code-ink:#2b2a22;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1424; --surface:#172036; --surface2:#1c2742; --ink:#e7ecf8; --muted:#9aa6c4; --line:#2c3857;
+  --front:#6fd083; --front-bg:#173222; --back:#8fa8ff; --back-bg:#1a2550;
+  --warn:#f0a35a; --warn-bg:#3a2813; --bad:#ff8f86; --bad-bg:#3c1b19; --good:#74d98f; --good-bg:#16311f;
+  --code-bg:#1f2236; --code-ink:#eceaf8; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e1424; --surface:#172036; --surface2:#1c2742; --ink:#e7ecf8; --muted:#9aa6c4; --line:#2c3857;
+  --front:#6fd083; --front-bg:#173222; --back:#8fa8ff; --back-bg:#1a2550;
+  --warn:#f0a35a; --warn-bg:#3a2813; --bad:#ff8f86; --bad-bg:#3c1b19; --good:#74d98f; --good-bg:#16311f;
+  --code-bg:#1f2236; --code-ink:#eceaf8; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:14px 40px}
+.wrap{max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.tab:focus-visible{outline:3px solid var(--back);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.25rem}
+.ring{width:30px;height:30px;flex:none}
+.stats{display:flex;gap:16px;font-variant-numeric:tabular-nums;font-size:.9rem;color:var(--muted)}
+.stats b{color:var(--ink);font-size:1.05rem}
+.prog{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--front);width:0;transition:width .4s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.tag{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pips{display:flex;gap:5px;align-items:center;font-size:.8rem;color:var(--muted)}
+.pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--front)}
+.pip.on{background:var(--front)}
+.mode{font-size:.78rem;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--surface2);border:1px solid var(--line)}
+.mode.prac{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.title{font-size:1.35rem}
+.q{font-size:1.02rem;min-width:0}
+.q p{margin:.4em 0}
+code,.mono{font-family:var(--mono);font-size:.9em}
+.q code,.fb code,.opt code{background:var(--surface2);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--mono);font-size:.84rem;line-height:1.45;background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0;overflow-x:auto;white-space:pre}
+.tabs{display:flex;gap:6px}
+.tab{border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:8px;padding:6px 12px;font-size:.88rem;font-weight:500}
+.tab[aria-selected="true"]{background:var(--back-bg);color:var(--back);border-color:var(--back)}
+textarea,input[type=text]{width:100%;font-family:var(--mono);font-size:.9rem;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:170px;resize:vertical;line-height:1.45}
+textarea.prose{font-family:var(--body);font-size:1rem;min-height:110px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.fields label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);min-width:0}
+.opt[aria-pressed="true"]{border-color:var(--back);background:var(--back-bg)}
+.opt .k{font-weight:700;color:var(--muted);font-family:var(--mono)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:9px;padding:9px 16px;font-weight:600}
+.btn.main{background:var(--back);border-color:var(--back);color:#fff}
+:root[data-theme="dark"] .btn.main{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.main{color:#0e1424}}
+.btn.go{background:var(--front);border-color:var(--front);color:#fff}
+:root[data-theme="dark"] .btn.go{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.go{color:#0e1424}}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.quiet{background:transparent}
+.hint{background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:.92rem}
+.verdict{border-radius:10px;padding:12px 14px;font-weight:600;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px}
+.verdict.ok{background:var(--good-bg);color:var(--good)}
+.verdict.no{background:var(--bad-bg);color:var(--bad)}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.checks li{display:flex;gap:9px;align-items:flex-start;font-size:.95rem}
+.checks .m{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;color:#fff;margin-top:1px}
+.checks .ok .m{background:var(--good)} .checks .no .m{background:var(--bad)}
+:root[data-theme="dark"] .checks .m{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .checks .m{color:#0e1424}}
+.tip{display:block;color:var(--muted);font-size:.86rem}
+.fb h3{font-size:1rem;margin-bottom:4px}
+.box{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.box p{margin:.3em 0}
+.draft{white-space:pre-wrap;font-family:var(--mono);font-size:.85rem;background:var(--surface2);border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.photo{display:flex;flex-direction:column;gap:10px}
+.photo img{max-width:100%;max-height:300px;border-radius:8px;border:1px solid var(--line);object-fit:contain;align-self:flex-start}
+.self label{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:.95rem}
+.self input{margin-top:4px;width:18px;height:18px;flex:none}
+.small{font-size:.86rem;color:var(--muted)}
+.hero{display:flex;flex-direction:column;gap:14px}
+.hero h2{font-size:1.9rem}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.how .box h3{font-size:.98rem;margin-bottom:4px}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.sumgrid .box{display:flex;flex-direction:column;gap:3px;font-size:.88rem}
+.sumgrid .box b{font-size:.92rem}
+.st{font-size:.76rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.st.first{color:var(--good)} .st.prac{color:var(--warn)} .st.skip{color:var(--bad)}
+@media (prefers-reduced-motion: no-preference){.card{animation:rise .25s ease-out}@keyframes rise{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap" id="app">
+  <div class="bar">
+    <div class="brand">
+      <svg class="ring" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="var(--line)" stroke-width="2"/><rect x="11" y="1.5" width="8" height="7" rx="2" fill="var(--front)"/><rect x="11" y="21.5" width="8" height="7" rx="2" fill="none" stroke="var(--back)" stroke-width="2" stroke-dasharray="3 2"/><rect x="1.5" y="11.5" width="7" height="7" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><rect x="21.5" y="11.5" width="7" height="7" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/></svg>
+      <span>Recursion Card Quest</span>
+    </div>
+    <div class="stats" id="stats" hidden>
+      <span>Score <b id="sScore">0</b></span>
+      <span>Streak <b id="sStreak">0</b></span>
+      <span>Cards done <b id="sDone">0</b>/<span id="sTotal">15</span></span>
+    </div>
+  </div>
+  <div class="prog" id="progWrap" hidden><i id="prog"></i></div>
+  <main id="stage"></main>
+</div>
+<script>
+/* ---------- helpers ---------- */
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rnd(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const squash=raw=>raw.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'').replace(/\s+/g,'');
+const R=(label,re,tip)=>({label,re,tip});
+const mod=(a,m)=>((a%m)+m)%m;
+const L=(s)=>'<code>'+s+'</code>';
+/* run a student's recursive function (no loops) on test inputs; returns array of results or null */
+function runFn(raw,name,inputs){
+  const src=raw.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'');
+  const ids=src.match(/[A-Za-z_]\w*/g)||[];
+  const ok=new Set([name,'n','if','else','return','long','int','unsigned','short']);
+  const decl=[...src.matchAll(/\b(?:long|int|unsigned|short)\s+([A-Za-z_]\w*)\s*=/g)].map(m=>m[1]);
+  decl.forEach(d=>{if(d!==name&&d!=='n')ok.add(d);});
+  if(ids.some(w=>!ok.has(w)))return null;
+  if(/[^\w\s(){}<>=!+\-*?:;,&|]/.test(src))return null;
+  if(/<<|>>|[^&]&[^&]|[^|]\|[^|]/.test(src))return null;
+  let js=src.replace(/\b(?:unsigned|long|int|short)\s+([A-Za-z_]\w*)\s*=/g,'var $1 =').replace(/\b(unsigned|long|int|short)\b/g,'').replace(/\s+/g,' ');
+  js=js.replace(new RegExp('^\\s*'+name+'\\s*\\(\\s*n\\s*\\)'),'function '+name+'(n)');
+  if(!/^\s*function /.test(js))return null;
+  try{const rec=[];const f=new Function('__rec',js+';var __o='+name+';'+name+'=function(x){__rec.push(x);return __o(x);};return __o;')(rec);const out2=[];const out=inputs.map(x=>{rec.length=0;let v;try{v=f(x);}catch(e){v=undefined;}out2.push(rec.slice());return v;});out.rec=out2;return out;}catch(e){return null;}
+}
+
+const clauses=n=>n.toLowerCase().split(/[.;,\n]|\band\b|\bwhile\b|\bbut\b|\bwhereas\b|\bwhich\b/).map(x=>x.trim()).filter(Boolean);
+const NEG=/\bnot\b|n't|\bnever\b|\bno\b|\bdoesnt\b|\bdoesn't\b/;
+function dfsNotShortest(n){const cs=clauses(n);
+  return cs.some(c=>/dfs|depth/.test(c)&&!/bfs|breadth/.test(c)&&NEG.test(c)&&/short|best|fewest|optimal/.test(c))||/(not|n't|never)\s+(necessarily\s+|always\s+|guaranteed\s+)?(the\s+|a\s+)?(shortest|fewest|best)/.test(n)&&!/bfs[^.]*(not|n't)[^.]*short/.test(n)||cs.some(c=>/dfs|depth/.test(c)&&/(any|first|some|a)\s+(route|path)/.test(c)&&!/bfs|breadth/.test(c));}
+function bfsShortest(n){return clauses(n).some(c=>/bfs|breadth/.test(c)&&!/dfs|depth/.test(c)&&/short|fewest|minimum|optimal/.test(c)&&!NEG.test(c))||(/bfs|breadth/.test(n)&&/(finds?|gives?|guarantees?)[^.]*(shortest|fewest)/.test(n)&&!/dfs[^.]*(finds?|gives?|guarantees?)[^.]*(shortest|fewest)[^.]*bfs[^.]*not/.test(n)&&!clauses(n).some(c=>/bfs|breadth/.test(c)&&NEG.test(c)&&/short|fewest/.test(c)));}
+function containerPairs(n){let good=0,bad=0;
+  for(const c of clauses(n)){const d=/dfs|depth/.test(c),b=/bfs|breadth/.test(c),s=/stack/.test(c),q=/queue/.test(c);
+    if(d===b)continue; if(s===q)continue;
+    if((d&&s)||(b&&q))good|=(d?1:2); else bad=1;}
+  return good===3&&!bad;}
+
+const T=(prompt,rubric,explain,model,hint,need)=>({type:'text',prompt,rubric,explain,model,hint,need:need||rubric.length});
+const C=(prompt,labels,check,explain,model,hint)=>({type:'code',prompt,labels,check,explain,model,hint});
+const N=(prompt,fields,explain,hint)=>({type:'nums',prompt,fields,explain,hint});
+const M=(prompt,correct,wrongs,explain)=>({type:'mc',prompt,explain,options:shuffle([{t:correct,ok:true},...wrongs.map(t=>({t,ok:false}))])});
+
+
+/* ---------- helpers for recursion cards ---------- */
+const WORDS=['stack','queue','maze','cat','tree','node','loop','base','call','list','data','heap','swap'];
+function dfsGrid(g,S,Tt){
+  const R=g.length,Cn=g[0].length,vis=g.map(r=>r.map(()=>false)),order=[],ans=[];
+  (function h(r,c){
+    vis[r][c]=true;order.push([r,c]);
+    if(r===Tt[0]&&c===Tt[1]){ans.push([r,c]);return;}
+    for(const d of [[0,-1],[0,1],[-1,0],[1,0]]){
+      const nr=r+d[0],nc=c+d[1];
+      if(nr>=0&&nr<R&&nc>=0&&nc<Cn&&g[nr][nc]===0&&!vis[nr][nc]){h(nr,nc);if(ans.length){ans.push([r,c]);return;}}
+    }
+  })(S[0],S[1]);
+  return {order,route:ans.slice().reverse()};
+}
+function makeMaze(){
+  let best=null;
+  for(let t=0;t<300;t++){
+    const g=[[0,0,0],[0,0,0],[0,0,0]];
+    const tc=rnd(0,2),T=[2,tc],S=[0,0];
+    let w=rnd(2,3);
+    while(w>0){const r=rnd(0,2),c=rnd(0,2);if((r===0&&c===0)||(r===T[0]&&c===T[1])||g[r][c]===1)continue;g[r][c]=1;w--;}
+    const d=dfsGrid(g,S,T);
+    if(!d.route.length)continue;
+    best={g,S,T,d};
+    if(d.order.length>d.route.length)break;
+  }
+  return best;
+}
+const mazeText=m=>m.g.map((row,r)=>row.map((v,c)=>(r===m.S[0]&&c===m.S[1])?'S':(r===m.T[0]&&c===m.T[1])?'T':(v?'#':'.')).join(' ')).join('\n');
+const cellStr=a=>a.map(p=>'('+p[0]+','+p[1]+')').join(', ');
+
+/* ---------- the 15 topics ---------- */
+const MODEL_SUMTO=`int sumTo(int n) {
+    if (n == 0) {          // base case
+        return 0;
+    }
+    return n + sumTo(n - 1);   // recursive case + combine
+}`;
+const MODEL_FACT=`long factorial(int n) {
+    if (n == 0) {          // base case
+        return 1;
+    }
+    return n * factorial(n - 1);   // recursive case + combine
+}`;
+const SKILLS=[
+/* 1 */{id:'recipe',title:'The recursion recipe',open:[
+  ()=>T('Name the <b>three parts</b> of a recursive solution and say what each one does.',
+      [R('base case: solve the smallest problem directly',/base/,'Which case stops the recursion?'),R('recursive case: call the function on a smaller (closer to the base case) problem',/recursive case|smaller|closer|progress|same function|calls itself/,'What does the function do for a bigger problem?'),R('combine: use the result of the recursive call (or finish the work) to solve the original problem',/combin|use (its|the) (result|answer)|finish|after the (recursive )?call|build/,'What happens after the recursive call?')],
+      '<p><b>Base case:</b> solve the smallest problem directly. <b>Recursive case:</b> move one step closer to the base case by calling the function on a smaller problem. <b>Combine:</b> after the recursive call, use its result (or finish the work still needed) to solve the original problem.</p>',
+      'Base case: solve the smallest problem directly. Recursive case: call the function on a problem closer to the base case. Combine: use the result of that call (or finish the remaining work) to solve the original problem.','Think of the line analogy: who do you ask, and what do you do with the answer?')],
+ mc:[()=>M('Which line of <code>sumTo</code> is the <b>base case</b>?<pre>int sumTo(int n) {\n    if (n == 0) {\n        return 0;\n    }\n    return n + sumTo(n - 1);\n}</pre>','<code>if (n == 0) { return 0; }</code>',['<code>return n + sumTo(n - 1);</code>','<code>int sumTo(int n) {</code>','<code>sumTo(n - 1)</code> by itself'],'<p>The base case is the smallest problem the function answers <b>without</b> another call. Here, <code>sumTo(0)</code> is <code>0</code>.</p>'),
+     ()=>M('In <code>return n * factorial(n - 1);</code>, which part is the <b>combine</b> step?','The multiplication <code>n * ...</code> after the call returns',['The call <code>factorial(n - 1)</code> itself','The test <code>n == 0</code>','The return type <code>long</code>'],'<p>The call makes the problem smaller. The <b>combine</b> step uses its answer: multiply by <code>n</code>.</p>')]},
+/* 2 */{id:'base',title:'The base case',open:[
+  ()=>T('This function is meant to return <code>1 + 2 + &hellip; + n</code>.<pre>int sumTo(int n) {\n    return n + sumTo(n - 1);\n}</pre>What happens when you call <code>sumTo(3)</code>, and why? What one line fixes it?',
+      [R('it never stops: there is no base case',/never (stop|end|finish|return)|no base|infinite|forever|keeps (calling|going)|without a base/,'Does anything ever stop the calls?'),R('the call stack runs out of space (stack overflow, crash)',/overflow|crash|segfault|segmentation|out of (stack )?(space|memory)|runs out/,'What happens to the stack when calls never return?'),R('add if (n == 0) return 0 (before the recursive call)',/n\s*==\s*0|n\s*<=\s*0|base case.*(0|zero)|return 0/,'What should sumTo(0) be?')],
+      '<p>Without a base case the calls go <code>sumTo(3)</code>, <code>sumTo(2)</code>, <code>sumTo(1)</code>, <code>sumTo(0)</code>, <code>sumTo(-1)</code>, &hellip; until the call stack runs out of space (stack overflow). Add <code>if (n == 0) { return 0; }</code> before the recursive call.</p>',
+      'It never stops, because there is no base case. The calls pile up until the stack overflows and the program crashes. Add: if (n == 0) { return 0; } before the return.','Where would the calls ever stop?'),
+  ()=>{const f=Math.random()<.5;
+    return C('Write the C++ function <code>'+(f?'long factorial(int n)':'int sumTo(int n)')+'</code> recursively. '+(f?'<code>factorial(0)</code> is 1, and <code>factorial(n)</code> is <code>n</code> times <code>factorial(n - 1)</code>.':'It returns <code>1 + 2 + &hellip; + n</code>, so <code>sumTo(0)</code> is 0.'),
+      ['Has a base case (an if on n, such as n == 0)','The base case is right: '+(f?'factorial(0) returns 1':'sumTo(0) returns 0'),'Calls itself on n - 1 (checked while running)','Gives the right answer for n = 0 to 6 (tested on a translation of your code)','Every return statement ends with a semicolon'],
+      (c,raw)=>{const nm=f?'factorial':'sumTo';
+        const ins=[0,1,2,3,4,5,6];const want=ins.map(k=>{let v=f?1:0;for(let i=1;i<=k;i++)v=f?v*i:v+i;return v;});
+        const got=runFn(raw,nm,ins);
+        if(!got)return null;
+        return [/if\(|\?/.test(c),
+          got[0]===want[0],
+          ins.every((k,i)=>k<2||got.rec[i].includes(k-1)),
+          got.every((v,i)=>v===want[i]),
+          !/return[^;{}]*\}/.test(c)];},
+      '<p>Test the base case first, then make the call on <code>n - 1</code> and combine.</p>',f?MODEL_FACT:MODEL_SUMTO,'Base case first. Then one recursive call on n - 1.');}],
+ mc:[()=>M('What happens if a recursive function <b>has no base case</b>?','The calls pile up until the call stack overflows',['It returns 0 by default','The compiler reports an error','It runs once and stops'],'<p>Every call makes another call. Nothing ever returns, so the stack of frames grows until it runs out of space.</p>')]},
+/* 3 */{id:'eval',title:'Evaluate a recursive call',open:[
+  ()=>{const n=rnd(3,6);let f=1;for(let i=2;i<=n;i++)f*=i;
+    return N('<code>long factorial(int n)</code> returns 1 when <code>n == 0</code>, otherwise <code>n * factorial(n - 1)</code>. For <code>factorial('+n+')</code>: what value is returned, and what is the <b>largest number of frames</b> on the call stack at one time (counting the base-case call)?',
+      [{id:'v',label:'Value of factorial('+n+')',ans:[f]},{id:'f',label:'Largest number of frames',ans:[n+1]}],
+      '<p>The calls go down <code>factorial('+n+'), factorial('+(n-1)+'), &hellip;, factorial(0)</code>: that is <b>'+(n+1)+'</b> frames at the deepest point. Then the returns multiply back up: '+Array.from({length:n},(_,i)=>i+1).join(' &times; ')+' = <b>'+f+'</b>.</p>',
+      'The base case factorial(0) is its own call, so there are n + 1 frames.');},
+  ()=>{const n=rnd(3,7);
+    return N('<code>int sumTo(int n)</code> returns 0 when <code>n == 0</code>, otherwise <code>n + sumTo(n - 1)</code>. For <code>sumTo('+n+')</code>: what value is returned, and how many calls are made in total (counting the base case)?',
+      [{id:'v',label:'Value of sumTo('+n+')',ans:[n*(n+1)/2]},{id:'c',label:'Total number of calls',ans:[n+1]}],
+      '<p>Calls: <code>sumTo('+n+')</code> down to <code>sumTo(0)</code>, which is <b>'+(n+1)+'</b> calls. The result is '+Array.from({length:n},(_,i)=>i+1).join(' + ')+' = <b>'+(n*(n+1)/2)+'</b>.</p>','Count the base-case call too.');}],
+ mc:[()=>{const n=rnd(3,7);return M('What is the largest number of frames on the stack when you run <code>factorial('+n+')</code>?',String(n+1),[String(n),String(n+2),String(2*n)],'<p>Frames for <code>factorial('+n+')</code> down to <code>factorial(0)</code>: <b>'+(n+1)+'</b>. The base-case call has its own frame.</p>');}]},
+/* 4 */{id:'order',title:'Before and after the call',open:[
+  ()=>{const n=rnd(2,4);const a=[],b=[];for(let i=n;i>=1;i--)a.push(i);for(let i=1;i<=n;i++)b.push(i);
+    return N('What does <code>show('+n+')</code> print? List every number printed, in order.<pre>void show(int n) {\n    if (n == 0) {\n        return;\n    }\n    std::cout &lt;&lt; n &lt;&lt; " ";   // (A) before the call\n    show(n - 1);\n    std::cout &lt;&lt; n &lt;&lt; " ";   // (B) after the call\n}</pre>',
+      [{id:'o',label:'Output of show('+n+')',ans:a.concat(b)}],
+      '<p>Line (A) runs on the way <b>down</b>: '+a.join(' ')+'. Line (B) runs on the way <b>back up</b>, after each deeper call returns: '+b.join(' ')+'. Together: <b>'+a.concat(b).join(' ')+'</b>.</p>','Print on the way down, then print again on the way back up.');},
+  ()=>{const n=rnd(3,5);const b=[];for(let i=1;i<=n;i++)b.push(i);
+    return N('This function prints <b>after</b> the recursive call. What does <code>count('+n+')</code> print?<pre>void count(int n) {\n    if (n == 0) {\n        return;\n    }\n    count(n - 1);\n    std::cout &lt;&lt; n &lt;&lt; " ";\n}</pre>',
+      [{id:'o',label:'Output of count('+n+')',ans:b}],
+      '<p>Nothing prints until the base case is reached. Then the calls finish in the order <code>count(1)</code>, <code>count(2)</code>, &hellip;, <code>count('+n+')</code>, so the output is <b>'+b.join(' ')+'</b>.</p>','The first print happens in the deepest call that is not the base case.');}],
+ mc:[()=>M('A function prints its argument <b>after</b> its recursive call. For <code>f(3)</code> (base case <code>n == 0</code>), what is printed?','1 2 3',['3 2 1','3 2 1 1 2 3','3 3 3'],'<p>The deepest non-base call, <code>f(1)</code>, prints first. The outermost call prints last.</p>')]},
+/* 5 */{id:'frame',title:'Stack frames',open:[
+  ()=>T('What is a <b>stack frame</b>, and why can <code>factorial(3)</code>, <code>factorial(2)</code> and <code>factorial(1)</code> each have a different <code>n</code> at the same time?',
+      [R('every call gets its own frame (with its own parameters and local variables)',/own (frame|copy|n|variable|parameter)|each (call|frame)|separate|different (copy|n)/,'How many copies of n are there?'),R('frames are stacked: a new call goes on top, and the older ones wait',/stack|on top|wait|pile|pushed/,'Where does a new frame go?'),R('when a call returns its frame is removed and the caller resumes',/return|remov|pop|resume|finish/,'What happens to the frame when the call returns?')],
+      '<p>Each call gets its <b>own stack frame</b> holding its own parameters and local variables. A new call goes on top of the stack; the callers below wait. When a call returns, its frame is removed and the caller resumes. So each pending call keeps its own <code>n</code>.</p>',
+      'Each call gets its own stack frame holding its own n. A new call puts a frame on top while the older frames wait. When a call returns, its frame is removed and the caller resumes.','Think about one copy of n per call.')],
+ mc:[()=>M('<code>factorial(3)</code> has called <code>factorial(2)</code>, which has called <code>factorial(1)</code>. How many <code>n</code> variables exist right now?','Three, one in each pending call',['One shared <code>n</code>','Only the one in the newest call','Zero, until a call returns'],'<p>Each call has its own frame and its own <code>n</code>: 3, 2 and 1 all exist at the same time.</p>')]},
+/* 6 */{id:'lifo',title:'The call stack is a stack',open:[
+  ()=>T('How is the <b>call stack</b> related to the <b>stack ADT</b> from Class 9? Which call finishes first?',
+      [R('last in, first out: the most recent call finishes first',/last[\s-]*in|lifo|most recent|newest|latest|last call|deepest|top/,'Which call finishes first?'),R('a call is like a push and a return is like a pop',/push|pop|add|remov/,'Which operations match a call and a return?'),R('the computer maintains this stack for you',/computer|automatic|for you|system|runtime|compiler|you do not|don.t (write|have)/,'Who writes this stack?')],
+      '<p>The call stack is <b>last in, first out</b>. Each call is like a <code>push</code> of a frame, and each return is like a <code>pop</code>. The most recently called function that has not yet returned finishes first. The computer maintains this stack for you.</p>',
+      'The call stack is LIFO: a call is like a push, a return is like a pop, and the most recent unfinished call finishes first. The computer maintains it for you.','Class 9 stack: push, pop, top.')],
+ mc:[()=>M('<code>A</code> calls <code>B</code>, and <code>B</code> calls <code>C</code>. In what order do they <b>finish</b>?','<code>C</code>, then <code>B</code>, then <code>A</code>',['<code>A</code>, then <code>B</code>, then <code>C</code>','<code>B</code>, then <code>C</code>, then <code>A</code>','They finish in any order'],'<p>Last in, first out: the most recent call that has not returned finishes first.</p>')]},
+/* 7 */{id:'progress',title:'Progress toward the base case',open:[
+  ()=>{const k=rnd(2,3);const call=k===2?5:7;
+    return T('<code>f(n)</code> has base case <code>n == 0</code> and calls <code>f(n - '+k+')</code>. Why is <code>f('+call+')</code> a problem, and what is a better base case?',
+      [R('n skips over 0 (it goes '+Array.from({length:4},(_,i)=>call-k*i).join(', ')+', &hellip;)',/skip|jump|miss|never (hit|reach|equal|get)|go(es)? (past|below|negative)|odd|over/,'Does n ever equal 0?'),R('so the base case is never reached: infinite recursion / stack overflow',/never (stop|end|reach|hit)|infinite|overflow|crash/,'What happens if the base case is never reached?'),R('use n <= 0 (a base case that every smaller n reaches)',/<=\s*0|n\s*<\s*1|negative|less than or equal|<= 0|<\s*0/,'Which test catches every n that has gone too far?')],
+      '<p>Starting at '+call+' and subtracting '+k+' gives '+Array.from({length:5},(_,i)=>call-k*i).join(', ')+', &hellip;: <code>n</code> never equals 0. Every recursive call must make <b>progress toward a base case</b>. Use <code>n &lt;= 0</code> as the base case.</p>',
+      'n goes '+Array.from({length:4},(_,i)=>call-k*i).join(', ')+', ... and skips 0, so the base case is never reached and the recursion overflows the stack. Use n <= 0 as the base case.','Write down the first four values of n.');}],
+ mc:[()=>{const v=pick([['f(n) calls f(n + 1), base case n == 0, called as f(5)','f(n + 1)'],['f(n) calls f(n), base case n == 0, called as f(3)','f(n)']]);
+   return M('Which function <b>never</b> reaches its base case? <b>'+v[0]+'</b>. Why?','The argument does not move toward 0 (no progress)',['The base case is in the wrong place','It needs a second parameter','It calls itself too many times'],'<p>Each recursive call must move <b>toward</b> a base case. Here the argument grows (or stays the same), so the base case is never reached and the stack overflows.</p>');}]},
+/* 8 */{id:'sumarr',title:'Recursive array sum',open:[
+  ()=>{const n=rnd(3,5);const a=Array.from({length:n},()=>rnd(1,9));const s=a.reduce((x,y)=>x+y,0);
+    return N('<code>int sumArray(const int a[], int n)</code> returns 0 when <code>n == 0</code>, otherwise <code>a[n - 1] + sumArray(a, n - 1)</code>. For <code>a = {'+a.join(', ')+'}</code> and <code>sumArray(a, '+n+')</code>: what is returned, and how many calls are made in total?',
+      [{id:'s',label:'Value returned',ans:[s]},{id:'c',label:'Total number of calls',ans:[n+1]}],
+      '<p>Calls: <code>sumArray(a, '+n+')</code> down to <code>sumArray(a, 0)</code> is <b>'+(n+1)+'</b> calls. The sum is '+a.slice().reverse().join(' + ')+' + 0 = <b>'+s+'</b>.</p>','The base case is also a call.');}],
+ mc:[()=>M('In <code>sumArray(a, n)</code>, what should the <b>base case</b> (<code>n == 0</code>) return, and why?','<code>0</code>: the sum of no numbers',['<code>a[0]</code>: the first element','<code>-1</code>: to show an error','Nothing: it must not return'],'<p>With nothing left to add, the sum is <code>0</code>, which does not change the total when combined with <code>+</code>.</p>')]},
+/* 9 */{id:'reverse',title:'Print a string backward',open:[
+  ()=>{const w=pick(WORDS);
+    return N('<code>printReverse(s)</code> returns immediately when <code>s</code> is empty; otherwise it calls <code>printReverse(s.substr(1))</code> and <b>then</b> prints <code>s[0]</code>. For <code>printReverse("'+w+'")</code>: how many calls are made in total (counting the empty-string call), and what is the <b>position</b> (0, 1, 2, &hellip;) in <code>"'+w+'"</code> of the character printed <b>first</b>?',
+      [{id:'c',label:'Total number of calls',ans:[w.length+1]},{id:'p',label:'Position of the first character printed',ans:[w.length-1]}],
+      '<p>One call per character plus the empty-string call: <b>'+(w.length+1)+'</b>. Nothing prints until the base case returns. The first print happens in the call for the last character, <code>"'+w[w.length-1]+'"</code>, at position <b>'+(w.length-1)+'</b>. The output is <code>'+w.split('').reverse().join('')+'</code>.</p>','The print comes after the recursive call.');}],
+ mc:[()=>{const w=pick(['abc','node','heap','tree']);const r=w.split('').reverse().join('');
+   return M('What does <code>printReverse("'+w+'")</code> print?<pre>void printReverse(std::string s) {\n    if (s.empty()) {\n        return;\n    }\n    printReverse(s.substr(1));\n    std::cout &lt;&lt; s[0];\n}</pre>',r,[w,w[1]+w[0]+w.slice(2),w.slice(1)+w[0]],'<p>Each call first prints the rest of the string backward, then its own first character. So the characters come out last to first: <code>'+r+'</code>.</p>');}]},
+/* 10 */{id:'versions',title:'Version A or Version B?',open:[
+  ()=>T('Two versions of <code>printReverse</code> print the same output.<pre>// Version A\nvoid printReverse(std::string s) {\n    if (s.empty()) return;\n    printReverse(s.substr(1));\n    std::cout &lt;&lt; s[0];\n}\n\n// Version B\nvoid printReverse(const std::string&amp; s,\n                  std::string::size_type i) {\n    if (i == s.length()) return;\n    printReverse(s, i + 1);\n    std::cout &lt;&lt; s[i];\n}</pre>Which is more efficient, and why? What does <code>i</code> mean in Version B?',
+      [R('Version B is more efficient',/\bb\b|version b|second/,'A or B?'),R('Version A builds a new, shorter string in every call (copying characters)',/new (shorter )?string|copy|copies|copying|substr|builds/,'What does substr do in every call?'),R('Version B only changes the index (the string is passed by reference, nothing is copied)',/index|reference|nothing (is )?copied|no cop|only (changes|moves)|does not (copy|build)/,'What changes from call to call in B?'),R('i is the position of the first character not yet handled',/position|index|first (character|char)|not yet|next character|current/,'What does i point to?')],
+      '<p><b>Version B</b> is more efficient. Version A builds a new, shorter string in every call (about <code>n-1, n-2, &hellip;</code> characters copied). Version B passes the string by reference and only changes <code>i</code>, the position of the first character not yet handled. Both are correct; A is simpler to read.</p>',
+      'Version B. Version A builds a new, shorter string with substr in every call, copying characters. Version B passes the same string by reference and only moves the index i, the position of the first character not yet handled.','What changes in each recursive call? What gets built?',3)],
+ mc:[()=>M('In Version B, <code>printReverse(s, i)</code>, what does <code>i == s.length()</code> mean?','Every character has been handled: the base case',['The string is empty at the start','The recursion should print <code>s[i]</code>','The string has an odd length'],'<p><code>i</code> is the position of the first character not yet handled. When it equals the length, nothing is left.</p>'),
+     ()=>M('Why is Version B (index) usually more efficient than Version A (<code>substr</code>)?','Version A builds a new shorter string in every call; B copies nothing',['Version B uses fewer recursive calls','Version B has no base case','Version A cannot print the last character'],'<p>Both make the same number of calls. The difference is the copying done by <code>substr</code> in A.</p>')]},
+/* 11 */{id:'loop',title:'Recursion or a loop?',open:[
+  ()=>T('Factorial, reversal and sum can all be written with a <code>for</code> loop. When is recursion still worth it, and what is its cost?',
+      [R('a loop is usually cheaper (a recursive call uses a stack frame; a loop does not)',/cheaper|faster|frame|memory|loop (is|does)|efficient/,'What does each recursive call use that a loop does not?'),R('recursion is worth it when the problem is naturally the same procedure applied to a part of it (tree, maze search)',/natural|same (procedure|problem|idea)|smaller|part|tree|maze|subproblem|self[\s-]?similar/,'What kind of problem fits recursion?'),R('cost: very deep recursion can overflow the stack',/overflow|deep|crash|run out|too many calls/,'What goes wrong with very deep recursion?')],
+      '<p>A loop is usually cheaper: a recursive call uses a stack frame; a loop does not. Recursion is worth it when the problem is naturally solved by <b>the same procedure applied to a part of it</b> (a tree, a maze search). The cost to remember is depth: if <code>n</code> recursive calls are active at once there are <code>n</code> frames, and a very deep recursion can overflow the stack.</p>',
+      'A loop is usually cheaper because a recursive call uses a stack frame. Recursion is worth it when the problem is naturally the same procedure applied to a part of it (a tree, a maze). The cost: n active calls use n frames, so very deep recursion can overflow the stack.','Think about what a call costs and what problems repeat on a smaller part.')],
+ mc:[()=>{const s=pick([['adding up the numbers 1 to n','A loop is simple and cheaper'],['exploring a maze, trying each neighbor the same way','Recursion is natural'],['walking every node of a binary tree','Recursion is natural'],['printing the numbers 1 to 1,000,000','A loop (a million frames could overflow the stack)']]);
+   return M('Which fits best for <b>'+s[0]+'</b>?',s[1],['A loop is simple and cheaper','Recursion is natural','A loop (a million frames could overflow the stack)'].filter(x=>x!==s[1]).slice(0,3),'<p>Loops cost less per step. Recursion shines when each part of the problem looks like the whole problem. Very deep recursion can overflow the stack.</p>');}]},
+/* 12 */{id:'dfsrules',title:'Recursive DFS: the rules',open:[
+  ()=>T('Describe what the recursive DFS helper does for a cell, in order. Use the Project 2 rules (answer stack, neighbor order).',
+      [R('marks the cell visited first',/mark|visit/,'What happens to the cell before anything else?'),R('if the cell is the end: push it onto the answer stack and return',/end|target|exit|goal/,'What if the cell is the end?'),R('tries neighbors in the order left, right, up, down (open and not visited)',/left[^.]*right[^.]*up[^.]*down|order/,'Which order? Which neighbors?'),R('recurses on each valid neighbor',/recurs|call|helper|go (to|into)/,'What do you do with a valid neighbor?'),R('if the answer stack is no longer empty, push this cell and return',/(answer|stack)[^.]*(not empty|has|non[\s-]?empty)|push (this|the|current) cell|success came back/,'How does the route get built?')],
+      '<p>1. Mark the cell visited. 2. If it is the end, push it onto the answer stack and return. 3. For each neighbor in the order <b>left, right, up, down</b>: if it is open and not visited, call the helper on it; if the answer stack is not empty afterwards, push this cell and return. 4. If every neighbor failed, return: the caller tries its next choice (the backtrack). The route is built as the calls <b>unwind</b>: end first, start last (on top).</p>',
+      'Mark the cell visited. If it is the end, push it on the answer stack and return. Otherwise try left, right, up, down: for each open, unvisited neighbor call the helper, and if the answer stack is no longer empty, push this cell and return. If every neighbor fails, return.','Four things in order: mark, check the end, loop over neighbors, push on success.',4)],
+ mc:[()=>M('In what order does the Project 2 recursive DFS try the neighbors of a cell?','Left, right, up, down',['Up, down, left, right','Right, down, left, up','Any order: it does not matter'],'<p>Project 2 fixes the order <b>left, right, up, down</b> so that every solution produces the same route.</p>'),
+     ()=>M('In recursive DFS, when does a cell get pushed onto the answer stack?','When it is the end, or when a call below it found the end (success came back)',['As soon as the cell is visited','Whenever the cell is a dead end','When the cell is first marked visited'],'<p>The end pushes itself as soon as it is reached. Every other cell pushes itself only when a recursive call below it succeeded, so the start ends up on top.</p>')]},
+/* 13 */{id:'dfstrace',title:'Trace DFS on a grid',open:[
+  ()=>{const m=makeMaze();const d=m.d;
+    return N('Recursive DFS starts at <b>S</b> = (0,0) and looks for <b>T</b> = ('+m.T[0]+','+m.T[1]+'). It marks a cell visited, then tries its neighbors in the order <b>left, right, up, down</b> (open and not visited). <code>#</code> is a wall. Visited cells stay visited.<pre>'+mazeText(m)+'</pre>How many calls are <b>entered</b> (cells visited, including S and T)? How many cells are on the <b>final route</b> (including S and T)?',
+      [{id:'e',label:'Cells entered (calls)',ans:[d.order.length]},{id:'r',label:'Cells on the final route',ans:[d.route.length]}],
+      '<p>Cells entered, in order: <b>'+cellStr(d.order)+'</b> ('+d.order.length+' calls).</p><p>Final route: <b>'+cellStr(d.route)+'</b> ('+d.route.length+' cells).'+(d.order.length>d.route.length?' The cells entered but not on the route were <b>dead ends</b>: visited, then abandoned when every neighbor failed.':'')+'</p>',
+      'Follow left, right, up, down from S. Count each cell the first time you enter it.');}],
+ mc:[()=>{const m=makeMaze();const d=m.d;const first=d.order[d.order.length-1];
+   return M('Using the same rules (left, right, up, down; <code>#</code> is a wall; start S = (0,0)), which is the <b>last cell entered</b> by DFS?<pre>'+mazeText(m)+'</pre>','('+first[0]+','+first[1]+')',['('+(first[0]===0?1:0)+','+first[1]+')','(0,0)','('+first[0]+','+(first[1]===0?1:0)+')'].filter((x,i,a)=>x!=='('+first[0]+','+first[1]+')'&&a.indexOf(x)===i).slice(0,3),'<p>Cells entered, in order: '+cellStr(d.order)+'. The search ends the moment <b>T</b> is entered, so the last cell entered is T.</p>');}]},
+/* 14 */{id:'backtrack',title:'Dead ends and backtracking',open:[
+  ()=>T('A DFS call reaches a cell that is <b>not the end</b> and whose neighbors are all walls or already visited. What happens next? Do the visited marks get erased?',
+      [R('the call returns (no route found from this cell)',/return|give up|fail|no (route|path)|nothing found|dead end/,'What does this call do when every neighbor fails?'),R('its caller continues with its next neighbor (left, right, up, down)',/caller|previous|parent|next neighbor|next (choice|option)|resumes|goes back|backs up/,'Who tries another direction?'),R('visited cells stay visited (they are never un-marked)',/stay|remain|never|not (un)?mark|not erased|do not|don.t|still visited|keep/,'Does a dead end get re-explored?')],
+      '<p>The call returns without finding a route. Its caller then tries its next neighbor. This return-and-try-another is the <b>backtrack</b>. Visited cells <b>stay visited</b>, so a dead end is never explored twice.</p>',
+      'The call returns empty-handed to its caller, which tries its next neighbor (the backtrack). Visited cells stay visited and are never un-marked.','Think about who is in charge after the call returns.')],
+ mc:[()=>M('After a DFS call hits a dead end and returns, what happens to its cell in the visited table?','It stays marked visited',['It is un-marked so another route can use it','It is marked as part of the route','It is deleted from the maze'],'<p>Un-marking would let DFS explore the same dead end again and again. Project 2 never un-marks.</p>')]},
+/* 15 */{id:'dfsbfs',title:'DFS or BFS?',open:[
+  ()=>T('On the 4&times;4 Project 2 example, DFS finds a route of 9 cells while BFS finds one of 7. What does that tell you about the two searches? What container does each one use?',
+      [R('DFS finds a route, not necessarily the shortest one',{test:n=>dfsNotShortest(n)},'Does DFS promise the shortest route?'),R('BFS finds a shortest route (fewest cells) in a maze',{test:n=>bfsShortest(n)},'Which one finds the shortest?'),R('DFS uses a stack (recursion or an explicit stack); BFS uses a queue',{test:n=>containerPairs(n)},'Which container does each one use?')],
+      '<p>DFS follows one branch as deep as it can and returns the first route it finds, which need not be the shortest. BFS explores in layers, so the first time it reaches the end it has found a route with the fewest cells. DFS uses a <b>stack</b> (the call stack, or an explicit one); BFS uses a <b>queue</b>. That is next class.</p>',
+      'DFS finds a route but not necessarily the shortest. BFS finds a shortest route. DFS uses a stack (recursion); BFS uses a queue.','Stack or queue? Which one keeps going deeper?')],
+ mc:[()=>M('Which search is <b>guaranteed</b> to find a route with the fewest cells in a maze with no weights?','BFS (breadth-first search)',['DFS (depth-first search)','Both always find the same route','Neither: no search can promise this'],'<p>BFS explores all cells at distance 1, then distance 2, and so on, so the first time it reaches the end is by a shortest route.</p>'),
+     ()=>M('Which container goes with each search?','DFS: stack, BFS: queue',['DFS: queue, BFS: stack','Both use a stack','Both use a queue'],'<p>Recursive DFS uses the call stack. BFS uses a queue: the cells discovered first are explored first.</p>')]}
+];
+
+</script>
+<script>
+/* ---------- optional Claude (viewer's own account; the game works without it) ---------- */
+let SAMPLE=null,SAMPLE_IMG=false;
+try{ if(window.claude&&claude.use){ claude.use('sample').then(async s=>{ if(!s)return; SAMPLE=s; try{const l=await s.limits(); SAMPLE_IMG=!!(l&&l.images);}catch(e){} }).catch(()=>{}); } }catch(e){}
+
+/* ---------- state ---------- */
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+let G=null;
+const TOTAL=SKILLS.length;
+const byId=id=>SKILLS.find(s=>s.id===id);
+const norm=s=>String(s).toLowerCase().replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+const plain=h=>{const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/\s+/g,' ').trim();};
+const ints=s=>(String(s).match(/-?\d+/g)||[]).map(Number);
+
+function newGame(){
+  G={score:0,streak:0,best:0,order:shuffle(SKILLS.map(s=>s.id)),res:{},fmt:{},lastv:{},practice:null,cur:null,count:0,log:[]};
+  SKILLS.forEach(s=>G.res[s.id]={status:'new',first:null,pr:0,att:0});
+  $('stats').hidden=false;$('progWrap').hidden=false;
+  updateStats();deal();
+}
+function doneCount(){return SKILLS.filter(s=>G.res[s.id].status==='done').length;}
+function updateStats(){
+  $('sScore').textContent=G.score;$('sStreak').textContent=G.streak;$('sDone').textContent=doneCount();$('sTotal').textContent=TOTAL;
+  $('prog').style.width=(100*doneCount()/TOTAL)+'%';
+}
+function nextSkill(){
+  if(G.practice&&G.res[G.practice].status==='practice')return G.practice;
+  G.practice=null;
+  let id=G.order.find(i=>G.res[i].status==='new');
+  if(!id){id=G.order.find(i=>G.res[i].status==='skipped'); if(id){G.res[id].status='practice';G.res[id].pr=G.res[id].pr||0;G.practice=id;}}
+  return id||null;
+}
+function deal(){
+  const sid=nextSkill(); if(!sid){summary();return;}
+  const sk=byId(sid),fmt=G.fmt[sid]||'open';
+  const pool=fmt==='mc'?sk.mc:sk.open;
+  let vi=rnd(0,pool.length-1); const key=sid+fmt;
+  if(pool.length>1&&vi===G.lastv[key])vi=(vi+1)%pool.length;
+  G.lastv[key]=vi;
+  G.count++;
+  G.cur={sid,fmt,q:pool[vi](),hint:false,mode:'type',sel:null,file:null,answered:false};
+  renderQuestion();
+}
+
+/* ---------- screens ---------- */
+function intro(){
+  stage.innerHTML=`<section class="card hero">
+    <span class="tag">CSCI 235 &middot; Class 11 &middot; Recursion</span>
+    <h2>Fifteen cards. Answer them yourself.</h2>
+    <p>Each card asks a question about recursion and the call stack. You write the answer: a sentence, a few numbers, or code you type yourself. You can also write on paper and upload a photo. After every answer you get a check, an explanation and the model solution.</p>
+    <div class="how">
+      <div class="box"><h3>Cards come in random order</h3><p class="small">Get one right on the first try and that card is done.</p></div>
+      <div class="box"><h3>Miss one? Practice it</h3><p class="small">You get fresh, similar problems until you answer <b>three</b> correctly. Numbers change each time.</p></div>
+      <div class="box"><h3>Stuck on the type?</h3><p class="small">Switch between written answers and multiple choice, or skip a topic and come back later.</p></div>
+    </div>
+    <div class="row"><button class="btn main" data-act="start">Deal the first card</button><span class="small">Your progress lives in this tab only. Reloading restarts the game.</span></div>
+  </section>`;
+}
+function pipsHtml(n){return '<span class="pips" aria-label="'+n+' of 3 practice answers correct">'+[0,1,2].map(i=>'<i class="pip'+(i<n?' on':'')+'"></i>').join('')+'</span>';}
+function header(){
+  const c=G.cur,r=G.res[c.sid],sk=byId(c.sid);
+  const mode=r.status==='practice'?'<span class="mode prac">Practice</span>'+pipsHtml(r.pr):'<span class="mode">New card</span>';
+  return `<div class="top"><span class="tag">Card ${SKILLS.indexOf(sk)+1} of ${TOTAL}</span><span class="row" style="gap:8px">${mode}</span></div><h3 class="title">${esc(sk.title)}</h3>`;
+}
+function renderQuestion(){
+  const c=G.cur,q=c.q,sk=byId(c.sid);
+  let body='';
+  if(q.type==='mc'){
+    body='<div class="opts" id="opts">'+q.options.map((o,i)=>`<button class="opt" data-act="pick" data-i="${i}" aria-pressed="false"><span class="k">${'ABCD'[i]}</span><span>${o.t}</span></button>`).join('')+'</div>';
+  }else{
+    const tabs=`<div class="tabs" role="tablist"><button class="tab" role="tab" data-act="mode" data-m="type" aria-selected="${c.mode==='type'}">Type my answer</button><button class="tab" role="tab" data-act="mode" data-m="photo" aria-selected="${c.mode==='photo'}">Answer on paper</button></div>`;
+    let area='';
+    if(c.mode==='type'){
+      if(q.type==='nums')area='<div class="fields">'+q.fields.map(f=>`<label for="f_${f.id}">${esc(f.label)}<input type="text" id="f_${f.id}" autocomplete="off" inputmode="text"></label>`).join('')+'</div>';
+      else if(q.type==='code')area='<textarea id="ans" data-code="1" spellcheck="false" autocapitalize="off" aria-label="Your code" placeholder="Type your C++ here. Tab inserts four spaces."></textarea>';
+      else area='<textarea id="ans" class="prose" aria-label="Your answer" placeholder="Write your answer in your own words."></textarea>';
+    }else{
+      area=`<div class="photo"><p class="small">Write your answer on paper, then take a photo and choose it here. Make sure the writing is dark and the whole answer is in the frame.</p><input type="file" id="photo" accept="image/*" capture="environment" aria-label="Photo of your written answer"><div id="pv"></div><div class="row" id="photoBtns"></div></div>`;
+    }
+    body=tabs+area;
+  }
+  const other=c.fmt==='mc'?'Write it out instead':'Switch to multiple choice';
+  stage.innerHTML=`<section class="card">${header()}<div class="q">${q.prompt}</div>${body}
+    <div id="hintbox"></div>
+    <div class="row">${(q.type==='mc'||c.mode==='type')?'<button class="btn main" data-act="check" id="checkBtn"'+(q.type==='mc'?' disabled':'')+'>Check my answer</button>':''}
+    <button class="btn quiet" data-act="hint">Show a hint</button>
+    <button class="btn quiet" data-act="switch">${other}</button>
+    <button class="btn quiet" data-act="skip">Skip this topic</button></div></section>`;
+  if(c.mode==='photo'&&q.type!=='mc')wirePhoto();
+  const ta=$('ans'); if(ta&&ta.dataset.code)wireTab(ta);
+}
+function wireTab(ta){
+  let free=false;
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){free=true;return;}
+    if(e.key==='Tab'&&!free&&!e.shiftKey){e.preventDefault();const s=ta.selectionStart,t=ta.selectionEnd;ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(t);ta.selectionStart=ta.selectionEnd=s+4;}
+    else if(e.key!=='Tab')free=false;
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter')check();
+  });
+}
+function wirePhoto(){
+  const inp=$('photo');
+  inp.addEventListener('change',()=>{
+    const f=inp.files&&inp.files[0]; if(!f)return;
+    G.cur.file=f;
+    const url=URL.createObjectURL(f);
+    $('pv').innerHTML='<img alt="Your photo" src="'+url+'">';
+    const canClaude=SAMPLE&&SAMPLE_IMG;
+    $('photoBtns').innerHTML=(canClaude?'<button class="btn main" data-act="claudePhoto">Grade my photo with Claude</button>':'')+'<button class="btn '+(canClaude?'':'main')+'" data-act="selfcheck">'+(canClaude?'Self-check instead':'Show the model answer and self-check')+'</button>'+(canClaude?'<span class="small">Claude uses your own claude.ai account.</span>':'');
+  });
+}
+
+/* ---------- grading ---------- */
+function gradeTyped(q,raw){
+  if(q.type==='mc')return null;
+  if(q.type==='nums'){
+    const items=q.fields.map(f=>{const got=ints(document.getElementById('f_'+f.id).value);const ok=got.length===f.ans.length&&got.every((v,i)=>v===f.ans[i]);
+      return {ok,label:f.label+': '+f.ans.join(', '),tip:ok?'':'You wrote: '+(got.length?got.join(', '):'nothing')};});
+    return {items,pass:items.every(i=>i.ok),user:q.fields.map(f=>f.label+' = '+document.getElementById('f_'+f.id).value).join('\n')};
+  }
+  if(q.type==='code'){
+    if(!raw.trim())return {items:q.labels.map(l=>({ok:false,label:l})),pass:false,user:raw};
+    let res;try{res=q.check(squash(raw),raw);}catch(e){res=null;}
+    if(!res)return {unverified:true,why:'Your code uses something this checker does not handle (a different parameter name, loops, or unusual syntax), so it cannot judge it automatically.',items:[],user:raw};
+    const items=q.labels.map((l,i)=>({ok:!!res[i],label:l}));
+    return {items,pass:items.every(i=>i.ok),user:raw};
+  }
+  const n=norm(raw); const m=q.rubric.map(r=>r.re.test(n));
+  if(true)return {unverified:true,prose:true,why:'A program cannot reliably judge written explanations, so you decide: compare your answer with the model answer.',items:q.rubric.map((r,i)=>({ok:m[i],label:r.label})),user:raw};
+  const got=m.filter(Boolean).length;
+  let items;
+  if(q.need<q.rubric.length){
+    items=q.rubric.filter((r,i)=>m[i]).map(r=>({ok:true,label:r.label}));
+    items.push({ok:got>=q.need,label:'Name at least '+q.need+' (you named '+got+')',tip:got>=q.need?'':'Think about where order of arrival matters.'});
+    return {items,pass:got>=q.need,user:raw};
+  }
+  items=q.rubric.map((r,i)=>({ok:m[i],label:r.label,tip:m[i]?'':r.tip}));
+  return {items,pass:got>=q.need&&n.length>0,user:raw};
+}
+function check(){
+  const c=G.cur;if(!c||c.answered)return;
+  const q=c.q;
+  if(q.type==='mc'){
+    if(c.sel===null)return;
+    const ok=q.options[c.sel].ok;
+    const items=[{ok,label:'You chose: '+plain(q.options[c.sel].t)}];
+    if(!ok)items.push({ok:true,label:'Correct choice: '+plain(q.options.find(o=>o.ok).t)});
+    finish({items,pass:ok,user:'',mc:true});return;
+  }
+  const raw=q.type==='nums'?'':($('ans')?$('ans').value:'');
+  if(q.type!=='nums'&&!raw.trim()){$('hintbox').innerHTML='<div class="hint">Type something first, even a partial answer. A wrong attempt teaches more than a blank.</div>';return;}
+  const g=gradeTyped(q,raw);
+  if(g.unverified){G.cur.typed=raw;compareScreen(q,g);return;}
+  finish(g);
+}
+function compareScreen(q,g){
+  const c=G.cur,labels=selfLabels(q);
+  const hints=g.prose?'<div><h3>Keyword scan (a hint, not a grade)</h3><ul class="checks">'+g.items.map(i=>`<li class="${i.ok?'ok':'no'}"><span class="m" aria-hidden="true">${i.ok?'&#10003;':'?'}</span><span>${esc(i.label)}<span class="tip">${i.ok?'Keywords noticed':'No matching keywords found'}</span></span></li>`).join('')+'</ul></div>':'';
+  const model=q.type==='code'?'<div><h3>Model solution</h3><pre>'+esc(q.model)+'</pre></div>':'<div><h3>Model answer</h3><div class="box">'+esc(q.model)+'</div></div>';
+  stage.innerHTML=`<section class="card fb">${header()}
+    <div class="verdict" style="background:var(--card2,transparent);border:1px solid var(--line)"><span>Could not automatically verify: compare with the model answer</span><span></span></div>
+    <p class="small" style="margin:0">${esc(g.why)}</p>
+    <div><h3>Your answer</h3><div class="draft">${esc(g.user)}</div></div>
+    ${hints}${model}
+    <div><h3>Why</h3><div class="box">${q.explain}</div></div>
+    <h3>Be honest: tick each point your own answer really had.</h3>
+    <div class="self">${labels.map((l,i)=>`<label><input type="checkbox" class="sc" data-i="${i}"><span>${esc(l)}</span></label>`).join('')}</div>
+    <div class="row"><button class="btn main" data-act="submitSelf">Submit my self-check</button></div></section>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function selfLabels(q){return q.type==='text'?q.rubric.map(r=>r.label):q.type==='code'?q.labels:q.fields.map(f=>f.label+' matches: '+f.ans.join(', '));}
+function selfCheck(){
+  const c=G.cur,q=c.q,labels=selfLabels(q);
+  const model=q.type==='nums'?'':'<h3>Model answer</h3>'+(q.type==='code'?'<pre>'+esc(q.model)+'</pre>':'<div class="box">'+esc(q.model)+'</div>');
+  $('photoBtns').innerHTML='';
+  $('pv').insertAdjacentHTML('beforeend','<div class="fb">'+model+'<h3 style="margin-top:10px">Compare your paper answer. Tick each point you really had.</h3><div class="self">'+labels.map((l,i)=>`<label><input type="checkbox" class="sc" data-i="${i}"><span>${esc(l)}</span></label>`).join('')+'</div><div class="row"><button class="btn main" data-act="submitSelf">Submit my self-check</button></div></div>');
+}
+function submitSelf(){
+  const q=G.cur.q,labels=selfLabels(q);
+  const ticks=[...document.querySelectorAll('.sc')].map(x=>x.checked);
+  const items=labels.map((l,i)=>({ok:ticks[i],label:l,tip:ticks[i]?'':'Not in your paper answer yet.'}));
+  finish({items,pass:items.every(i=>i.ok),user:G.cur.typed||'(answered on paper)',self:true});
+}
+async function claudePhoto(){
+  const c=G.cur,q=c.q;if(!SAMPLE||!c.file)return;
+  const labels=selfLabels(q);
+  $('photoBtns').innerHTML='<span class="small" id="thk">Claude is reading your photo...</span>';
+  const prompt='You are grading a student\'s handwritten answer (photo attached) to a data-structures flashcard about recursion in C++.\nQuestion: '+plain(q.prompt)+'\nReference answer: '+(q.model?q.model:plain(q.explain))+'\nChecklist:\n'+labels.map((l,i)=>(i+1)+'. '+l).join('\n')+'\nFor each checklist item decide whether the photo clearly shows it. Be fair about wording and handwriting. Reply with only JSON: {"parts":[{"ok":true,"note":"short reason"}],"feedback":"2 or 3 kind, specific sentences"} with one part per checklist item in order. If the photo is unreadable, set every ok to false and say so in feedback.';
+  try{
+    const out=await SAMPLE.json(prompt,{images:c.file,modelTier:'default'});
+    const parts=out.parts||[];
+    const items=labels.map((l,i)=>({ok:!!(parts[i]&&parts[i].ok),label:l,tip:parts[i]&&parts[i].note||''}));
+    finish({items,pass:items.every(i=>i.ok),user:'(photo)',claudeNote:out.feedback||''});
+  }catch(e){
+    $('photoBtns').innerHTML='<span class="small">Claude could not grade the photo ('+esc(e.code||'error')+'). You can self-check instead.</span> <button class="btn main" data-act="selfcheck">Self-check</button>';
+  }
+}
+async function askClaude(){
+  const c=G.cur,q=c.q,box=$('claudeBox');if(!SAMPLE||!box)return;
+  box.innerHTML='<p class="small">Claude is reading your answer...</p>';
+  const ref=q.model?q.model:plain(q.explain);
+  const prompt='You are a kind teaching assistant for a college data-structures class (C++, recursion). A student answered a flashcard.\nQuestion: '+plain(q.prompt)+'\nReference solution: '+ref+'\nStudent answer:\n'+String(c.user||'').slice(0,4000)+'\nIn 3 to 5 short sentences: say what is right, what is missing or wrong (be specific, and point to the exact line or idea), and give one tip. Do not rewrite the whole solution.';
+  try{
+    await SAMPLE(prompt,{modelTier:'quick',onText:({text})=>{box.innerHTML='<h3>Claude\'s review</h3><p style="white-space:pre-wrap">'+esc(text)+'</p>';}});
+  }catch(e){box.innerHTML='<p class="small">Claude could not review this answer ('+esc(e.code||'error')+'). The model solution above still applies.</p>';}
+}
+
+/* ---------- feedback and progression ---------- */
+function finish(g){
+  const c=G.cur,q=c.q,r=G.res[c.sid];
+  c.answered=true;c.user=g.user;r.att++;
+  const wasNew=r.status==='new';
+  let pts=0,note='';
+  if(g.pass){
+    pts=(wasNew?10:6)+Math.min(G.streak,5)-(c.hint?3:0);pts=Math.max(pts,3);
+    G.streak++;G.best=Math.max(G.best,G.streak);G.score+=pts;
+    if(wasNew){r.status='done';r.first=true;note='Done: first try.';}
+    else{r.pr++;if(r.pr>=3){r.status='done';G.practice=null;note='Topic mastered after practice.';}else note='Practice '+r.pr+' of 3.';}
+  }else{
+    G.streak=0;
+    if(wasNew){r.status='practice';r.first=false;r.pr=0;G.practice=c.sid;note='This card goes to practice: you need three correct answers.';}
+    else note='Practice stays at '+r.pr+' of 3.';
+  }
+  updateStats();
+  const sk=byId(c.sid);
+  const checks='<ul class="checks">'+g.items.map(i=>`<li class="${i.ok?'ok':'no'}"><span class="m" aria-hidden="true">${i.ok?'&#10003;':'&#10005;'}</span><span>${esc(i.label)}${i.tip?'<span class="tip">'+esc(i.tip)+'</span>':''}</span></li>`).join('')+'</ul>';
+  const user=(!g.mc&&!g.self&&g.user&&q.type!=='nums')?'<div><h3>Your answer</h3><div class="draft">'+esc(g.user)+'</div></div>':(q.type==='nums'&&g.user?'<div><h3>Your answer</h3><div class="draft">'+esc(g.user)+'</div></div>':'');
+  const model=q.type==='code'?'<div><h3>Model solution</h3><pre>'+esc(q.model)+'</pre></div>':(q.type==='text'?'<div><h3>Model answer</h3><div class="box">'+esc(q.model)+'</div></div>':'');
+  let btns='';
+  const practiceNow=G.practice===c.sid&&r.status==='practice';
+  if(g.pass)btns='<button class="btn go" data-act="next" id="nextBtn">'+(practiceNow?'Next practice problem':'Next card')+'</button>';
+  else btns='<button class="btn main" data-act="next" id="nextBtn">Try a similar problem</button>';
+  btns+=(!g.pass?'<button class="btn" data-act="switch2">'+(c.fmt==='mc'?'Write it out instead':'Switch to multiple choice')+'</button>':'')+(r.status==='practice'?'<button class="btn quiet" data-act="skip2">Skip this topic for now</button>':'');
+  const askBtn=(SAMPLE&&!g.mc&&!g.self&&!g.claudeNote&&String(c.user||'').trim()&&c.user!=='(photo)')?'<button class="btn" data-act="askclaude">Ask Claude to review my answer</button>':'';
+  stage.innerHTML=`<section class="card fb">${header()}
+    <div class="verdict ${g.pass?'ok':'no'}"><span>${g.pass?'Correct':'Not yet'} &middot; ${g.items.filter(i=>i.ok).length} of ${g.items.length} parts</span><span>${g.pass?'+'+pts+' points':'0 points'}</span></div>
+    <p class="small" style="margin:0">${esc(note)}</p>
+    ${checks}${user}
+    ${g.claudeNote?'<div class="box"><h3>Claude\'s feedback</h3><p style="white-space:pre-wrap;margin:0">'+esc(g.claudeNote)+'</p></div>':''}
+    <div><h3>Why</h3><div class="box">${q.explain}</div></div>${model}
+    <div id="claudeBox" class="box" ${askBtn?'':'hidden'}></div>
+    <div class="row">${btns}${askBtn}</div></section>`;
+  if(askBtn)$('claudeBox').hidden=true;
+  const nb=$('nextBtn');if(nb)nb.focus({preventScroll:true});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function summary(){
+  $('prog').style.width='100%';
+  const rs=SKILLS.map(s=>({s,r:G.res[s.id]}));
+  const first=rs.filter(x=>x.r.first===true).length;
+  const prac=rs.filter(x=>x.r.first===false&&x.r.status==='done').length;
+  const open=rs.filter(x=>x.r.status!=='done').length;
+  stage.innerHTML=`<section class="card"><span class="tag">Round complete</span><h2>You finished the deck.</h2>
+    <p><b>${G.score}</b> points &middot; best streak <b>${G.best}</b> &middot; ${first} cards right on the first try &middot; ${prac} mastered through practice${open?' &middot; '+open+' still open':''}.</p>
+    <div class="sumgrid">${rs.map(({s,r})=>`<div class="box"><b>${esc(s.title)}</b><span class="st ${r.status==='done'?(r.first?'first':'prac'):'skip'}">${r.status==='done'?(r.first?'First try':'Practiced, mastered'):'Not finished'}</span><span class="small">${r.att} attempt${r.att===1?'':'s'}</span></div>`).join('')}</div>
+    <div class="row"><button class="btn main" data-act="start">Play again with a new shuffle</button></div></section>`;
+}
+
+/* ---------- events ---------- */
+stage.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,c=G&&G.cur;
+  if(a==='start'){newGame();return;}
+  if(a==='pick'){c.sel=+b.dataset.i;document.querySelectorAll('.opt').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));$('checkBtn').disabled=false;return;}
+  if(a==='check'){check();return;}
+  if(a==='mode'){if(c.mode!==b.dataset.m){c.mode=b.dataset.m;renderQuestion();}return;}
+  if(a==='hint'){const h=c.q.hint||'Re-read the question and take it one step at a time.';c.hint=true;$('hintbox').innerHTML='<div class="hint"><b>Hint</b> (costs 3 points): '+esc(h)+'</div>';return;}
+  if(a==='switch'||a==='switch2'){G.fmt[c.sid]=c.fmt==='mc'?'open':'mc';deal();return;}
+  if(a==='skip'||a==='skip2'){const r=G.res[c.sid];if(r.status==='practice'){r.status='skipped';}if(r.status==='new'||r.status==='skipped'){G.order=G.order.filter(i=>i!==c.sid).concat(c.sid);}if(G.practice===c.sid)G.practice=null;G.streak=0;updateStats();deal();return;}
+  if(a==='next'){deal();return;}
+  if(a==='selfcheck'){selfCheck();return;}
+  if(a==='submitSelf'){submitSelf();return;}
+  if(a==='claudePhoto'){claudePhoto();return;}
+  if(a==='askclaude'){$('claudeBox').hidden=false;b.disabled=true;askClaude();return;}
+});
+intro();
+</script>
+
+</body>
+</html>
