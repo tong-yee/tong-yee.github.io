@@ -172,7 +172,8 @@ bool ok = solver-&gt;reachable();                  // base-class code, which cal
 <tr><td>Time</td><td>O(n)</td><td>O(n)</td><td>Every cell is marked visited at most once, and each visited cell looks at only its four neighbors, a constant amount of work. Total work is proportional to the number of cells.</td></tr>
 <tr><td>Space</td><td>O(n)</td><td>O(n)</td><td>The visited table has one entry per cell. DFS may also hold up to <em>n</em> recursive calls at once (a long winding corridor). BFS may hold up to <em>n</em> cells in the queue and in the parent table.</td></tr>
 </tbody></table></div>
-<div class="box"><p>Both searches have the same Big-O, yet they behave very differently. DFS can wander a long way around before it stumbles on the exit. BFS promises the <em>fewest steps</em> but needs the extra parent table to remember the route. Big-O tells you how the work <em>grows</em>; it does not tell you which answer you get.</p></div>
+<div class="box"><p>
+Both searches have the same Big-O, yet they behave very differently. DFS can wander a long way around before it stumbles on the exit. BFS promises the <em>fewest steps</em> and uses a parent table to reconstruct the route. Big-O tells you how the work <em>grows</em>; it does not tell you which answer you get.</p></div>
 
 <h2 id="provided">What Is Provided</h2>
 <ul>
@@ -283,8 +284,8 @@ for (const Maze_Solver* curr : solvers) {
   <li>Build in the order of the tasks, and test each solver on your own small mazes before you submit.</li>
 </ul>
 
-<h2 id="starter">Starter Code (Headers)</h2>
-<p>These three files are provided with the project. Read the declarations and the comments in them carefully before you start coding.</p>
+<h2 id="starter">Starter Code</h2>
+<p>These files are provided with the project. <code>Maze_Solver.hpp</code> and <code>Maze_Solver.cpp</code> are complete: read them, but do not change them. <code>DFS_Solver.hpp</code> and <code>BFS_Solver.hpp</code> are the declarations of the two classes you will implement, in <code>DFS_Solver.cpp</code> and <code>BFS_Solver.cpp</code>. <code>main.cpp</code> is a small driver for your own testing; it is not submitted. Read the declarations and the comments carefully before you start coding.</p>
 <h4>Maze_Solver.hpp</h4><pre><code class="language-cpp">// Maze_Solver.hpp
 #ifndef MAZE_SOLVER_HPP
 #define MAZE_SOLVER_HPP
@@ -321,6 +322,128 @@ class Maze_Solver {
     Coord end_;
 };
 #endif
+</code></pre><h4>Maze_Solver.cpp</h4><pre><code class="language-cpp">// Maze_Solver.cpp
+#include &quot;Maze_Solver.hpp&quot;
+#include &lt;sstream&gt; // Required for std::ostringstream
+#include &lt;iomanip&gt; // Required for std::setw and std::setfill
+
+Maze_Solver::Maze_Solver() : 
+maze_({{0, 0, 0}, {1, 0, 0}, {0, 0}}), start_({0, 0}), end_({2, 1}) 
+// maze_({{0, 0, 1}, {0, 1}, {0, 0}}), start_({0, 0}), end_({2, 1})
+{
+}
+
+// make a deep copy
+Maze_Solver::Maze_Solver(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; start, const Coord&amp; end) : maze_(maze), start_(start), end_(end) {
+}
+
+std::vector&lt;std::vector&lt;int&gt;&gt; Maze_Solver::getMaze() const {
+  return maze_;
+}
+
+Coord Maze_Solver::getStart() const {
+  return start_;
+}
+
+Coord Maze_Solver::getEnd() const {
+  return end_;
+}
+
+bool Maze_Solver::reachable() const {
+  return !getPath().empty();
+}
+
+std::string Maze_Solver::toString() const {
+  std::ostringstream ss;
+  ss &lt;&lt; &quot;Find a path from (&quot; &lt;&lt; start_.row 
+     &lt;&lt; &quot;, &quot; &lt;&lt; start_.col &lt;&lt; &quot;) to (&quot; 
+     &lt;&lt; end_.row &lt;&lt; &quot;, &quot; &lt;&lt; end_.col &lt;&lt; &quot;)\n&quot;;
+
+  int maxNumCols = 0;
+  for (int i = 0; i &lt; static_cast&lt;int&gt;(maze_.size()); i++) {
+    if (maxNumCols &lt; static_cast&lt;int&gt;(maze_[i].size())) {
+      maxNumCols = maze_[i].size();
+    }
+  }
+
+  std::string b_header = &quot;\033[34mcol &quot;; // \033[34m is blue color
+  ss &lt;&lt; b_header &lt;&lt; std::setw(3) &lt;&lt; &quot; &quot;;
+  for (int col = 0; col &lt; maxNumCols; col++) {
+    ss &lt;&lt; std::setw(2) &lt;&lt; col &lt;&lt; &quot; &quot;; 
+  }
+  ss &lt;&lt; &quot;\n\033[0m&quot;; // \033[0m restores to black font
+
+  for (int row = 0; row &lt; static_cast&lt;int&gt;(maze_.size()); row++) {
+    if (row == 0) {
+      ss &lt;&lt; &quot;\033[32mrow &quot;; // \033[32m is green color
+    }
+    else {
+      ss &lt;&lt; std::setw(4) &lt;&lt; &quot; &quot;; // length of &quot;row &quot;
+    }
+    ss &lt;&lt; &quot;\033[32m&quot; &lt;&lt; std::setw(2) &lt;&lt; row &lt;&lt; &quot; \033[0m&quot;;
+  
+    for (int col = 0; col &lt; static_cast&lt;int&gt;(maze_[row].size()); col++) {
+      if (row == start_.row &amp;&amp; col == start_.col) {
+        ss &lt;&lt; &quot;\033[30;48;2;230;230;230m\033[31m\033[1m&quot; &lt;&lt; std::setw(2) &lt;&lt;  maze_[row][col] &lt;&lt; &quot; \033[0m&quot;; // \033[30;48;2;230;230;230m very light gray background, \033\[31m red, \033\[1m bold
+      }
+      else if (row == end_.row &amp;&amp; col == end_.col) {
+        ss &lt;&lt; &quot;\033[30;48;2;230;230;230m\033[36m\033[1m&quot; &lt;&lt; std::setw(2) &lt;&lt;  maze_[row][col] &lt;&lt; &quot; \033[0m&quot;; // \033[30;48;2;230;230;230m very light gray background, \033\[36m cyan, \033\[1m bold
+      }
+      else {
+        ss &lt;&lt; std::setw(2) &lt;&lt; maze_[row][col] &lt;&lt; &quot; &quot;; 
+      }
+
+    }
+    ss &lt;&lt; &#x27;\n&#x27;;
+  }
+
+  std::stack&lt;Coord&gt; pathStack = getPath();
+
+  if (pathStack.empty()) {
+    ss &lt;&lt; &quot;No path.\n&quot;;
+    return ss.str();
+  }
+
+  ss &lt;&lt; &quot;\nA path: \n&quot;;
+
+  std::vector&lt;std::vector&lt;int&gt;&gt; mazeClone = maze_;
+  while (!pathStack.empty()) {
+    Coord cell = pathStack.top();
+    pathStack.pop();
+    mazeClone[cell.row][cell.col] = &#x27;*&#x27;;
+    ss &lt;&lt; &quot;(&quot; &lt;&lt; cell.row 
+       &lt;&lt; &quot;,&quot; &lt;&lt; cell.col &lt;&lt; &quot;)&quot;;
+
+    if (pathStack.size() &gt;= 1) {
+      ss &lt;&lt; &quot; -&gt; &quot;;
+    }
+  }
+  ss &lt;&lt; &quot;\n\n&quot;;
+
+  for (std::size_t i = 0; i &lt; mazeClone.size(); i++) {
+    for (std::size_t j = 0; j &lt; mazeClone[i].size(); j++) {
+      if (mazeClone[i][j] == &#x27;*&#x27;) {
+        ss &lt;&lt; &quot;* &quot;;
+      }
+      else {
+        ss &lt;&lt; mazeClone[i][j] &lt;&lt; &quot; &quot;;
+      }
+    }
+    ss &lt;&lt; &quot;\n&quot;;
+  }
+
+  return ss.str();
+}
+
+bool Maze_Solver::isOpen(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; cell) {
+  if (cell.row &lt; 0 || cell.row &gt;= static_cast&lt;int&gt;(maze.size()) ||
+      cell.col &lt; 0 || cell.col &gt;= static_cast&lt;int&gt;(maze[cell.row].size()) ||
+      maze[cell.row][cell.col] != 0) {
+    return false;
+  }
+
+  return true;
+}
 </code></pre><h4>DFS_Solver.hpp</h4><pre><code class="language-cpp">// DFS_Solver.hpp
 #ifndef DFS_SOLVER_HPP
 #define DFS_SOLVER_HPP
@@ -352,6 +475,23 @@ class BFS_Solver : public Maze_Solver {
     std::string toString() const override;
 };
 #endif
+</code></pre><h4>main.cpp</h4><pre><code class="language-cpp">// main.cpp
+#include &quot;Maze_Solver.hpp&quot;
+#include &quot;DFS_Solver.hpp&quot;
+#include &quot;BFS_Solver.hpp&quot;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+int main() {
+  DFS_Solver dfs;
+  BFS_Solver bfs;
+  Maze_Solver *solvers[]{&amp;dfs, &amp;bfs};
+  for (const Maze_Solver* curr : solvers) {
+    std::cout &lt;&lt; curr-&gt;toString() &lt;&lt; &#x27;\n&#x27;;
+  }
+
+  return 0;
+}
 </code></pre>
 
 <footer>CSCI 235 &middot; Fall 2026 &middot; Project 2: Maze Solver</footer>
