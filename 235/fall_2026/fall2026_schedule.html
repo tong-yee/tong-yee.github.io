@@ -234,7 +234,7 @@
     <td>Th, 9/3</td>
     <td>Inheritance &amp; Polymorphism
         <div class="sub"><a href="slides/day2_inheritance.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
-    <td>Base/derived classes, the &ldquo;is-a&rdquo; relationship, <code>protected</code> members, overriding; base-class pointers &amp; references, <code>virtual</code> functions, runtime dispatch, virtual destructors; one pure-virtual abstract interface (<code>Shape</code> &rarr; <code>Circle</code>, <code>Rectangle</code>). Forward pointer: this pattern reappears in P2&rsquo;s <code>MazeSolver</code> hierarchy.</td>
+    <td>Base/derived classes, the &ldquo;is-a&rdquo; relationship, <code>protected</code> members, overriding; base-class pointers &amp; references, <code>virtual</code> functions, runtime dispatch, virtual destructors; one pure-virtual abstract interface (<code>Shape</code> &rarr; <code>Circle</code>, <code>Rectangle</code>). Forward pointer: this pattern reappears in P2&rsquo;s <code>Maze_Solver</code> hierarchy.</td>
     <td><a href="exercises/ex1_shape_triangle_square.html" style="text-decoration:none;"><span class="badge b-ex">Ex&nbsp;1 Posted</span></a>
         <div class="sub">Polymorphism Trace</div></td>
     <td></td>
@@ -293,7 +293,7 @@
     <td>Tu, 9/22</td>
     <td>Abstract Data Types; Singly Linked List &mdash; Nodes &amp; Traversal
         <div class="sub"><a href="slides/day7_adt_linked_list.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
-    <td>Interface vs. implementation, node structure, head pointer, sequential access; preview of P2&rsquo;s <code>MazeSolver</code> abstract interface and its <code>DFSSolver</code> / <code>BFSSolver</code> subclasses</td>
+    <td>Interface vs. implementation, node structure, head pointer, sequential access; preview of P2&rsquo;s <code>Maze_Solver</code> abstract interface and its <code>DFS_Solver</code> / <code>BFS_Solver</code> subclasses</td>
     <td><span class="badge b-due">Ex&nbsp;3 Due</span></td>
     <td></td>
   </tr>
@@ -338,6 +338,7 @@
     <td>Tu, 10/6</td>
     <td>Recursion and the Call Stack; Recursive DFS
         <div class="sub"><a href="slides/day11_recursion.pdf">&#128196;&nbsp;Slides (PDF)</a></div>
+        <div class="sub"><a href="slides/lecture11_qa.pdf">&#128196;&nbsp;Q&amp;A (PDF)</a></div>
         <div class="sub"><a href="supplements/class11_flashcards.pdf">&#128196;&nbsp;Flashcards (PDF)</a></div>
         <div class="sub"><a href="supplements/recursion_card_quest.html">&#127183;&nbsp;Recursion Card Quest (practice game)</a></div></td>
     <td>Base case, recursive leap of faith, stack frames; recursion uses an implicit stack; recursive DFS on a grid</td>
@@ -348,8 +349,9 @@
   <tr>
     <td class="lec-num">12</td>
     <td>Th, 10/8</td>
-    <td>BFS; DFS vs. BFS Comparison</td>
-    <td>Breadth-first traversal with an explicit queue; shortest path and path reconstruction using a linked list; DFS vs. BFS time/space tradeoffs; calling <code>solve()</code> through a <code>MazeSolver*</code> without knowing the concrete type</td>
+    <td>BFS; DFS vs. BFS Comparison
+        <div class="sub"><a href="slides/day12_bfs.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
+    <td>Breadth-first traversal with an explicit queue; shortest path and path reconstruction using a linked list; DFS vs. BFS time/space tradeoffs; calling <code>getPath()</code> through a <code>Maze_Solver*</code> without knowing the concrete type</td>
     <td><span class="badge b-due">Ex&nbsp;5 Due</span></td>
     <td></td>
   </tr>
@@ -365,7 +367,7 @@
     <td class="lec-num">13</td>
     <td>Th, 10/15</td>
     <td>Midterm Review</td>
-    <td>DFS vs. BFS; linked-list path reconstruction; polymorphism and calling <code>solve()</code> through a <code>MazeSolver*</code>; Big-O review; practice problems</td>
+    <td>DFS vs. BFS; linked-list path reconstruction; polymorphism and calling <code>getPath()</code> through a <code>Maze_Solver*</code>; Big-O review; practice problems</td>
     <td></td>
     <td></td>
   </tr>
@@ -389,9 +391,10 @@
     <td>Th, 10/22</td>
     <td>Permutations &amp; Operator Combinations</td>
     <td>Factorial growth, generating permutations in-place, implicit state in vectors</td>
-    <td><span class="badge b-ex">Ex&nbsp;6 Posted</span>
+    <td><a href="exercises/ex6_permutations.html" data-available="2026-10-22" style="text-decoration:none;"><span class="badge b-ex">Ex&nbsp;6 Posted</span></a>
         <div class="sub">Permutation Trace</div></td>
-    <td><span class="badge b-due">&#35;2 Due</span></td>
+    <td><span class="badge b-due">&#35;2 Due</span>
+        <div class="sub">Sun, 10/25, 11:59&nbsp;PM</div></td>
   </tr>
 
   <!-- ═══ MIDTERM BANNER ═══ -->
