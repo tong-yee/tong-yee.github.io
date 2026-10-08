@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 6: Recursion and Queues</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: .55rem;
+    right: .6rem;
+    z-index: 2;
+    font: 600 .78rem/1 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--navy);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(30,39,97,.08);
+  }
+  .copy-btn:hover { background: #f0f2f8; border-color: var(--navy-light); }
+  .copy-btn:focus-visible { outline: 2px solid var(--navy-light); outline-offset: 2px; }
+  .copy-btn.done { color: #2e7d32; border-color: #2e7d32; }
+  .copy-btn.failed { color: #b3261e; border-color: #b3261e; }
+  @media print { .copy-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 6 &mdash; Recursion and Queues</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Due: Tuesday, October 20, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#warmup">Warm-Up &mdash; Trace by Hand (not graded)</a></li>
+    <li><a href="#taskA">Task A &mdash; <code>rotate()</code></a></li>
+    <li><a href="#taskB">Task B &mdash; <code>reverseQueue()</code></a></li>
+    <li><a href="#taskC">Task C &mdash; <code>hotPotato()</code></a></li>
+    <li><a href="#taskD">Task D &mdash; <code>survivorPosition()</code></a></li>
+    <li><a href="#edges">Edge Cases to Test</a></li>
+    <li><a href="#grading">Grading</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>
+  Recursion (Class 11) and queues (Class 10) meet in the BFS you saw in Class 12. This exercise puts the two
+  together in a small game. By the end of it you should be able to:
+</p>
+<ul>
+  <li>write a recursive function with a <strong>base case</strong> and a <strong>recursive case</strong> that works on a
+      <strong>smaller problem</strong>, where &ldquo;smaller&rdquo; can mean a smaller number (<code>k</code>) or a
+      smaller queue;</li>
+  <li>use only the queue operations <code>front()</code>, <code>push()</code>, <code>pop()</code>, <code>size()</code>
+      and <code>empty()</code> &mdash; no peeking inside;</li>
+  <li>see that the <strong>call stack remembers things for you</strong>: a recursive function can hold a value
+      in a local variable while the smaller problem is solved, and then use it afterwards;</li>
+  <li>get the same answer in two ways &mdash; by simulating a process with a queue, and by a recursive
+      formula &mdash; and explain why the two agree.</li>
+</ul>
+<div class="note">
+  <span class="label">The game: hot potato</span>
+  A group of people stands in a circle and passes a potato. After the potato has been passed
+  <em>k</em> times, the person holding it leaves the circle. The potato keeps going around
+  with one person fewer, until only one person is left: the winner. A queue models the circle
+  perfectly. Passing the potato means the person at the front steps to the back of the line. Leaving the circle
+  means a person is removed from the front.
+</div>
+
+<h2 id="files">Files</h2>
+<table>
+  <thead><tr><th>File</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>RecQueue.hpp</code></td><td>Provided. Declares the four functions and documents each one. Do not modify, do not submit.</td></tr>
+    <tr><td><code>RecQueue.cpp</code></td><td><strong>Submit this.</strong> Tasks A, B, C and D.</td></tr>
+    <tr><td><code>Ex6Demo.cpp</code></td><td>Provided. A program that exercises your code so you can see what it does. Do not submit.</td></tr>
+    <tr><td><code>demo_output.txt</code></td><td>What <code>Ex6Demo</code> prints when everything is correct.</td></tr>
+  </tbody>
+</table>
+<p>
+  All four files are available together as <code>ex6_starter.zip</code> on the course website and on
+  Brightspace, and every one of them is also listed in full at the <a href="#listings">end of this handout</a>.
+</p>
+<p>
+  The queue is the standard library&rsquo;s <code>std::queue&lt;int&gt;</code>, so this exercise does not depend on your
+  Exercise&nbsp;5 code. Your work is the <code>TODO</code> sections of <code>RecQueue.cpp</code>. The stubs
+  compile as given, so you can build and run the demo before you have written anything.
+  <strong>Gradescope compiles your <code>RecQueue.cpp</code> against the original header</strong>, so any change
+  you make to <code>RecQueue.hpp</code> is ignored.
+</p>
+<div class="note">
+  <span class="label">The one rule</span>
+  Every function must be <strong>recursive</strong>. Do not use a <code>for</code> or <code>while</code> loop to do the
+  repeating that a recursive call is supposed to do. Your instructor will read your code, and a loop where a
+  recursive call belongs will lose the points for that task even if the output is right.
+</div>
+
+<h2 id="warmup">Warm-Up &mdash; Trace by Hand (not graded)</h2>
+<p>Do this on paper before you write any code. Nothing here is submitted or graded.</p>
+
+<p><strong>1. Rotate.</strong> <code>rotate(q, 2)</code> on <code>[1 2 3 4 5]</code>. Fill in the queue after each call
+begins its work.</p>
+<table>
+  <thead><tr><th>Call</th><th>Queue when the call starts</th><th>What this call does</th></tr></thead>
+  <tbody>
+    <tr><td><code>rotate(q, 2)</code></td><td><code>[1 2 3 4 5]</code></td><td>moves <code>1</code> to the back, then calls <code>rotate(q, 1)</code></td></tr>
+    <tr><td><code>rotate(q, 1)</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>rotate(q, 0)</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+
+<p><strong>2. Reverse.</strong> Task B asks you to reverse a queue <em>without</em> a second container. Trace
+<code>reverseQueue</code> on <code>[1 2 3]</code> with a call-stack diagram: draw one box per call, and in each
+box write the value of the local variable that call is holding while it waits. Then ask yourself: when
+the innermost call returns, what is in the queue? What does each box do next, from the innermost box outward?
+This is the &ldquo;the call stack remembers it for you&rdquo; idea from Class 11, with queues in place of the
+<code>printReverse</code> example.</p>
+
+<p><strong>3. Hot potato.</strong> Play the game by hand for <code>[1 2 3 4 5]</code> with <em>k</em>&nbsp;=&nbsp;1.
+Each round: rotate the queue <em>k</em> times, then the person at the front leaves.</p>
+<table>
+  <thead><tr><th>Round</th><th>Queue at the start</th><th>After passing <em>k</em> times</th><th>Who leaves</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>[1 2 3 4 5]</code></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>2</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>3</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>4</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+<p>
+  Notice that every round leaves you with exactly the same kind of problem you started with, only with one
+  person fewer. That is what makes recursion fit. The demo prints the winner for this case, so you can check
+  yourself afterwards.
+</p>
+
+<h2 id="taskA">Task A &mdash; <code>rotate()</code></h2>
+<p>
+  Move the front element to the back, <em>k</em> times, recursively. For example <code>[1 2 3 4 5]</code> rotated
+  by 2 is <code>[3 4 5 1 2]</code>. If the queue is empty, nothing happens. Here the thing that gets smaller is the number
+  <code>k</code>, not the queue.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  What is the easiest value of <code>k</code>? What does one move accomplish, and how many moves are left
+  after it? Remember that <code>k</code> may be larger than the size of the queue.
+</div>
+
+<h2 id="taskB">Task B &mdash; <code>reverseQueue()</code></h2>
+<p>
+  Reverse the elements of the queue in place. For example <code>[1 2 3 4]</code> becomes <code>[4 3 2 1]</code>.
+  You may not use any other container: no <code>vector</code>, no <code>stack</code>, no second queue. The
+  <em>recursion itself</em> must do the remembering.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Remove the front element and keep it in a local variable. Suppose a recursive call has already reversed the
+  rest. Where does your element belong now? Check the trace you drew in the warm-up.
+</div>
+
+<h2 id="taskC">Task C &mdash; <code>hotPotato()</code></h2>
+<p>
+  Play the game and return the winner&rsquo;s value. Each round, pass the potato <em>k</em> times
+  (the front person moves to the back, <em>k</em> times, exactly like <code>rotate(q, k)</code> in Task A), and then the person at the front is out.
+  Rounds repeat until one person is left. Worked example, <code>[1 2 3 4 5]</code> with <em>k</em>&nbsp;=&nbsp;2:
+</p>
+<table>
+  <thead><tr><th>Round</th><th>Queue at the start</th><th>After passing twice</th><th>Leaves</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>[1 2 3 4 5]</code></td><td><code>[3 4 5 1 2]</code></td><td>3</td></tr>
+    <tr><td>2</td><td><code>[4 5 1 2]</code></td><td><code>[1 2 4 5]</code></td><td>1</td></tr>
+    <tr><td>3</td><td><code>[2 4 5]</code></td><td><code>[5 2 4]</code></td><td>5</td></tr>
+    <tr><td>4</td><td><code>[2 4]</code></td><td><code>[2 4]</code></td><td>2</td></tr>
+  </tbody>
+</table>
+<p>The winner is <code>4</code>. (In round 4 the potato is passed twice among two people, so it ends up where it started.) When your function returns, the queue holds exactly one element, the winner.</p>
+<p>
+  You may call your own <code>rotate()</code> from Task A to pass the potato. If you do, a bug in Task A will
+  also lose you points in Task C, so test Task A first.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  One round leaves you with a smaller game of the same kind. What is the smallest game, the one you can answer
+  without playing a round?
+</div>
+
+<h2 id="taskD">Task D &mdash; <code>survivorPosition()</code></h2>
+<p>
+  The same game, answered without a queue. Number the people <code>0, 1, &hellip;, n-1</code> in queue order.
+  <code>survivorPosition(n, k)</code> returns the number of the winner. It has a recursive definition:
+</p>
+<table>
+  <tbody>
+    <tr><td><em>n</em> = 1</td><td>the only person, number 0, wins</td></tr>
+    <tr><td><em>n</em> &gt; 1</td><td><code>survivorPosition(n, k)</code> = ( <code>survivorPosition(n&nbsp;&minus;&nbsp;1, k)</code> + <em>k</em> + 1 ) mod <em>n</em></td></tr>
+  </tbody>
+</table>
+<p>
+  Why does it work? After the first person leaves, the circle has <em>n</em>&nbsp;&minus;&nbsp;1 people, and the
+  new front of the circle is the person who stood at position <em>k</em>&nbsp;+&nbsp;1 (counting from 0, wrapping around) in the old circle, so every number from
+  the smaller game is shifted by <em>k</em>&nbsp;+&nbsp;1 and wrapped around the circle of <em>n</em>. You do not need to
+  prove this. You do need to check it: for <code>[1 2 3 4 5]</code> and <em>k</em>&nbsp;=&nbsp;2, the formula gives
+  position 3, which is the person labeled 4, the winner of the worked example above. If the queue holds the
+  values <code>1..n</code> in order, <code>hotPotato(q, k)</code> equals <code>survivorPosition(n, k) + 1</code>.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  This one is almost a translation of the table. Which row is the base case, and which is the recursive call?
+</div>
+
+<h2 id="edges">Edge Cases to Test</h2>
+<p>Write a few small calls of your own in a scratch <code>main</code> before submitting. Check at least:</p>
+<ul>
+  <li><code>rotate</code> with <code>k = 0</code>, with <code>k</code> equal to the size, with <code>k</code> larger than the size, and on an empty queue;</li>
+  <li><code>reverseQueue</code> on an empty queue, a one-element queue, and a two-element queue;</li>
+  <li><code>hotPotato</code> with one person, with two people, and with <em>k</em>&nbsp;=&nbsp;0 (the potato is never passed);</li>
+  <li><code>survivorPosition(1, k)</code> for any <em>k</em>;</li>
+  <li>whether <code>hotPotato</code> and <code>survivorPosition</code> agree for <em>n</em> = 1..10 and a few values of <em>k</em>.</li>
+</ul>
+<p>
+  Remember that <code>front()</code> on an <em>empty</em> queue is undefined behavior: it may crash, or it may
+  appear to work and give garbage. Check <code>empty()</code> or <code>size()</code> first.
+</p>
+
+<h2 id="grading">Grading</h2>
+<table>
+  <thead><tr><th>Item</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td>Task A &mdash; <code>rotate()</code></td><td>20</td></tr>
+    <tr><td>Task B &mdash; <code>reverseQueue()</code></td><td>25</td></tr>
+    <tr><td>Task C &mdash; <code>hotPotato()</code></td><td>35</td></tr>
+    <tr><td>Task D &mdash; <code>survivorPosition()</code></td><td>20</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>100</strong></td></tr>
+  </tbody>
+</table>
+<div class="note">
+  <span class="label">How credit is earned</span>
+  Each task is graded by its own set of checks, with partial credit for the checks you pass. A task earns credit
+  only once its core behavior works: an unfinished stub that happens to produce the right answer for one input does not
+  earn points on its own. The autograder uses different inputs from <code>Ex6Demo.cpp</code>, so matching the
+  demo output is necessary but not sufficient. The &ldquo;recursion only&rdquo; rule is checked by reading your code.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>When all four tasks are correct, <code>Ex6Demo</code> prints exactly the contents of <code>demo_output.txt</code>:</p>
+<pre class="copyable" data-filename="demo_output.txt"><code class="language-plaintext">=== Task A: rotate ===
+  rotate [1 2 3 4 5] by 0: [1 2 3 4 5]
+  rotate [1 2 3 4 5] by 1: [2 3 4 5 1]
+  rotate [1 2 3 4 5] by 2: [3 4 5 1 2]
+  rotate [1 2 3 4 5] by 5: [1 2 3 4 5]
+  rotate [1 2 3 4 5] by 7: [3 4 5 1 2]
+
+=== Task B: reverseQueue ===
+  [] -&gt; []
+  [1] -&gt; [1]
+  [1 2] -&gt; [2 1]
+  [1 2 3 4 5 6] -&gt; [6 5 4 3 2 1]
+
+=== Task C: hotPotato ===
+  5 people, k = 0: winner 5, queue size afterwards 1
+  5 people, k = 1: winner 3, queue size afterwards 1
+  5 people, k = 2: winner 4, queue size afterwards 1
+
+=== Task D: survivorPosition ===
+  k = 1: 0 0 2 0 2 4 6
+  k = 2: 0 1 1 0 3 0 3</code></pre>
+
+<h2 id="compile">Compile and Run</h2>
+<pre><code class="language-bash">g++ -std=c++17 -g RecQueue.cpp Ex6Demo.cpp -o ex6demo
+./ex6demo</code></pre>
+
+<h2 id="listings">Provided File Listings</h2>
+<h3>RecQueue.hpp</h3>
+<pre class="copyable" data-filename="RecQueue.hpp"><code class="language-cpp">// RecQueue.hpp
+// CSCI 235 -- Exercise 6: Recursion and Queues
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef RECQUEUE_HPP
+#define RECQUEUE_HPP
+
+#include &lt;queue&gt;
+#include &lt;vector&gt;
+
+// Every function below must be RECURSIVE: do not use a loop (for, while) to
+// do the repeating that a recursive call is supposed to do.
+//
+// The only queue operations you need are front(), back(), push(), pop(),
+// empty() and size() from std::queue&lt;int&gt;.
+
+// Task A -- Move the front element to the back, k times.
+// Example: q = [1 2 3 4 5], k = 2  -&gt;  q = [3 4 5 1 2].
+// Precondition: k &gt;= 0. If q is empty, nothing happens. Afterwards the
+// elements of q are the same ones, in the rotated order.
+void rotate(std::queue&lt;int&gt;&amp; q, int k);
+
+// Task B -- Reverse the order of the elements of q, in place.
+// Example: q = [1 2 3 4] -&gt; q = [4 3 2 1]. An empty or one-element queue is
+// left alone. No other container (no vector, no stack) may be used: the
+// recursion&#x27;s own call stack does the remembering.
+void reverseQueue(std::queue&lt;int&gt;&amp; q);
+
+// Task C -- The &quot;hot potato&quot; game. The people in q are standing in a circle,
+// front of the queue first. Each round, the potato is passed k times (the
+// person at the front moves to the back, k times, exactly as in rotate()),
+// and then the person now at the front is OUT of the game (removed). Rounds
+// repeat until only one person is left. Return that person&#x27;s value.
+//
+// Example: q = [1 2 3 4 5], k = 2.
+//   Round 1: pass twice ([3 4 5 1 2]), remove 3.   q = [4 5 1 2]
+//   Round 2: pass twice ([1 2 4 5]),   remove 1.   q = [2 4 5]
+//   Round 3: pass twice ([5 2 4]),     remove 5.   q = [2 4]
+//   Round 4: pass twice ([2 4]),       remove 2.   q = [4]    -&gt; returns 4
+//
+// With k = 0 the potato is never passed: the front person leaves every round.
+//
+// Preconditions: q is not empty, 0 &lt;= k &lt;= 100. When the call returns,
+// q holds exactly one element, the winner.
+// You may call your own rotate() from Task A, but then Task C inherits any
+// bug that Task A has.
+int hotPotato(std::queue&lt;int&gt;&amp; q, int k);
+
+// Task D -- The same game as a formula. People are numbered 0, 1, ..., n-1
+// in queue order. Return the NUMBER (0-based position in the original
+// queue) of the person who wins. Recursive definition:
+//   n == 1:  the only person, position 0, wins.
+//   n  &gt; 1:  see the handout.
+// Preconditions: n &gt;= 1, 0 &lt;= k &lt;= 100.
+// Check: if q holds the values 1..n in order, then
+//   hotPotato(q, k) == survivorPosition(n, k) + 1.
+int survivorPosition(int n, int k);
+
+#endif</code></pre>
+
+<h3>RecQueue.cpp (starter)</h3>
+<pre class="copyable" data-filename="RecQueue.cpp"><code class="language-cpp">// RecQueue.cpp
+// CSCI 235 -- Exercise 6: Recursion and Queues
+// Complete the four functions below by finishing the TODO sections.
+// Submit this file (and only this file) to Gradescope.
+
+#include &quot;RecQueue.hpp&quot;
+
+// Task A
+void rotate(std::queue&lt;int&gt;&amp; q, int k) {
+    // TODO: base case, then move one element and recurse with a smaller k.
+    (void)q; (void)k;
+}
+
+// Task B
+void reverseQueue(std::queue&lt;int&gt;&amp; q) {
+    // TODO: base case; otherwise take the front element out, reverse what
+    // is left, and decide where the element you took out belongs.
+    (void)q;
+}
+
+// Task C
+int hotPotato(std::queue&lt;int&gt;&amp; q, int k) {
+    // TODO: base case: one person left. Otherwise play one round (k passes,
+    // then one person leaves), then recurse on the smaller game.
+    (void)q; (void)k;
+    return -1;
+}
+
+// Task D
+int survivorPosition(int n, int k) {
+    // TODO: base case, then express the answer for n people through the
+    // answer for n - 1 people.
+    (void)n; (void)k;
+    return -1;
+}</code></pre>
+
+<h3>Ex6Demo.cpp</h3>
+<pre class="copyable" data-filename="Ex6Demo.cpp"><code class="language-cpp">// Ex6Demo.cpp
+// CSCI 235 -- Exercise 6: Recursion and Queues
+//
+// Provided file -- do not submit this. Build it with:
+//
+//     g++ -std=c++17 -g RecQueue.cpp Ex6Demo.cpp -o ex6demo
+//     ./ex6demo
+//
+// The expected output is in demo_output.txt. Your output should match it
+// exactly once all four tasks are done.
+
+#include &quot;RecQueue.hpp&quot;
+
+#include &lt;iostream&gt;
+#include &lt;queue&gt;
+
+static std::queue&lt;int&gt; make(int n) {
+    std::queue&lt;int&gt; q;
+    for (int i = 1; i &lt;= n; ++i) {
+        q.push(i);
+    }
+    return q;
+}
+
+static void print(std::queue&lt;int&gt; q) {      // by value: prints a copy
+    std::cout &lt;&lt; &quot;[&quot;;
+    bool first = true;
+    while (!q.empty()) {
+        std::cout &lt;&lt; (first ? &quot;&quot; : &quot; &quot;) &lt;&lt; q.front();
+        first = false;
+        q.pop();
+    }
+    std::cout &lt;&lt; &quot;]&quot;;
+}
+
+int main() {
+    std::cout &lt;&lt; &quot;=== Task A: rotate ===\n&quot;;
+    for (int k : {0, 1, 2, 5, 7}) {
+        std::queue&lt;int&gt; q = make(5);
+        rotate(q, k);
+        std::cout &lt;&lt; &quot;  rotate [1 2 3 4 5] by &quot; &lt;&lt; k &lt;&lt; &quot;: &quot;;
+        print(q);
+        std::cout &lt;&lt; &quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task B: reverseQueue ===\n&quot;;
+    for (int n : {0, 1, 2, 6}) {
+        std::queue&lt;int&gt; q = make(n);
+        std::cout &lt;&lt; &quot;  &quot;;
+        print(q);
+        reverseQueue(q);
+        std::cout &lt;&lt; &quot; -&gt; &quot;;
+        print(q);
+        std::cout &lt;&lt; &quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task C: hotPotato ===\n&quot;;
+    for (int k : {0, 1, 2}) {
+        std::queue&lt;int&gt; q = make(5);
+        int w = hotPotato(q, k);
+        std::cout &lt;&lt; &quot;  5 people, k = &quot; &lt;&lt; k &lt;&lt; &quot;: winner &quot; &lt;&lt; w
+                  &lt;&lt; &quot;, queue size afterwards &quot; &lt;&lt; q.size() &lt;&lt; &quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task D: survivorPosition ===\n&quot;;
+    for (int k : {1, 2}) {
+        std::cout &lt;&lt; &quot;  k = &quot; &lt;&lt; k &lt;&lt; &quot;:&quot;;
+        for (int n = 1; n &lt;= 7; ++n) {
+            std::cout &lt;&lt; &quot; &quot; &lt;&lt; survivorPosition(n, k);
+        }
+        std::cout &lt;&lt; &quot;\n&quot;;
+    }
+    return 0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>
+  Submit <strong>exactly one file</strong>, named <code>RecQueue.cpp</code>, to the Exercise 6 assignment on
+  Gradescope. Do not rename it, do not put it in a folder, and do not submit <code>RecQueue.hpp</code> or
+  <code>Ex6Demo.cpp</code>. All four functions must be defined, even if one is unfinished, or the program will
+  not link. You may resubmit as many times as you like before the deadline; the last submission is graded.
+</p>
+
+</main>
+
+<footer>
+  CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026
+</footer>
+
+<script>hljs.highlightAll();</script>
+<script>
+// Add a "Copy" button to each provided header / demo listing.
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('pre.copyable').forEach(function (pre) {
+    var wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy ' + (pre.dataset.filename || 'code') + ' to clipboard');
+    btn.addEventListener('click', function () {
+      copyText(pre.textContent).then(function (ok) {
+        btn.textContent = ok ? 'Copied!' : 'Copy failed';
+        btn.classList.toggle('done', ok);
+        btn.classList.toggle('failed', !ok);
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('done', 'failed');
+        }, 1800);
+      });
+    });
+    wrap.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 7: Permutation Trace</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: .55rem;
+    right: .6rem;
+    z-index: 2;
+    font: 600 .78rem/1 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--navy);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(30,39,97,.08);
+  }
+  .copy-btn:hover { background: #f0f2f8; border-color: var(--navy-light); }
+  .copy-btn:focus-visible { outline: 2px solid var(--navy-light); outline-offset: 2px; }
+  .copy-btn.done { color: #2e7d32; border-color: #2e7d32; }
+  .copy-btn.failed { color: #b3261e; border-color: #b3261e; }
+  @media print { .copy-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 7 &mdash; Permutation Trace</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Due: Tuesday, November 3, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#warmup">Warm-Up &mdash; Trace by Hand (not graded)</a></li>
+    <li><a href="#taskA">Task A &mdash; <code>factorial()</code></a></li>
+    <li><a href="#taskB">Task B &mdash; <code>permute()</code></a></li>
+    <li><a href="#taskC">Task C &mdash; <code>allPermutations()</code></a></li>
+    <li><a href="#taskD">Task D &mdash; <code>countDerangements()</code></a></li>
+    <li><a href="#edges">Edge Cases to Test</a></li>
+    <li><a href="#grading">Grading</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>
+  This exercise is the recursion lectures in code form, and it is the same shape of problem you will meet
+  again as backtracking in Project 3. By the end of it you should be able to:
+</p>
+<ul>
+  <li>write a recursive function with a clear <strong>base case</strong>, a <strong>recursive case</strong>
+      on a smaller input, and a <strong>combine</strong> step;</li>
+  <li>trace a recursive function on paper by drawing the <strong>call stack</strong>, one frame per call;</li>
+  <li>use <strong>choose, explore, undo</strong>: make a choice, recurse on what is left, then restore the
+      state so the next choice starts fresh &mdash; the same idea as backing out of a dead end in a maze;</li>
+  <li>explain why <strong>pruning</strong> (refusing to follow a choice that can never succeed) makes a
+      search faster without changing its answer;</li>
+  <li>modify an object <strong>in place</strong> and guarantee it is back to its original state when the
+      function returns.</li>
+</ul>
+<div class="note">
+  <span class="label">An analogy: seating a dinner party</span>
+  You have <em>n</em> guests and <em>n</em> chairs. Fill the chairs left to right. For chair <em>k</em>, try
+  every guest who is still standing; seat one, then seat the remaining guests in the remaining chairs. When
+  you have tried a guest, ask them to stand up again before you try the next one. A <strong>permutation</strong>
+  is one complete seating. The &ldquo;stand up again&rdquo; step is the <em>undo</em> that makes this
+  backtracking.
+</div>
+
+<h2 id="files">Files</h2>
+<table>
+  <thead><tr><th>File</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>Permute.hpp</code></td><td>Provided. Declares the four functions and documents each one. Do not modify, do not submit.</td></tr>
+    <tr><td><code>Permute.cpp</code></td><td><strong>Submit this.</strong> Tasks A, B, C and D.</td></tr>
+    <tr><td><code>Ex7Demo.cpp</code></td><td>Provided. A program that exercises your code so you can see what it does. Do not submit.</td></tr>
+    <tr><td><code>demo_output.txt</code></td><td>What <code>Ex7Demo</code> prints when everything is correct.</td></tr>
+  </tbody>
+</table>
+<p>
+  All four files are available together as <code>ex7_starter.zip</code> on the course website and on
+  Brightspace, and every one of them is also listed in full at the
+  <a href="#listings">end of this handout</a>.
+</p>
+<p>
+  Your work is the <code>TODO</code> sections of <code>Permute.cpp</code>. The stubs compile as given, so you
+  can build and run the demo before you have written anything. <strong>Gradescope compiles your
+  <code>Permute.cpp</code> against the original header</strong>, so any change you make to
+  <code>Permute.hpp</code> is ignored &mdash; and if your code depended on that change, it will not compile.
+</p>
+
+<h2 id="warmup">Warm-Up &mdash; Trace by Hand (not graded)</h2>
+<p>
+  Do this on paper before you write any code. Nothing here is submitted or graded.
+</p>
+
+<p><strong>1. Every arrangement.</strong> List all six permutations of <code>(1 2 3)</code>, then mark each
+one that has <em>no</em> element in its original position (that is, <code>1</code> is not first,
+<code>2</code> is not second, and <code>3</code> is not third). How many are left? Keep that number: it is what
+Task D must compute for three values.</p>
+
+<p><strong>2. The calls.</strong> Task B works on <code>v = (1 2 3)</code> by swapping. Complete the table.
+&ldquo;Swap&rdquo; means <code>swap(v[k], v[i])</code> before the recursive call; the undo swap happens after
+the call returns.</p>
+<table>
+  <thead><tr><th>Call</th><th><code>k</code></th><th><code>i</code></th><th><code>v</code> after the swap</th><th>What happens next</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>0</td><td>0</td><td><code>(1 2 3)</code></td><td>recurse with <code>k = 1</code></td></tr>
+    <tr><td>2</td><td>1</td><td>1</td><td><code>(1 2 3)</code></td><td>recurse with <code>k = 2</code></td></tr>
+    <tr><td>3</td><td>2</td><td>2</td><td>&nbsp;</td><td>recurse with <code>k = 3</code></td></tr>
+    <tr><td>4</td><td>3</td><td>&mdash;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>5</td><td>1</td><td>2</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+<p>
+  Row 4 is the base case: <code>k</code> equals the size, so every position has been chosen. What does
+  the function do there? Then carry the trace on until <code>v</code> is <code>(1 2 3)</code> again and the
+  first call (<code>k = 0, i = 0</code>) returns. Which permutation is recorded second?
+</p>
+<p>
+  <strong>3. The one that matters.</strong> After row 5 finishes and returns to the loop in row 1, what must
+  <code>v</code> be before the loop moves on to <code>i = 1</code>? If it is anything other than
+  <code>(1 2 3)</code>, the next choice is made from a scrambled vector and permutations are lost or repeated.
+  That is why the undo swap exists.
+</p>
+
+<h2 id="taskA">Task A &mdash; <code>factorial()</code></h2>
+<p>
+  Return <em>n</em>! as a <code>long long</code>, recursively. Remember <em>n</em>! = <em>n</em> &middot;
+  (<em>n</em> &minus; 1)!, and the recursion must stop. Your function is allowed to assume
+  0 &le; <em>n</em> &le; 20.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Name the case you can answer without any more calls. Then ask: is the argument of your recursive call
+  closer to that case than <code>n</code> was?
+</div>
+
+<h2 id="taskB">Task B &mdash; <code>permute()</code></h2>
+<p>
+  Append to <code>out</code> every arrangement of <code>v[k]</code>, <code>v[k+1]</code>, &hellip; the end of
+  the vector, leaving <code>v[0..k-1]</code> where they are. Each arrangement is appended as a copy of the
+  whole vector. Work <strong>in place</strong>: swap, recurse, undo.
+</p>
+<p>
+  The <strong>order</strong> of the results is part of the specification. For each position <code>k</code>,
+  try the choices <code>v[k]</code>, <code>v[k+1]</code>, &hellip; in that order, by swapping the chosen
+  element into position <code>k</code>. For <code>(4 7 9)</code> this gives
+  <code>(4 7 9)</code>, <code>(4 9 7)</code>, <code>(7 4 9)</code>, <code>(7 9 4)</code>,
+  <code>(9 7 4)</code>, <code>(9 4 7)</code>.
+</p>
+<p>
+  When the call returns, <code>v</code> must be exactly as it was at the start, and everything that was
+  already in <code>out</code> must still be there &mdash; append to it, never clear or replace it.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Your warm-up table already is the algorithm. The base case is row 4. The loop is the &ldquo;<code>i</code>&rdquo;
+  column. The undo is whatever restores <code>v</code> to what it was just before the swap.
+</div>
+
+<h2 id="taskC">Task C &mdash; <code>allPermutations()</code></h2>
+<p>
+  Return all permutations of <code>v</code>, in the order Task B produces them. The parameter is passed
+  <em>by value</em>, so the caller&rsquo;s vector is never changed &mdash; you are free to scramble your own
+  copy. This task is short; its point is to see how an in-place helper is wrapped in a clean interface.
+</p>
+
+<h2 id="taskD">Task D &mdash; <code>countDerangements()</code></h2>
+<p>
+  A <strong>derangement</strong> is a permutation in which no element ends up where it started. Count the
+  derangements of <code>original</code>. The vector <code>v</code> starts as a copy of
+  <code>original</code>; the call counts arrangements of <code>v[k..end]</code> with <code>v[0..k-1]</code>
+  fixed, and returns the number of arrangements in which no <code>v[j]</code> equals
+  <code>original[j]</code>. As in Task B, <code>v</code> must be exactly as it was when the call returns.
+</p>
+<p>
+  This is Task B with two changes: you <em>count</em> rather than store, and you <strong>prune</strong>. If a
+  choice puts an element in its original position, that choice can never lead to a derangement, so do not
+  recurse on it. For 8 values, pruning is the difference between a quick run and a very slow one.
+</p>
+<table>
+  <thead><tr><th>Number of values</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+  <tbody><tr><td>Derangements</td><td>1</td><td>0</td><td>1</td><td>2</td><td>9</td><td>44</td></tr></tbody>
+</table>
+<div class="hint">
+  <span class="label">Hint</span>
+  Where in the loop do you know which element just landed in position <code>k</code>? Compare it with the
+  element that started there. Do the undo whether or not you recursed.
+</div>
+
+<h2 id="edges">Edge Cases to Test</h2>
+<p>Write a few small calls of your own in a scratch <code>main</code> before submitting. Check at least:</p>
+<ul>
+  <li>an <strong>empty</strong> vector: there is exactly one arrangement (the empty one), not zero;</li>
+  <li>a vector with <strong>one</strong> element;</li>
+  <li><code>permute(v, 1, out)</code>: the first element must stay put in every result;</li>
+  <li>a non-empty <code>out</code> before the call: old entries survive;</li>
+  <li>after every call, print <code>v</code> &mdash; is it unchanged?</li>
+  <li><code>factorial(20)</code>: do you get <code>2432902008176640000</code>?</li>
+</ul>
+
+<h2 id="grading">Grading</h2>
+<table>
+  <thead><tr><th>Item</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td>Task A &mdash; <code>factorial()</code></td><td>15</td></tr>
+    <tr><td>Task B &mdash; <code>permute()</code></td><td>35</td></tr>
+    <tr><td>Task C &mdash; <code>allPermutations()</code></td><td>20</td></tr>
+    <tr><td>Task D &mdash; <code>countDerangements()</code></td><td>30</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>100</strong></td></tr>
+  </tbody>
+</table>
+<div class="note">
+  <span class="label">How credit is earned</span>
+  Each task is graded by its own set of checks, and partial credit is given for the checks you pass. A task
+  earns credit only once its core behavior works: an unfinished stub that happens to return the right value
+  for one input does not earn points on its own. The autograder uses different inputs from
+  <code>Ex7Demo.cpp</code>, so matching the demo output is necessary but not sufficient.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>
+  When all four tasks are correct, <code>Ex7Demo</code> prints exactly the contents of
+  <code>demo_output.txt</code>:
+</p>
+<pre class="copyable" data-filename="demo_output.txt"><code class="language-plaintext">=== Task A: factorial ===
+  0! = 1
+  1! = 1
+  2! = 2
+  3! = 6
+  4! = 24
+  5! = 120
+  10! = 3628800
+
+=== Task B: permute ===
+  (1 2 3)
+  (1 3 2)
+  (2 1 3)
+  (2 3 1)
+  (3 2 1)
+  (3 1 2)
+  v afterwards: (1 2 3)   (must equal the original)
+
+=== Task C: allPermutations ===
+  24 permutations of (5 6 7 8)
+  first: (5 6 7 8)
+  last:  (8 5 6 7)
+  w unchanged: (5 6 7 8)
+
+=== Task D: countDerangements ===
+  0 values: 1
+  1 values: 0
+  2 values: 1
+  3 values: 2
+  4 values: 9
+  5 values: 44</code></pre>
+
+<h2 id="compile">Compile and Run</h2>
+<pre><code class="language-bash">g++ -std=c++17 -g Permute.cpp Ex7Demo.cpp -o ex7demo
+./ex7demo</code></pre>
+
+<h2 id="listings">Provided File Listings</h2>
+<h3>Permute.hpp</h3>
+<pre class="copyable" data-filename="Permute.hpp"><code class="language-cpp">// Permute.hpp
+// CSCI 235 -- Exercise 7: Permutations
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef PERMUTE_HPP
+#define PERMUTE_HPP
+
+#include &lt;cstddef&gt;
+#include &lt;vector&gt;
+
+// All four functions work on vectors of DISTINCT ints (no repeated values).
+// Every function is recursive. The loops you may use are the one that tries
+// each choice for the current position; the repetition itself comes from
+// the recursive calls.
+
+// Task A -- n! = n * (n-1) * ... * 1, with 0! = 1.
+// Precondition: 0 &lt;= n &lt;= 20 (20! is the largest factorial a long long holds).
+long long factorial(int n);
+
+// Task B -- append to out every arrangement of v[k], v[k+1], ..., v[size-1],
+// keeping v[0..k-1] where they are. Each arrangement is appended as a full
+// copy of v. Do this IN PLACE: swap elements of v, recurse, and undo the swap.
+//
+// Calling permute(v, 0, out) produces every permutation of v.
+//
+// The order of the permutations in out is part of the specification: for each
+// position k, try the choices v[k], v[k+1], ... in that order, by swapping the
+// chosen element into position k. When permute returns, v must be exactly as
+// it was when the call began, and anything already in out must still be there.
+void permute(std::vector&lt;int&gt;&amp; v, std::size_t k,
+             std::vector&lt;std::vector&lt;int&gt;&gt;&amp; out);
+
+// Task C -- return all permutations of v, in the order Task B produces them.
+// v is passed BY VALUE, so the caller&#x27;s vector is never touched.
+std::vector&lt;std::vector&lt;int&gt;&gt; allPermutations(std::vector&lt;int&gt; v);
+
+// Task D -- count the permutations of original in which NO element is in the
+// position it started in. (original[j] must not appear at index j.)
+//
+// v starts as a copy of original. The call counts arrangements of
+// v[k..size-1], keeping v[0..k-1] where they are, and returns the count.
+// v must be exactly as it was when the call began once the call returns.
+//
+// Calling countDerangements(v, original, 0) with v == original counts all of them.
+// Examples: 3 distinct values -&gt; 2, 4 -&gt; 9, 1 -&gt; 0, 0 values -&gt; 1.
+int countDerangements(std::vector&lt;int&gt;&amp; v, const std::vector&lt;int&gt;&amp; original,
+                      std::size_t k);
+
+#endif</code></pre>
+
+<h3>Permute.cpp (starter)</h3>
+<pre class="copyable" data-filename="Permute.cpp"><code class="language-cpp">// Permute.cpp
+// CSCI 235 -- Exercise 7: Permutations
+// Complete the four functions below by finishing the TODO sections.
+// Submit this file (and only this file) to Gradescope.
+
+#include &quot;Permute.hpp&quot;
+
+#include &lt;utility&gt;   // std::swap
+
+// Task A
+long long factorial(int n) {
+    // TODO: base case, then a recursive call on a smaller n.
+    (void)n;
+    return 0;
+}
+
+// Task B
+void permute(std::vector&lt;int&gt;&amp; v, std::size_t k,
+             std::vector&lt;std::vector&lt;int&gt;&gt;&amp; out) {
+    // TODO:
+    //   * base case: nothing left to arrange.
+    //   * otherwise, for each choice for position k: put that choice at
+    //     position k, recurse on the rest, then undo what you did so the next
+    //     choice starts from the same vector.
+    (void)v; (void)k; (void)out;
+}
+
+// Task C
+std::vector&lt;std::vector&lt;int&gt;&gt; allPermutations(std::vector&lt;int&gt; v) {
+    // TODO: collect the results of Task B.
+    (void)v;
+    return {};
+}
+
+// Task D
+int countDerangements(std::vector&lt;int&gt;&amp; v, const std::vector&lt;int&gt;&amp; original,
+                      std::size_t k) {
+    // TODO: like Task B, but count instead of storing, and do not follow a
+    // choice that puts an element in its original position.
+    (void)v; (void)original; (void)k;
+    return 0;
+}</code></pre>
+
+<h3>Ex7Demo.cpp</h3>
+<pre class="copyable" data-filename="Ex7Demo.cpp"><code class="language-cpp">// Ex7Demo.cpp
+// CSCI 235 -- Exercise 7: Permutations
+//
+// Provided file -- do not submit this. Build it with:
+//
+//     g++ -std=c++17 -g Permute.cpp Ex7Demo.cpp -o ex7demo
+//     ./ex7demo
+//
+// The expected output is in demo_output.txt. Your output should match it
+// exactly once all four tasks are done.
+
+#include &quot;Permute.hpp&quot;
+
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+static void print(const std::vector&lt;int&gt;&amp; v) {
+    std::cout &lt;&lt; &quot;(&quot;;
+    for (std::size_t i = 0; i &lt; v.size(); ++i) {
+        std::cout &lt;&lt; (i ? &quot; &quot; : &quot;&quot;) &lt;&lt; v[i];
+    }
+    std::cout &lt;&lt; &quot;)&quot;;
+}
+
+int main() {
+    std::cout &lt;&lt; &quot;=== Task A: factorial ===\n&quot;;
+    for (int n : {0, 1, 2, 3, 4, 5, 10}) {
+        std::cout &lt;&lt; &quot;  &quot; &lt;&lt; n &lt;&lt; &quot;! = &quot; &lt;&lt; factorial(n) &lt;&lt; &quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task B: permute ===\n&quot;;
+    std::vector&lt;int&gt; v{1, 2, 3};
+    std::vector&lt;std::vector&lt;int&gt;&gt; out;
+    permute(v, 0, out);
+    for (const auto&amp; p : out) {
+        std::cout &lt;&lt; &quot;  &quot;;
+        print(p);
+        std::cout &lt;&lt; &quot;\n&quot;;
+    }
+    std::cout &lt;&lt; &quot;  v afterwards: &quot;;
+    print(v);
+    std::cout &lt;&lt; &quot;   (must equal the original)\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task C: allPermutations ===\n&quot;;
+    std::vector&lt;int&gt; w{5, 6, 7, 8};
+    auto all = allPermutations(w);
+    std::cout &lt;&lt; &quot;  &quot; &lt;&lt; all.size() &lt;&lt; &quot; permutations of &quot;;
+    print(w);
+    std::cout &lt;&lt; &quot;\n  first: &quot;;
+    print(all.front());
+    std::cout &lt;&lt; &quot;\n  last:  &quot;;
+    print(all.back());
+    std::cout &lt;&lt; &quot;\n  w unchanged: &quot;;
+    print(w);
+    std::cout &lt;&lt; &quot;\n&quot;;
+
+    std::cout &lt;&lt; &quot;\n=== Task D: countDerangements ===\n&quot;;
+    for (int n = 0; n &lt;= 5; ++n) {
+        std::vector&lt;int&gt; base;
+        for (int i = 0; i &lt; n; ++i) {
+            base.push_back(10 * (i + 1));
+        }
+        std::vector&lt;int&gt; work = base;
+        std::cout &lt;&lt; &quot;  &quot; &lt;&lt; n &lt;&lt; &quot; values: &quot;
+                  &lt;&lt; countDerangements(work, base, 0) &lt;&lt; &quot;\n&quot;;
+    }
+    return 0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>
+  Submit <strong>exactly one file</strong>, named <code>Permute.cpp</code>, to the Exercise 7 assignment on
+  Gradescope. Do not rename it, do not put it in a folder, and do not submit <code>Permute.hpp</code> or
+  <code>Ex7Demo.cpp</code>. All four functions must be defined, even if one is unfinished, or the program
+  will not link. You may resubmit as many times as you like before the deadline; the last submission is
+  graded.
+</p>
+
+</main>
+
+<footer>
+  CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026
+</footer>
+
+<script>hljs.highlightAll();</script>
+<script>
+// Add a "Copy" button to each provided header / demo listing.
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('pre.copyable').forEach(function (pre) {
+    var wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy ' + (pre.dataset.filename || 'code') + ' to clipboard');
+    btn.addEventListener('click', function () {
+      copyText(pre.textContent).then(function (ok) {
+        btn.textContent = ok ? 'Copied!' : 'Copy failed';
+        btn.classList.toggle('done', ok);
+        btn.classList.toggle('failed', !ok);
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('done', 'failed');
+        }, 1800);
+      });
+    });
+    wrap.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>
