@@ -1,4 +1,4 @@
-i<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -81,6 +81,16 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);padd
   <div class="due">Due: Sunday, October 25, 2026 &middot; <a href="../../fall2026_schedule.html" style="color:inherit;text-decoration:underline;">course schedule</a></div>
 </div></header>
 <main>
+<div class="box" id="whatsnew"><p><span class="ttl">What changed? Updated Sunday, October 11, 2026</span></p>
+<p>If you already started, nothing you have written stops working: the tasks, tests, grading and due date are the <strong>same</strong>. Here is a map of what is new or clearer.</p>
+<ul>
+  <li><strong>New hint for DFS:</strong> a suggested signature for the recursive helper, and why DFS needs no parent table. See <a href="#helperhint">Hint: a recursive helper</a> (in the DFS section) and the box just after it.</li>
+  <li><strong>Which files you write:</strong> you submit all four of <code>DFS_Solver.hpp/.cpp</code> and <code>BFS_Solver.hpp/.cpp</code>, and you may add <code>private</code> helpers or members to the headers. See <a href="#provided">What Is Provided, and What You Write</a>.</li>
+  <li><strong>The interface your headers must keep:</strong> constructors, <code>getPath()</code>, <code>toString()</code> and its heading line. See <a href="#interface">the interface list</a>.</li>
+  <li><strong>Slow-motion DFS:</strong> a step-by-step slide walkthrough of the recursion, linked in the <a href="#dfsstepper">Try it yourself</a> box in Task A.</li>
+  <li><strong>Small wording fixes:</strong> the <a href="#complexity">complexity table</a> (parent table and queue) and the <a href="#dfsedge">loops note in the DFS edge cases</a>.</li>
+</ul></div>
+
 
 <h2 id="overview">Overview</h2>
 <p>Imagine you are dropped into a corn maze with a map in your hand. How do you find the exit? There are two classic strategies, and in this project you will build both of them as C++ classes that share one interface.</p>
@@ -141,6 +151,14 @@ bool ok = solver-&gt;reachable();                  // base-class code, which cal
 <h3>Depth-first search</h3>
 <p>DFS is naturally <em>recursive</em>. A call that is handed a cell first marks it visited. If that cell is the end, the search has succeeded. Otherwise the call tries each unvisited open neighbor in turn, and as soon as one neighbor's call succeeds, this call succeeds too. If every neighbor fails, this call fails and control returns to the caller, which then tries <em>its</em> next neighbor. That return is the &ldquo;walk back to the last junction&rdquo; step. Your <em>visited</em> table must live outside the recursive function (pass it by reference), so that all the calls share it.</p>
 <p>How a call tells its caller &ldquo;I succeeded&rdquo; is up to you. One option is a <code>bool</code> return value. Another is to let the recursion fill the answer stack you are going to return: the call that reaches the end puts the end on it, and each caller that finds the stack non-empty after a recursive call knows its own cell belongs to the route. The trace in Task A uses the second option, so you can watch the route being built while the recursion unwinds, from the end of the maze back toward the start.</p>
+<div class="box tip" id="helperhint"><p><span class="ttl">Hint: a recursive helper.</span> <code>getPath()</code> takes no arguments, so put the recursion in a helper function that carries the search state with it. A signature like this works (it can be a <code>private</code> member function or a <code>static</code> free function in <code>DFS_Solver.cpp</code>):</p>
+<pre><code>void helper(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze,
+            const Coord&amp; curr,
+            const Coord&amp; target,
+            std::vector&lt;std::vector&lt;bool&gt;&gt;&amp; visited,
+            std::stack&lt;Coord&gt;&amp; pathStack);</code></pre>
+<p><code>visited</code> and <code>pathStack</code> are passed <strong>by reference</strong>, so every call in the recursion shares the same two objects. <code>getPath()</code> creates them, makes the first call from the start, and returns <code>pathStack</code>. The ideas for the body are in the pseudocode in the &ldquo;Where is the backtracking?&rdquo; box just below: mark, check the target, try the four neighbors in order, and after each recursive call ask whether <code>pathStack</code> is now non-empty. You still have to decide where each of those lines goes.</p>
+<p><strong>No parent table is needed here.</strong> In this recursive implementation the active calls already remember how to get back: a successful call&rsquo;s caller is exactly the previous cell on the route, and each caller pushes its own <code>curr</code> as success returns. That is the contrast with BFS, where the cells that led to the target are not sitting in a chain of active calls, so BFS uses a parent table to rebuild the route. (An iterative DFS does not have this recursive call chain, so it needs another way to reconstruct the route, such as a parent table.)</p></div>
 
 <div class="box tip"><p><span class="ttl">Where is the backtracking?</span> In a recursive DFS there is no line of code that says &ldquo;backtrack.&rdquo; Each call on the recursion stack is a junction you have not finished with. <strong>When a recursive call fails, returning to its caller lets the search try the next neighbor. This is backtracking.</strong> Control comes back to the line right after the recursive call, you are standing on that junction again, and the loop simply moves on to the next neighbor. <strong>When a call succeeds, the callers instead build the answer stack as they return.</strong> The call stack is the ball of string.</p>
 <pre><code>helper(cell):
@@ -164,25 +182,36 @@ bool ok = solver-&gt;reachable();                  // base-class code, which cal
 <p><span class="ttl">A small example.</span> Suppose cells 1 and 2 are the same distance from the start, and both are neighbors of cell 3. When cell 1 is processed, cell 3 is pushed onto the queue. If cell 3 has not been marked yet, then when cell 2 is processed next, cell 3 is pushed a <em>second</em> time. Marking cell 3 the moment it is first pushed makes cell 2 skip it.</p></div>
 <p>To recover the route, BFS also remembers each cell's <strong>parent</strong>, the cell that discovered it. A second table with the same shape as the maze works well. When the end is found, you follow parents from the end back to the start. Because the stack reverses order, pushing cells in that end-to-start order leaves the start on top.</p>
 
-<h3>Complexity Analysis</h3>
+<h3 id="complexity">Complexity Analysis</h3>
 <p>Let <em>n</em> be the number of cells in the maze (the total number of entries in all rows).</p>
 <div class="scroll"><table>
 <thead><tr><th>Resource</th><th>DFS</th><th>BFS</th><th>Why</th></tr></thead>
 <tbody>
 <tr><td>Time</td><td>O(n)</td><td>O(n)</td><td>Every cell is marked visited at most once, and each visited cell looks at only its four neighbors, a constant amount of work. Total work is proportional to the number of cells.</td></tr>
-<tr><td>Space</td><td>O(n)</td><td>O(n)</td><td>The visited table has one entry per cell. DFS may also hold up to <em>n</em> recursive calls at once (a long winding corridor). BFS may hold up to <em>n</em> cells in the queue and in the parent table.</td></tr>
+<tr><td>Space</td><td>O(n)</td><td>O(n)</td><td>The visited table has one entry per cell. DFS may also hold up to <em>n</em> recursive calls at once (a long winding corridor). BFS uses a parent table with one entry per cell, and may also hold up to <em>n</em> cells in the queue.</td></tr>
 </tbody></table></div>
 <div class="box"><p>Both searches have the same Big-O, yet they behave very differently. DFS can wander a long way around before it stumbles on the exit. BFS promises the <em>fewest steps</em> and uses a parent table to reconstruct the route. Big-O tells you how the work <em>grows</em>; it does not tell you which answer you get.</p></div>
 
-<h2 id="provided">What Is Provided</h2>
+<h2 id="provided">What Is Provided, and What You Write</h2>
 <ul>
   <li><code>Maze_Solver.hpp</code> and <code>Maze_Solver.cpp</code>: the abstract base class, already complete (<code>reachable()</code>, <code>toString()</code> and <code>isOpen()</code> are written). <strong>Do not modify these.</strong> The autograder always uses its own copy.</li>
-  <li><code>DFS_Solver.hpp</code> and <code>BFS_Solver.hpp</code>: the class declarations (listed at the bottom of this page). They declare only <code>getPath()</code> and <code>toString()</code>, because <code>reachable()</code> is inherited.</li>
-  <li>The constructors and <code>toString()</code> of both solvers. Each <code>toString()</code> just puts a heading line in front of the base-class output. Colors in the printed board are only for your terminal and are ignored by the autograder.</li>
-  <li>A <code>main.cpp</code> you can freely edit to try your own mazes.</li>
+  <li><code>DFS_Solver.hpp</code> and <code>BFS_Solver.hpp</code>: the class declarations (listed under Starter Code at the bottom of this page). They declare the constructors, <code>getPath()</code> and <code>toString()</code>. <code>reachable()</code> is not declared because it is inherited. You may add <code>private</code> helper functions or data members to these headers if you need them.</li>
+  <li>A <code>main.cpp</code> you can freely edit to try your own mazes. It is not submitted.</li>
 </ul>
-<p><strong>You write</strong> <code>getPath()</code> in <code>DFS_Solver.cpp</code> and in <code>BFS_Solver.cpp</code>. Use <code>std::queue</code> from the standard library for BFS (you do not need your own queue class). Name your traversal variable <code>curr</code>.</p>
-<div class="box warn"><p><span class="ttl">Helper-function name clash.</span> If you write a free helper function (a recursive DFS helper, for example) and <code>DFS_Solver.cpp</code> and <code>BFS_Solver.cpp</code> each define a helper with the same name and parameters, the linker will stop with <em>multiple definition</em>. Give each helper a distinctive name, or declare it <code>static</code> (or put it inside an anonymous <code>namespace</code>) so that it is private to its file.</p></div>
+<p><strong>You write and submit four files:</strong> <code>DFS_Solver.hpp</code>, <code>DFS_Solver.cpp</code>, <code>BFS_Solver.hpp</code> and <code>BFS_Solver.cpp</code>. In the <code>.cpp</code> files you implement the constructors, <code>getPath()</code> and <code>toString()</code>; the heading line of each <code>toString()</code> is described below. Use <code>std::queue</code> from the standard library for BFS (you do not need your own queue class). Name your traversal variable <code>curr</code>, as in the traces and examples on this page (a style convention; the autograder does not check it).</p>
+
+<h3 id="interface">The interface your headers must provide</h3>
+<p>The autograder includes your submitted headers and uses your classes exactly the way <code>main.cpp</code> does, so the public names and signatures below must stay as they are. Think of this list as the contract: private helpers and data members are up to you. The list is given for <code>DFS_Solver</code>; <code>BFS_Solver</code> is identical with the name changed.</p>
+<ul>
+  <li>The header has an include guard and includes <code>"Maze_Solver.hpp"</code>.</li>
+  <li><code>class DFS_Solver : public Maze_Solver</code>, with every member below declared <code>public</code>.</li>
+  <li>A default constructor <code>DFS_Solver()</code>, and a constructor <code>DFS_Solver(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; maze, const Coord&amp; start, const Coord&amp; end)</code> that passes its arguments on to the base-class constructor.</li>
+  <li><code>std::stack&lt;Coord&gt; getPath() const override;</code> &mdash; the same signature as the base class, marked <code>override</code> so the compiler catches a misspelling.</li>
+  <li><code>std::string toString() const override;</code> &mdash; returns the heading line <code>Use Depth First Search</code> followed by a newline (<code>Use Breadth First Search</code> for BFS), and then the text returned by <code>Maze_Solver::toString()</code>.</li>
+  <li>Do <strong>not</strong> declare <code>reachable()</code> again. It is inherited, and Task C checks that it works through your <code>getPath()</code>.</li>
+</ul>
+<div class="box tip"><p><span class="ttl">Where the data lives.</span> The maze, start and end are stored privately in <code>Maze_Solver</code>; read them with <code>getMaze()</code>, <code>getStart()</code> and <code>getEnd()</code> inside <code>getPath()</code>. Your solver classes do not need any data members of their own.</p></div>
+<div class="box warn"><p><span class="ttl">Helper-function name clash.</span> If you write a free helper function (a recursive DFS helper, for example) and <code>DFS_Solver.cpp</code> and <code>BFS_Solver.cpp</code> each define a helper with the same name and parameters, the linker will stop with <em>multiple definition</em>. Give each helper a distinctive name, or declare it <code>static</code> (or put it inside an anonymous <code>namespace</code>) so that it is private to its file. You may also make the helper a <code>private</code> member function of your class.</p></div>
 
 <h2 id="example">A Worked Example</h2>
 <p>We will follow both searches on this 4 &times; 4 maze. Start at <code>(0,0)</code>, end at <code>(3,3)</code>. The autograder uses additional mazes, so this example is yours to study.</p>
@@ -205,14 +234,15 @@ row 3  .  .  .  E </div>
 </tbody></table></div>
 <p>Notice steps 9&ndash;12: from <code>(3,2)</code> the search tries <em>left</em> first, wanders into <code>(3,1)</code> and then <code>(3,0)</code>, finds a dead end, and returns two calls back to <code>(3,2)</code>. That is the ball of string being wound back up. Nothing was added to the answer stack for those two cells, so they are not part of the route. Step 13 then reaches the destination, where the base case fires immediately: the call does not look at any neighbors.</p>
 <p>In steps 14&ndash;21 every call on the recursion stack finds the answer stack non-empty and pushes its own cell. When the recursion is finished, the answer stack holds <code>(0,0) &rarr; (0,1) &rarr; (0,2) &rarr; (0,3) &rarr; (1,3) &rarr; (2,3) &rarr; (2,2) &rarr; (3,2) &rarr; (3,3)</code> with the start on top, which is exactly what <code>getPath()</code> must return.</p>
-<div class="box tip"><p><span class="ttl">Try it yourself.</span> Step through the recursion call by call with the <a href="p2_maze_dfs_stepper.html">DFS step visualizer</a>. It shows the recursion stack, the answer stack, and the call tree, using the maze above and three others. Your DFS <strong>must</strong> try the neighbors in the order left, right, up, down, and the visualizer follows that order.</p></div>
-<h4>Edge cases and what to return</h4>
+<div class="box tip" id="dfsstepper"><p><span class="ttl">Try it yourself.</span> Step through the recursion call by call with the <a href="p2_maze_dfs_stepper.html">DFS step visualizer</a>. It shows the recursion stack, the answer stack, and the call tree, using the maze above and three others. Your DFS <strong>must</strong> try the neighbors in the order left, right, up, down, and the visualizer follows that order.</p>
+<p>For a slower, picture-by-picture walkthrough, see <a href="../../slides/slip3_dfs_slow_all.pdf">Slip 3: DFS, step by step (PDF)</a> from Lecture 11. It traces a 3&times;3 maze and then a second maze where a junction has two choices: the first one fails, the second works, and DFS returns a longer route than the shortest one. It shows the call stack, the answer stack, stop signs for dead ends, and the call tree.</p></div>
+<h4 id="dfsedge">Edge cases and what to return</h4>
 <ul>
   <li>If the start cell or the end cell is a wall <strong>or outside the maze</strong> (a negative row or column, a row past the last one, or a column past the end of that particular row), return an empty stack immediately. <code>isOpen()</code> answers all of these for you.</li>
   <li>If the maze has no rows at all, there is no path: return an empty stack.</li>
   <li>If the start equals the end <strong>and that cell is open</strong>, the path is that single cell.</li>
   <li>The start must be on <strong>top</strong> of the stack and the end at the <strong>bottom</strong>.</li>
-  <li>Mazes can contain loops. If you forget to mark cells visited, your program recurses forever and crashes.</li>
+  <li>Mazes can contain loops. If you forget to mark cells visited, your program can recurse forever around a loop and eventually crash.</li>
   <li>Rows can have different lengths, so size each row of your visited table from that row.</li>
   <li>With the specified traversal order and opposite-corner endpoints, the 30 &times; 30 open-room test exercises deep recursion. Pass the maze, visited table, and answer stack by reference.</li>
 </ul>
@@ -284,7 +314,7 @@ for (const Maze_Solver* curr : solvers) {
 </ul>
 
 <h2 id="starter">Starter Code</h2>
-<p>These files are provided with the project. <code>Maze_Solver.hpp</code> and <code>Maze_Solver.cpp</code> are complete: read them, but do not change them. <code>DFS_Solver.hpp</code> and <code>BFS_Solver.hpp</code> are the declarations of the two classes you will implement, in <code>DFS_Solver.cpp</code> and <code>BFS_Solver.cpp</code>. <code>main.cpp</code> is a small driver for your own testing; it is not submitted. Read the declarations and the comments carefully before you start coding.</p>
+<p>These files are provided with the project. <code>Maze_Solver.hpp</code> and <code>Maze_Solver.cpp</code> are complete: read them, but do not change them. <code>DFS_Solver.hpp</code> and <code>BFS_Solver.hpp</code> declare the two classes you implement in <code>DFS_Solver.cpp</code> and <code>BFS_Solver.cpp</code>; you may add private helpers or members to them. <code>main.cpp</code> is a small driver for your own testing; it is not submitted. Read the declarations and the comments carefully before you start coding.</p>
 <h4>Maze_Solver.hpp</h4><pre><code class="language-cpp">// Maze_Solver.hpp
 #ifndef MAZE_SOLVER_HPP
 #define MAZE_SOLVER_HPP
@@ -498,4 +528,4 @@ int main() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>if (window.hljs) { hljs.highlightAll(); }</script>
 </body>
-</html>/
+</html>
