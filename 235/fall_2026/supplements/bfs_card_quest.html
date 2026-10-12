@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BFS Card Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: one centered playing card under a slim status bar; the card shows the question, then turns into the feedback. */
+:root{
+  --bg:#edf0f6; --surface:#ffffff; --surface2:#f4f6fb; --ink:#14213d; --muted:#56607a; --line:#d5dbe8;
+  --front:#2f7a3e; --front-bg:#e4f2e6; --back:#2446b8; --back-bg:#e3e9fb;
+  --warn:#b4540a; --warn-bg:#fdecd9; --bad:#b3261e; --bad-bg:#fbe4e1; --good:#1e7a3a; --good-bg:#def3e3;
+  --code-bg:#fffbea; --code-ink:#2b2a22;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1424; --surface:#172036; --surface2:#1c2742; --ink:#e7ecf8; --muted:#9aa6c4; --line:#2c3857;
+  --front:#6fd083; --front-bg:#173222; --back:#8fa8ff; --back-bg:#1a2550;
+  --warn:#f0a35a; --warn-bg:#3a2813; --bad:#ff8f86; --bad-bg:#3c1b19; --good:#74d98f; --good-bg:#16311f;
+  --code-bg:#1f2236; --code-ink:#eceaf8; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e1424; --surface:#172036; --surface2:#1c2742; --ink:#e7ecf8; --muted:#9aa6c4; --line:#2c3857;
+  --front:#6fd083; --front-bg:#173222; --back:#8fa8ff; --back-bg:#1a2550;
+  --warn:#f0a35a; --warn-bg:#3a2813; --bad:#ff8f86; --bad-bg:#3c1b19; --good:#74d98f; --good-bg:#16311f;
+  --code-bg:#1f2236; --code-ink:#eceaf8; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:14px 40px}
+.wrap{max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.tab:focus-visible{outline:3px solid var(--back);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.25rem}
+.ring{width:30px;height:30px;flex:none}
+.stats{display:flex;gap:16px;font-variant-numeric:tabular-nums;font-size:.9rem;color:var(--muted)}
+.stats b{color:var(--ink);font-size:1.05rem}
+.prog{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--front);width:0;transition:width .4s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.tag{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pips{display:flex;gap:5px;align-items:center;font-size:.8rem;color:var(--muted)}
+.pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--front)}
+.pip.on{background:var(--front)}
+.mode{font-size:.78rem;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--surface2);border:1px solid var(--line)}
+.mode.prac{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.title{font-size:1.35rem}
+.q{font-size:1.02rem;min-width:0}
+.q p{margin:.4em 0}
+code,.mono{font-family:var(--mono);font-size:.9em}
+.q code,.fb code,.opt code{background:var(--surface2);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--mono);font-size:.84rem;line-height:1.45;background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0;overflow-x:auto;white-space:pre}
+.tabs{display:flex;gap:6px}
+.tab{border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:8px;padding:6px 12px;font-size:.88rem;font-weight:500}
+.tab[aria-selected="true"]{background:var(--back-bg);color:var(--back);border-color:var(--back)}
+textarea,input[type=text]{width:100%;font-family:var(--mono);font-size:.9rem;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:170px;resize:vertical;line-height:1.45}
+textarea.prose{font-family:var(--body);font-size:1rem;min-height:110px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.fields label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);min-width:0}
+.opt[aria-pressed="true"]{border-color:var(--back);background:var(--back-bg)}
+.opt .k{font-weight:700;color:var(--muted);font-family:var(--mono)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:9px;padding:9px 16px;font-weight:600}
+.btn.main{background:var(--back);border-color:var(--back);color:#fff}
+:root[data-theme="dark"] .btn.main{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.main{color:#0e1424}}
+.btn.go{background:var(--front);border-color:var(--front);color:#fff}
+:root[data-theme="dark"] .btn.go{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.go{color:#0e1424}}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.quiet{background:transparent}
+.hint{background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:.92rem}
+.verdict{border-radius:10px;padding:12px 14px;font-weight:600;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px}
+.verdict.ok{background:var(--good-bg);color:var(--good)}
+.verdict.no{background:var(--bad-bg);color:var(--bad)}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.checks li{display:flex;gap:9px;align-items:flex-start;font-size:.95rem}
+.checks .m{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;color:#fff;margin-top:1px}
+.checks .ok .m{background:var(--good)} .checks .no .m{background:var(--bad)}
+:root[data-theme="dark"] .checks .m{color:#0e1424}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .checks .m{color:#0e1424}}
+.tip{display:block;color:var(--muted);font-size:.86rem}
+.fb h3{font-size:1rem;margin-bottom:4px}
+.box{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.box p{margin:.3em 0}
+.draft{white-space:pre-wrap;font-family:var(--mono);font-size:.85rem;background:var(--surface2);border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.photo{display:flex;flex-direction:column;gap:10px}
+.photo img{max-width:100%;max-height:300px;border-radius:8px;border:1px solid var(--line);object-fit:contain;align-self:flex-start}
+.self label{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:.95rem}
+.self input{margin-top:4px;width:18px;height:18px;flex:none}
+.small{font-size:.86rem;color:var(--muted)}
+.hero{display:flex;flex-direction:column;gap:14px}
+.hero h2{font-size:1.9rem}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.how .box h3{font-size:.98rem;margin-bottom:4px}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.sumgrid .box{display:flex;flex-direction:column;gap:3px;font-size:.88rem}
+.sumgrid .box b{font-size:.92rem}
+.st{font-size:.76rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.st.first{color:var(--good)} .st.prac{color:var(--warn)} .st.skip{color:var(--bad)}
+@media (prefers-reduced-motion: no-preference){.card{animation:rise .25s ease-out}@keyframes rise{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap" id="app">
+  <div class="bar">
+    <div class="brand">
+      <svg class="ring" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="var(--line)" stroke-width="2"/><rect x="11" y="1.5" width="8" height="7" rx="2" fill="var(--front)"/><rect x="11" y="21.5" width="8" height="7" rx="2" fill="none" stroke="var(--back)" stroke-width="2" stroke-dasharray="3 2"/><rect x="1.5" y="11.5" width="7" height="7" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><rect x="21.5" y="11.5" width="7" height="7" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/></svg>
+      <span>BFS Card Quest</span>
+    </div>
+    <div class="stats" id="stats" hidden>
+      <span>Score <b id="sScore">0</b></span>
+      <span>Streak <b id="sStreak">0</b></span>
+      <span>Cards done <b id="sDone">0</b>/<span id="sTotal">12</span></span>
+    </div>
+  </div>
+  <div class="prog" id="progWrap" hidden><i id="prog"></i></div>
+  <main id="stage"></main>
+</div>
+<script>
+/* ---------- helpers ---------- */
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rnd(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const squash=raw=>raw.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'').replace(/\s+/g,'');
+const R=(label,re,tip)=>({label,re,tip});
+const mod=(a,m)=>((a%m)+m)%m;
+const L=(s)=>'<code>'+s+'</code>';
+/* run a student's recursive function (no loops) on test inputs; returns array of results or null */
+function runFn(raw,name,inputs){
+  const src=raw.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'');
+  const ids=src.match(/[A-Za-z_]\w*/g)||[];
+  const ok=new Set([name,'n','if','else','return','long','int','unsigned','short']);
+  const decl=[...src.matchAll(/\b(?:long|int|unsigned|short)\s+([A-Za-z_]\w*)\s*=/g)].map(m=>m[1]);
+  decl.forEach(d=>{if(d!==name&&d!=='n')ok.add(d);});
+  if(ids.some(w=>!ok.has(w)))return null;
+  if(/[^\w\s(){}<>=!+\-*?:;,&|]/.test(src))return null;
+  if(/<<|>>|[^&]&[^&]|[^|]\|[^|]/.test(src))return null;
+  let js=src.replace(/\b(?:unsigned|long|int|short)\s+([A-Za-z_]\w*)\s*=/g,'var $1 =').replace(/\b(unsigned|long|int|short)\b/g,'').replace(/\s+/g,' ');
+  js=js.replace(new RegExp('^\\s*'+name+'\\s*\\(\\s*n\\s*\\)'),'function '+name+'(n)');
+  if(!/^\s*function /.test(js))return null;
+  try{const rec=[];const f=new Function('__rec',js+';var __o='+name+';'+name+'=function(x){__rec.push(x);return __o(x);};return __o;')(rec);const out2=[];const out=inputs.map(x=>{rec.length=0;let v;try{v=f(x);}catch(e){v=undefined;}out2.push(rec.slice());return v;});out.rec=out2;return out;}catch(e){return null;}
+}
+
+const clauses=n=>n.toLowerCase().split(/[.;,\n]|\band\b|\bwhile\b|\bbut\b|\bwhereas\b|\bwhich\b/).map(x=>x.trim()).filter(Boolean);
+const NEG=/\bnot\b|n't|\bnever\b|\bno\b|\bdoesnt\b|\bdoesn't\b/;
+function dfsNotShortest(n){const cs=clauses(n);
+  return cs.some(c=>/dfs|depth/.test(c)&&!/bfs|breadth/.test(c)&&NEG.test(c)&&/short|best|fewest|optimal/.test(c))||/(not|n't|never)\s+(necessarily\s+|always\s+|guaranteed\s+)?(the\s+|a\s+)?(shortest|fewest|best)/.test(n)&&!/bfs[^.]*(not|n't)[^.]*short/.test(n)||cs.some(c=>/dfs|depth/.test(c)&&/(any|first|some|a)\s+(route|path)/.test(c)&&!/bfs|breadth/.test(c));}
+function bfsShortest(n){return clauses(n).some(c=>/bfs|breadth/.test(c)&&!/dfs|depth/.test(c)&&/short|fewest|minimum|optimal/.test(c)&&!NEG.test(c))||(/bfs|breadth/.test(n)&&/(finds?|gives?|guarantees?)[^.]*(shortest|fewest)/.test(n)&&!/dfs[^.]*(finds?|gives?|guarantees?)[^.]*(shortest|fewest)[^.]*bfs[^.]*not/.test(n)&&!clauses(n).some(c=>/bfs|breadth/.test(c)&&NEG.test(c)&&/short|fewest/.test(c)));}
+function containerPairs(n){let good=0,bad=0;
+  for(const c of clauses(n)){const d=/dfs|depth/.test(c),b=/bfs|breadth/.test(c),s=/stack/.test(c),q=/queue/.test(c);
+    if(d===b)continue; if(s===q)continue;
+    if((d&&s)||(b&&q))good|=(d?1:2); else bad=1;}
+  return good===3&&!bad;}
+
+const T=(prompt,rubric,explain,model,hint,need)=>({type:'text',prompt,rubric,explain,model,hint,need:need||rubric.length});
+const C=(prompt,labels,check,explain,model,hint)=>({type:'code',prompt,labels,check,explain,model,hint});
+const N=(prompt,fields,explain,hint)=>({type:'nums',prompt,fields,explain,hint});
+const M=(prompt,correct,wrongs,explain)=>({type:'mc',prompt,explain,options:shuffle([{t:correct,ok:true},...wrongs.map(t=>({t,ok:false}))])});
+
+
+/* ---------- helpers for BFS cards ---------- */
+function dfsGrid(g,S,Tt){
+  const R=g.length,Cn=g[0].length,vis=g.map(r=>r.map(()=>false)),order=[],ans=[];
+  (function h(r,c){
+    vis[r][c]=true;order.push([r,c]);
+    if(r===Tt[0]&&c===Tt[1]){ans.push([r,c]);return;}
+    for(const d of [[0,-1],[0,1],[-1,0],[1,0]]){
+      const nr=r+d[0],nc=c+d[1];
+      if(nr>=0&&nr<R&&nc>=0&&nc<Cn&&g[nr][nc]===0&&!vis[nr][nc]){h(nr,nc);if(ans.length){ans.push([r,c]);return;}}
+    }
+  })(S[0],S[1]);
+  return {order,route:ans.slice().reverse()};
+}
+const mazeText=m=>m.g.map((row,r)=>row.map((v,c)=>(r===m.S[0]&&c===m.S[1])?'S':(r===m.T[0]&&c===m.T[1])?'T':(v?'#':'.')).join(' ')).join('\n');
+const DIRS=[[0,-1],[0,1],[-1,0],[1,0]]; /* left, right, up, down */
+const cellStr=a=>a.map(p=>'('+p[0]+','+p[1]+')').join(', ');
+const cs1=p=>'('+p[0]+','+p[1]+')';
+/* BFS exactly like Project 2: mark on push, record parent, stop when the end is discovered (the end is not pushed). */
+function bfsGrid(g,S,Tt){
+  const R=g.length,Cn=g[0].length,vis=g.map(r=>r.map(()=>false)),par={},pops=[];
+  const q=[S];vis[S[0]][S[1]]=true;let found=false;
+  while(q.length&&!found){
+    const cur=q.shift();pops.push(cur);
+    for(const d of DIRS){
+      const nr=cur[0]+d[0],nc=cur[1]+d[1];
+      if(nr>=0&&nr<R&&nc>=0&&nc<Cn&&g[nr][nc]===0&&!vis[nr][nc]){
+        vis[nr][nc]=true;par[nr+','+nc]=cur;
+        if(nr===Tt[0]&&nc===Tt[1]){found=true;break;}
+        q.push([nr,nc]);
+      }
+    }
+  }
+  if(!found)return {ok:false,pops,route:[]};
+  const route=[Tt];let p=par[Tt[0]+','+Tt[1]];
+  while(p){route.push(p);p=par[p[0]+','+p[1]];}
+  return {ok:true,pops,route:route.reverse(),par};
+}
+function randGrid(n,walls,S,Tt){
+  const g=Array.from({length:n},()=>Array(n).fill(0));
+  let w=walls;
+  while(w>0){const r=rnd(0,n-1),c=rnd(0,n-1);if((r===S[0]&&c===S[1])||(r===Tt[0]&&c===Tt[1])||g[r][c]===1)continue;g[r][c]=1;w--;}
+  return g;
+}
+/* a 4x4 maze with S=(0,0); wantLonger: DFS route must be longer than the BFS route */
+function makeMaze4(wantLonger){
+  for(let t=0;t<600;t++){
+    const S=[0,0],Tt=[3,rnd(1,3)];
+    const g=randGrid(4,rnd(3,5),S,Tt);
+    const b=bfsGrid(g,S,Tt);if(!b.ok||b.route.length<4)continue;
+    const d=dfsGrid(g,S,Tt);if(!d.route.length)continue;
+    if(wantLonger&&d.route.length<=b.route.length)continue;
+    return {g,S,T:Tt,b,d};
+  }
+  const g=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],S=[0,0],Tt=[3,3];
+  return {g,S,T:Tt,b:bfsGrid(g,S,Tt),d:dfsGrid(g,S,Tt)};
+}
+const MODEL_REBUILD=`pathStack.push(end);
+Coord p = parent[end.row][end.col];
+while (p.row != -1 && p.col != -1) {
+    pathStack.push(p);
+    p = parent[p.row][p.col];
+}
+// start was pushed last, so it is on top`;
+const MODEL_POLY=`Maze_Solver* s = new BFS_Solver(maze, start, end);
+std::stack<Coord> path = s->getPath();   // runs BFS_Solver::getPath
+delete s;                                // ~Maze_Solver is virtual`;
+
+/* ---------- the 12 topics ---------- */
+const SKILLS=[
+/* 1 */{id:'ripples',title:'BFS: spreading ripples',open:[
+  ()=>T('Breadth-first search is often compared to dropping a stone in a pond. In what <b>order</b> does BFS visit the cells of a maze, and what does it use to keep track of cells waiting their turn?',
+      [R('it spreads outward in layers: all cells 1 step from the start, then all cells 2 steps away, and so on',/layer|level|distance|step|ring|ripple|outward|nearest|closest|wave/,'What do the cells visited together have in common?'),R('closer cells are always visited before farther ones',/before|first|closer|nearest|closest|then|after|increasing/,'Which comes first: distance 2 or distance 3?'),R('it uses a queue to hold the discovered cells',/queue/,'Which container remembers the cells waiting?')],
+      '<p>BFS explores like ripples: first the start, then <b>every</b> cell one step away, then every cell two steps away, and so on. A <b>queue</b> keeps the discovered-but-not-yet-explored cells in the order they were found, so nearer cells always come out before farther ones.</p>',
+      'BFS spreads outward in layers by distance from the start: all cells 1 step away, then 2 steps away, and so on. A queue holds the cells waiting to be explored.','Think of a stone dropped in a pond.')],
+ mc:[()=>M('In what order does BFS visit the cells of a maze?','By distance from the start: all cells 1 step away, then 2 steps away, and so on',['As deep as possible down one branch before trying another','Row by row, left to right','In random order'],'<p>BFS spreads outward like ripples. Going as deep as possible down one branch is depth-first search.</p>')]},
+/* 2 */{id:'fifo',title:'The queue: first in, first out',open:[
+  ()=>{const v=shuffle([1,2,3,4,5,6,7,8,9]).slice(0,4);
+    /* random valid sequence of 4 pushes and 4 pops */
+    let ops=[],pushed=0,popped=0,size=0;
+    while(popped<4){const canPush=pushed<4,canPop=size>0;
+      if(canPush&&(!canPop||Math.random()<.55)){ops.push('push '+v[pushed]);pushed++;size++;}else{ops.push('pop');popped++;size--;}}
+    const q=[],out=[];ops.forEach(o=>{if(o==='pop')out.push(q.shift());else q.push(+o.split(' ')[1]);});
+    return N('A <b>queue</b> of numbers starts empty. You do these operations in order:<pre>'+ops.join(', ')+'</pre>What number does each <code>pop</code> remove? Give them in the order the pops happen.',
+      out.map((x,i)=>({id:'p'+i,label:'Pop number '+(i+1),ans:[x]})),
+      '<p>A queue is <b>first in, first out</b>: the number that has waited longest comes out first. The pops return <b>'+out.join(', ')+'</b>.</p><p>This is why BFS uses a queue: cells discovered earlier (closer to the start) are explored before cells discovered later.</p>',
+      'The oldest number still in the queue comes out first.');},
+  ()=>T('Why does BFS use a <b>queue</b> and not a stack? What would go wrong with a stack?',
+      [R('a queue gives first in, first out: the earliest discovered (closest) cells come out first',/first in|fifo|oldest|earliest|first.*(out|discovered)|in order|order/,'Which cell comes out of a queue first?'),R('so all cells at distance k are handled before any at distance k + 1',/distance|layer|level|closer|nearer|before/,'What does that order give you?'),R('a stack would dive deep along one branch (depth-first), not spread out in layers',/deep|dfs|depth|last in|lifo|newest|one branch|dive/,'Which cell does a stack give back first?')],
+      '<p>A queue returns the <b>oldest</b> discovered cell, so every cell at distance 1 is handled before any cell at distance 2, and so on. A stack returns the <b>newest</b> cell, which means diving down one branch: that is depth-first search.</p>',
+      'A queue is first in, first out, so cells are handled in the order they were discovered: nearer cells before farther ones. A stack would return the newest cell first and dive deep, which is DFS.','Which comes out of each container: the oldest or the newest cell?')],
+ mc:[()=>{const [a,b,c]=shuffle([1,2,3,4,5,6,7,8,9]);
+   return M('You <code>push('+a+')</code>, <code>push('+b+')</code>, <code>push('+c+')</code> on a <b>queue</b>, then call <code>front()</code> and <code>pop()</code>. Which number is at the front?',''+a,[''+c,''+b,'It depends on the values'].filter(x=>x!==''+a),'<p>First in, first out: <b>'+a+'</b> went in first, so it is at the front. (A stack would give '+c+'.)</p>');}]},
+/* 3 */{id:'algo',title:'The BFS algorithm',open:[
+  ()=>T('Describe the BFS used in Project 2: what you set up, what the loop does, and what you do after the loop.',
+      [R('set up: visited table, parent table, a queue; mark the start visited and push it',/visited|parent|queue|start/,'What data do you need before the loop?'),R('loop while the queue is not empty: pop the front cell',/while|not empty|front|pop|loop|dequeue/,'What does each pass of the loop take out of the queue?'),R('for each open, unvisited neighbor: mark it visited, set its parent to the current cell, then push it (stop if it is the end)',/neighbor|mark|parent|push|enqueue/,'What do you do with each neighbor you discover?'),R('after the loop: if the end was never reached return an empty stack; otherwise rebuild the path from the parent table',/empty|not (found|reach)|rebuild|reconstruct|parent|path/,'What if the queue runs out first?')],
+      '<p><b>Set up:</b> a visited table, a parent table (every entry {-1, -1}), and a queue; mark the start visited and push it.</p><p><b>Loop</b> while the queue is not empty: pop the front cell <code>curr</code>. For each neighbor (left, right, up, down) that is open and not visited: mark it visited, set <code>parent[nb] = curr</code>, and stop if it is the end; otherwise push it.</p><p><b>After:</b> if the end was never reached, return an empty stack. Otherwise rebuild the route with the parent table.</p>',
+      'Set up visited, parent and a queue; mark and push the start. While the queue is not empty: pop curr; for each open unvisited neighbor mark it visited, set its parent to curr, and push it (stop at the end). After: empty stack if the end was not reached, otherwise rebuild the path from parent.','Start with the three things you create before the loop.',3)],
+ mc:[()=>M('In BFS, what do you do with a neighbor that is open and not yet visited?','Mark it visited, record its parent, and push it (stop if it is the end)',['Recurse into it right away','Push it, and mark it visited later when it is popped','Mark it visited but do not remember where it came from'],'<p>Mark when you <b>push</b> and remember the parent right then. You never recurse in BFS: the queue decides what is explored next.</p>'),
+     ()=>M('Inside the BFS loop, which step comes first?','Pop the front cell of the queue',['Look at the neighbors of the end cell','Rebuild the path','Mark every cell in the maze visited'],'<p>Each pass of the loop takes the oldest waiting cell off the queue, then looks at its neighbors.</p>')]},
+/* 4 */{id:'markenq',title:'Mark visited when you push',open:[
+  ()=>T('BFS marks a cell visited at the moment it is <b>pushed</b> onto the queue, not when it is popped. What goes wrong if you wait until the pop?',
+      [R('mark on push, not on pop',/push|enqueue|when (it is )?(added|discovered|found)|discover/,'When exactly should the mark happen?'),R('otherwise two cells can both discover the same neighbor before it is popped',/twice|two|both|again|more than once|duplicate|multiple|same neighbor/,'What can happen to a cell found from two different cells?'),R('the neighbor can be pushed more than once (duplicate work); if its parent is set on every push, the parent can be overwritten too',/more than once|twice|duplicate|overwrit|wast|extra|repeat/,'What does that do to the queue and the parent table?')],
+      '<p>Suppose cells A and B are both one step from C. If A is processed and C is not marked until C is <b>popped</b>, then B is processed next and finds C unvisited again, so C is pushed a second time (duplicate work, and if the parent is set on every push it is overwritten too). Marking on <b>push</b> means each cell is pushed exactly once.</p>',
+      'Mark on push. If you wait until the pop, two cells can both discover the same neighbor before it is popped, so it can be pushed more than once (duplicate work). If the parent is assigned each time it is pushed, the parent can also be overwritten.','Imagine two cells that are both next to the same unvisited cell.')],
+ mc:[()=>M('A cell has two already-processed neighbors. If BFS marks cells visited only when they are <b>popped</b>, how many times can that cell be pushed?','More than once',['Exactly once, always','Never','Exactly twice at most, but never once'],'<p>Each neighbor that processes first sees the cell as unvisited and pushes it. Marking on push stops this: the second neighbor sees it is already visited.</p>'),
+     ()=>N('A 2&times;2 grid is completely open. The start is <b>(0,0)</b> and the end is somewhere else, so ignore it. BFS processes (0,0), then (0,1), then (1,0). How many times is cell <b>(1,1)</b> pushed if the program marks cells visited<ul><li>when they are <b>popped</b>?</li><li>when they are <b>pushed</b> (what Project 2 does)?</li></ul>',
+      [{id:'pop',label:'Pushes if marked on pop',ans:[2]},{id:'push',label:'Pushes if marked on push',ans:[1]}],
+      '<p>(0,1) and (1,0) are both next to (1,1). Marked on <b>pop</b>: (1,1) is still unvisited when (0,1) finds it and again when (1,0) finds it, so it is pushed <b>2</b> times. Marked on <b>push</b>: (1,0) sees it already visited, so it is pushed <b>1</b> time.</p>',
+      'Who discovers (1,1) first? Is it marked by the time the second cell looks at it?')]},
+/* 5 */{id:'bfstrace',title:'Trace BFS on a grid',open:[
+  ()=>{const m=makeMaze4(false),b=m.b;
+    return N('BFS starts at <b>S</b> = (0,0) and looks for <b>T</b> = ('+m.T[0]+','+m.T[1]+'). It pops a cell, then checks its neighbors in the order <b>left, right, up, down</b>. Cells are marked visited when pushed. <code>#</code> is a wall. BFS stops the moment T is discovered (T is not pushed).<pre>'+mazeText(m)+'</pre>How many cells are <b>popped</b> (including the one whose neighbor turns out to be T)? How many cells are on the <b>route</b> BFS returns (including S and T)?',
+      [{id:'p',label:'Cells popped',ans:[b.pops.length]},{id:'r',label:'Cells on the route',ans:[b.route.length]}],
+      '<p>Pop order: <b>'+cellStr(b.pops)+'</b> ('+b.pops.length+' pops). The last cell popped discovers T.</p><p>Route: <b>'+cellStr(b.route)+'</b> ('+b.route.length+' cells). It is a shortest route.</p>',
+      'Keep a list of the queue. Pop the front, add its new neighbors (left, right, up, down) at the back.');}],
+ mc:[()=>{const m=makeMaze4(false),b=m.b,third=b.pops[2];
+   const all=[];m.g.forEach((row,r)=>row.forEach((v,c)=>{if(!v&&!(r===third[0]&&c===third[1]))all.push('('+r+','+c+')');}));
+   const wr=shuffle(all).slice(0,3);
+   return M('Using the same rules (left, right, up, down; <code>#</code> is a wall; S = (0,0)), which cell is popped <b>third</b>?<pre>'+mazeText(m)+'</pre>',cs1(third),wr,'<p>Pop order: '+cellStr(b.pops)+'. The third pop is <b>'+cs1(third)+'</b>.</p>');}]},
+/* 6 */{id:'parent',title:'The parent table',open:[
+  ()=>T('What does the <b>parent table</b> store in BFS, and why is it needed? What is the parent of the start cell?',
+      [R('parent[r][c] is the cell we were processing when we first discovered (r, c)',/discover|came from|before|previous|processing|popped|which cell|from/,'What does the entry for a cell tell you?'),R('the queue forgets how a cell was reached, so the parent table is how we rebuild the route',/forget|route|path|rebuild|reconstruct|trace|back/,'Why can you not just read the route off the queue?'),R('the start has no parent: its entry stays {-1, -1}',/start|-1|none|no parent|sentinel|nothing/,'Who discovered the start?')],
+      '<p>For every cell BFS discovers, <code>parent[r][c]</code> records the cell that was being processed when it was found. The queue throws cells away as they are popped, so it cannot tell us the route. After BFS reaches the end, we follow parent links from the end back to the start. The start was never discovered by anyone, so its parent stays <b>{-1, -1}</b>.</p>',
+      'parent[r][c] is the cell we were processing when we first discovered (r, c). The queue forgets the route, so we follow parent links from the end back to the start. The start has no parent: it stays {-1, -1}.','Think of a trail of breadcrumbs.')],
+ mc:[()=>{const m=makeMaze4(false),b=m.b,r=b.route;
+   const rev=r.slice().reverse(),drop=r.filter((_,i)=>i!==1);
+   const sw=r.slice();[sw[1],sw[2]]=[sw[2],sw[1]];
+   const lines=shuffle(r.slice(1).map((c,i)=>cs1(c)+' &larr; '+cs1(r[i])));
+   return M('BFS finished and found the end <b>T</b> = '+cs1(m.T)+' from <b>S</b> = (0,0). These <code>child &larr; parent</code> entries are on the route (shown in a mixed-up order):<pre>'+lines.join('\n')+'</pre>What is the route from S to T?',cellStr(r),[cellStr(rev),cellStr(drop),cellStr(sw)],'<p>Start at T and follow the parents: '+cellStr(rev)+'. Read that backwards (or push on a stack, so S ends on top) to get <b>'+cellStr(r)+'</b>.</p>');}]},
+/* 7 */{id:'rebuild',title:'Rebuild the path',open:[
+  ()=>C('BFS has just found the end, so the parent table is filled in. Write the code that builds the answer stack <code>pathStack</code> with the <b>start on top</b>. You have <code>Coord start</code>, <code>Coord end</code>, an empty <code>std::stack&lt;Coord&gt; pathStack</code>, and <code>std::vector&lt;std::vector&lt;Coord&gt;&gt; parent</code>. The parent of the start is <code>{-1, -1}</code>.',
+      ['Pushes the end first (or starts the loop at the end)','Follows the parent table (an entry parent[..][..])','Uses a loop that stops at the start (parent {-1,-1} or compare with start)','Pushes the cells it walks through (a push inside the loop)'],
+      (c,raw)=>{const pushes=(c.match(/\.push\(/g)||[]).length;
+        if(!pushes)return null;
+        const first=c.match(/\.push\(([^)]*)\)/);
+        return [!!first&&first[1]==='end'||/(Coord|auto)\w+=end;/.test(c),
+          /parent\[[^\]]+\]\[[^\]]+\]|parent\.at\(|parent\[[^\]]+\]\.[^;]*\]/.test(c)||/=parent\[/.test(c),
+          /(while|for)\(/.test(c)&&(/-1/.test(c)||/!=start|!=\(start\)|start\.row|start\.col/.test(c)),
+          pushes>=2||/(while|for)\([^)]*\)\{[^}]*\.push\(/.test(c)];},
+      '<p>Push the end first. Then keep stepping to the parent and pushing it, until you step past the start (its parent is {-1, -1}). The start is pushed <b>last</b>, so it ends up on top.</p>',MODEL_REBUILD,'The end goes in first. What is the last cell you push?')],
+ mc:[()=>M('BFS rebuilds the route by walking from the end back to the start with parent links, pushing each cell onto <code>pathStack</code>. Why does this give the start on <b>top</b>?','The start is pushed last, and a stack gives back the last pushed first',['The parent table is sorted from start to end','Stacks always keep the smallest cell on top','The route is reversed afterward with a second loop'],'<p>Walking backwards pushes end, ..., start. A stack is last in, first out, so the start is on top. No reversing is needed.</p>')]},
+/* 8 */{id:'shortest',title:'Why BFS finds the shortest route',open:[
+  ()=>T('Why is the first route that BFS finds a <b>shortest</b> one (fewest cells)? Explain with the order in which cells come out of the queue.',
+      [R('cells leave the queue in order of distance: all at distance k before any at distance k + 1',/distance|layer|level|order|nearer|closer|before/,'In what order do cells come out of the queue?'),R('the first time the end is discovered it is reached by a shortest route; no shorter route exists, or it would have been found in an earlier layer',/first|earliest|no shorter|fewest|shortest|minimum|nothing shorter/,'What does the first time you reach the end tell you?'),R('marking on push means the end keeps that first (best) parent',/mark|visited|parent|once|first/,'Can a later, longer route change the end\'s parent?')],
+      '<p>The queue hands out cells in order of distance from the start: every cell at distance 1, then every cell at distance 2, and so on. So the <b>first</b> time the end is discovered, it is reached by a shortest route; no shorter route can exist, because it would have been discovered in an earlier layer. Since the end is marked visited at that moment, a later (longer) route can never replace its parent.</p>',
+      'The queue gives out cells in order of distance (all of distance k before k + 1), so the first time BFS discovers the end it is reached by a shortest route. No shorter route exists (it would have been discovered in an earlier layer), and the end keeps that first parent.','Ripples reach nearer cells first.')],
+ mc:[()=>M('On the same maze, how does the route BFS returns compare with the route DFS returns?','BFS is never longer: it has the fewest cells',['BFS is always strictly shorter','They are always the same length','DFS is never longer'],'<p>BFS always returns a shortest route. DFS returns whichever route it finds first, which may be longer (and sometimes happens to be equally short).</p>'),
+     ()=>M('A cell is 3 steps from the start. Another cell is 2 steps from the start. BFS pops them in what order?','The 2-step cell first',['The 3-step cell first','Whichever has the smaller row number','It is random'],'<p>Cells leave the queue in order of distance, which is what makes the first route found a shortest one.</p>')]},
+/* 9 */{id:'compare',title:'DFS or BFS on one maze',open:[
+  ()=>{const m=makeMaze4(true);
+    return N('Both searches start at <b>S</b> = (0,0) and look for <b>T</b> = ('+m.T[0]+','+m.T[1]+') in this maze. Both check neighbors in the order <b>left, right, up, down</b> and do not move onto walls (<code>#</code>).<pre>'+mazeText(m)+'</pre>How many cells are on the route that <b>DFS</b> returns? How many are on the route that <b>BFS</b> returns? (Count S and T.)',
+      [{id:'d',label:'Cells on the DFS route',ans:[m.d.route.length]},{id:'b',label:'Cells on the BFS route',ans:[m.b.route.length]}],
+      '<p>DFS route: <b>'+cellStr(m.d.route)+'</b> ('+m.d.route.length+' cells).</p><p>BFS route: <b>'+cellStr(m.b.route)+'</b> ('+m.b.route.length+' cells), a shortest route.</p><p>DFS followed the first open neighbor as deep as it could and took the first route it found. BFS spread out by distance.</p>',
+      'DFS: follow left, right, up, down as deep as you can, backtrack at dead ends. BFS: count the fewest steps from S to T.');},
+  ()=>T('Compare DFS and BFS: which container does each use, which guarantees the shortest route, and how much time do they take?',
+      [R('DFS uses a stack (recursion or an explicit stack); BFS uses a queue',{test:n=>containerPairs(n)},'Which container goes with each?'),R('BFS finds a shortest route (fewest cells)',{test:n=>bfsShortest(n)},'Which search is guaranteed shortest?'),R('DFS finds a route, not necessarily the shortest',{test:n=>dfsNotShortest(n)},'Does DFS promise the shortest?'),R('both take O(n) time for n cells',/o\(n\)|linear|n\b/,'How many times is each cell visited?')],
+      '<p>DFS uses a <b>stack</b> (the call stack in the recursive version) and returns the first route it finds, which need not be the shortest. BFS uses a <b>queue</b> and always returns a shortest route. Both visit each cell at most once, so both take <b>O(n)</b> time.</p>',
+      'DFS: stack, any route, O(n). BFS: queue, shortest route, O(n).','Which one keeps going deeper, and which one spreads out?',3)],
+ mc:[()=>M('Your BFS loop uses a queue. If you replace the queue with a <b>stack</b> (pop the newest cell) and change nothing else, what do you get?','A depth-first style search: it still finds a route, but not necessarily the shortest',['The same BFS answer, only faster','A search that never finds a route','A program that does not compile'],'<p>A stack returns the newest cell, so the search dives deep before it spreads out. Using a stack instead of a queue changes the search from breadth-first to a depth-first style: it explores the newest waiting cell instead of the oldest one.</p>')]},
+/* 10 */{id:'complexity',title:'Time and space',open:[
+  ()=>T('A maze has <b>n</b> cells. What are the time and space complexity of BFS? Explain why each cell causes only a constant amount of work.',
+      [R('time O(n)',/o\(n\)|linear/,'How does the work grow with n?'),R('each cell is marked visited once, so it is pushed and popped at most once',/once|at most|one time|visited|marked|pushed|popped/,'How many times can one cell enter the queue?'),R('each cell checks only 4 neighbors: constant work per cell',/4|four|constant|neighbors/,'How many neighbors does a cell look at?'),R('space O(n): the visited table, parent table and queue',/o\(n\)|linear|visited|parent|queue/,'What data structures grow with the maze?')],
+      '<p><b>Time O(n):</b> every cell is marked visited once, so it is pushed and popped at most once, and each pop looks at only 4 neighbors. That is constant work per cell, so about 4n steps in total.</p><p><b>Space O(n):</b> the visited table and the parent table each have one entry per cell, and the queue holds at most n cells.</p>',
+      'Time O(n): each cell is pushed and popped at most once and checks 4 neighbors. Space O(n): visited table, parent table and queue.','Count how many times each cell can be pushed.',3)],
+ mc:[()=>M('A maze has n cells. How does the time of BFS compare with the time of DFS?','Both are O(n): each cell is visited at most once',['BFS is O(n&sup2;) because it uses a queue','DFS is O(n) but BFS is O(2<sup>n</sup>)','BFS is O(log n)'],'<p>Both searches mark cells visited and never re-explore them, so each takes O(n) time. BFS being guaranteed shortest does not make it slower in big-O terms.</p>'),
+     ()=>M('Which statement about space is true for a maze with n cells?','Both searches need O(n) space in the worst case',['DFS needs O(1) space because it only uses recursion','BFS needs O(1) space because the queue is small','Only DFS needs a visited table'],'<p>Both need a visited table with one entry per cell. DFS also keeps up to n frames on the call stack, and BFS keeps a parent table and a queue.</p>')]},
+/* 11 */{id:'tradeoff',title:'Stack depth vs. queue width',open:[
+  ()=>T('A maze is one long winding corridor of 100,000 cells (no branches). Which search uses more <b>memory at one moment</b>, recursive DFS or BFS? What is the risk? (Hint: compare the call stack with the queue.)',
+      [R('recursive DFS goes about 100,000 calls deep: 100,000 frames on the call stack',/100.?000|deep|n frames|every cell|frames|n calls|stack/,'How many calls are waiting at the end of the corridor?'),R('BFS holds only the one cell at the edge of the ripple in its queue',/one cell|1 cell|one|small|tiny|few|constant|frontier/,'How many cells are discovered but not yet popped?'),R('so DFS risks a stack overflow; BFS does not',/overflow|crash|run out|out of (stack )?space/,'What happens when the call stack runs out?')],
+      '<p>In a corridor there is only one way forward. <b>Recursive DFS</b> makes one call per cell, so the call stack grows to about <b>100,000 frames</b>, and a program can run out of stack space (stack overflow). <b>BFS</b> has only one waiting cell in the queue at a time.</p><p>The queue can also be large: in a wide, branching maze BFS must remember a whole layer of cells at once. Both searches still use O(n) space in the worst case.</p>',
+      'Recursive DFS makes about 100,000 nested calls, so it risks a stack overflow. BFS keeps only one waiting cell in its queue. In a wide, branching maze the queue can hold a whole layer.','How many cells are waiting in each container at the far end?')],
+ mc:[()=>{const s=pick([['a single winding corridor of 100,000 cells','Recursive DFS: about 100,000 nested calls (risk of stack overflow)',['BFS: the queue holds all 100,000 cells at once','Neither: both use the same constant memory','BFS: it needs 100,000 recursive calls'],'<p>With no branches there is one waiting cell for BFS, but DFS makes a nested call for every cell.</p>'],['a tree-like maze that branches into many wide corridors','BFS can hold a whole layer of cells in its queue',['DFS never uses any memory','BFS never uses more than one cell','Only DFS can run out of memory'],'<p>BFS remembers every cell of the current layer. In a wide, branching maze that layer can be large.</p>']]);
+   return M('Which memory problem fits <b>'+s[0]+'</b>?',s[1],s[2],s[3]);}]},
+/* 12 */{id:'poly',title:'getPath() through a Maze_Solver*',open:[
+  ()=>T('<pre>Maze_Solver* s = new BFS_Solver(maze, start, end);\nstd::stack&lt;Coord&gt; path = s-&gt;getPath();\ndelete s;</pre>The pointer has type <code>Maze_Solver*</code>. Which <code>getPath()</code> runs, and why? What must be true in the base class? Why does <code>delete s</code> still clean up correctly?',
+      [R('BFS_Solver::getPath runs, chosen at run time by the object the pointer points to',/bfs_solver|bfs|actual|run ?time|object|derived|points to|dynamic/,'Does the pointer\'s type or the object\'s type decide?'),R('getPath() is virtual (pure virtual) in Maze_Solver, which makes this possible',/virtual/,'What keyword in the base class turns this on?'),R('the destructor is virtual too, so delete s runs ~BFS_Solver and then the base destructor',/destructor|~|delete|virtual/,'What would happen to the derived part without it?')],
+      '<p>The object is a <code>BFS_Solver</code>, so <b>BFS_Solver::getPath</b> runs. Because <code>getPath()</code> is <b>virtual</b> (pure virtual in Maze_Solver), C++ picks the version at <b>run time</b> from the real object, not from the pointer type. Point <code>s</code> at a <code>DFS_Solver</code> and the same line runs DFS. The destructor must be <b>virtual</b> too, so <code>delete s</code> destroys the whole BFS_Solver object. <code>reachable()</code> is not virtual: it just calls <code>getPath()</code>, so it works for both solvers.</p>',
+      'BFS_Solver::getPath runs, because getPath is virtual and the object (not the pointer type) decides at run time. The destructor is virtual too, so delete s cleans up the whole BFS_Solver.','Which one decides at run time: the pointer or the object?')],
+ mc:[()=>M('<code>Maze_Solver* s</code> points to a <code>DFS_Solver</code> object. What does <code>s-&gt;getPath()</code> run?','DFS_Solver::getPath, because getPath is virtual',['Maze_Solver::getPath, because s has type Maze_Solver*','BFS_Solver::getPath, because it is the newest class','Nothing: you cannot call getPath through a base pointer'],'<p>A virtual function call is resolved at run time from the actual object. That is polymorphism: the same line of code runs different solvers.</p>'),
+     ()=>M('Why does <code>Maze_Solver</code> declare a <b>virtual destructor</b>?','So <code>delete</code> through a Maze_Solver* destroys the whole derived object',['So the destructor runs faster','So the class can have a constructor','So getPath can be called without an object'],'<p>Without a virtual destructor, deleting a derived object through a base pointer is undefined behavior.</p>')],
+ code:()=>C('Write three lines: declare a <code>Maze_Solver*</code> named <code>s</code> that points to a new <code>BFS_Solver</code> built from <code>maze</code>, <code>start</code> and <code>end</code>; call <code>getPath()</code> through <code>s</code>; then release the object.',
+      ['Declares a Maze_Solver* initialized with new BFS_Solver(...)','Calls getPath() through the pointer (s-&gt;getPath())','Deletes the object (delete s)'],
+      (c,raw)=>{const m=c.match(/Maze_Solver\*(\w+)=newBFS_Solver\(/);
+        if(!m)return /unique_ptr|shared_ptr/.test(c)?null:[false,/->getPath\(\)/.test(c),/delete\w+;/.test(c)];
+        return [true,new RegExp(m[1]+'->getPath\\(\\)').test(c),new RegExp('delete'+m[1]+';').test(c)];},
+      '<p>Use a base-class pointer, call the virtual function through it, and <code>delete</code> it.</p>',MODEL_POLY,'Declare the pointer with the base type but create a BFS_Solver.')}
+];
+SKILLS.forEach(s=>{ if(s.code){ s.open.push(s.code); delete s.code; } });
+
+</script>
+<script>
+/* ---------- optional Claude (viewer's own account; the game works without it) ---------- */
+let SAMPLE=null,SAMPLE_IMG=false;
+try{ if(window.claude&&claude.use){ claude.use('sample').then(async s=>{ if(!s)return; SAMPLE=s; try{const l=await s.limits(); SAMPLE_IMG=!!(l&&l.images);}catch(e){} }).catch(()=>{}); } }catch(e){}
+
+/* ---------- state ---------- */
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+let G=null;
+const TOTAL=SKILLS.length;
+const byId=id=>SKILLS.find(s=>s.id===id);
+const norm=s=>String(s).toLowerCase().replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+const plain=h=>{const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/\s+/g,' ').trim();};
+const ints=s=>(String(s).match(/-?\d+/g)||[]).map(Number);
+
+function newGame(){
+  G={score:0,streak:0,best:0,order:shuffle(SKILLS.map(s=>s.id)),res:{},fmt:{},lastv:{},practice:null,cur:null,count:0,log:[]};
+  SKILLS.forEach(s=>G.res[s.id]={status:'new',first:null,pr:0,att:0});
+  $('stats').hidden=false;$('progWrap').hidden=false;
+  updateStats();deal();
+}
+function doneCount(){return SKILLS.filter(s=>G.res[s.id].status==='done').length;}
+function updateStats(){
+  $('sScore').textContent=G.score;$('sStreak').textContent=G.streak;$('sDone').textContent=doneCount();$('sTotal').textContent=TOTAL;
+  $('prog').style.width=(100*doneCount()/TOTAL)+'%';
+}
+function nextSkill(){
+  if(G.practice&&G.res[G.practice].status==='practice')return G.practice;
+  G.practice=null;
+  let id=G.order.find(i=>G.res[i].status==='new');
+  if(!id){id=G.order.find(i=>G.res[i].status==='skipped'); if(id){G.res[id].status='practice';G.res[id].pr=G.res[id].pr||0;G.practice=id;}}
+  return id||null;
+}
+function deal(){
+  const sid=nextSkill(); if(!sid){summary();return;}
+  const sk=byId(sid),fmt=G.fmt[sid]||'open';
+  const pool=fmt==='mc'?sk.mc:sk.open;
+  let vi=rnd(0,pool.length-1); const key=sid+fmt;
+  if(pool.length>1&&vi===G.lastv[key])vi=(vi+1)%pool.length;
+  G.lastv[key]=vi;
+  G.count++;
+  G.cur={sid,fmt,q:pool[vi](),hint:false,mode:'type',sel:null,file:null,answered:false};
+  renderQuestion();
+}
+
+/* ---------- screens ---------- */
+function intro(){
+  stage.innerHTML=`<section class="card hero">
+    <span class="tag">CSCI 235 &middot; Class 12 &middot; BFS</span>
+    <h2>Twelve cards. Answer them yourself.</h2>
+    <p>Each card asks a question about breadth-first search, queues and how BFS compares with DFS. You write the answer: a sentence, a few numbers, or code you type yourself. You can also write on paper and upload a photo. After every answer you get a check, an explanation and the model solution.</p>
+    <div class="how">
+      <div class="box"><h3>Cards come in random order</h3><p class="small">Get one right on the first try and that card is done.</p></div>
+      <div class="box"><h3>Miss one? Practice it</h3><p class="small">You get fresh, similar problems until you answer <b>three</b> correctly. Numbers change each time.</p></div>
+      <div class="box"><h3>Stuck on the type?</h3><p class="small">Switch between written answers and multiple choice, or skip a topic and come back later.</p></div>
+    </div>
+    <div class="row"><button class="btn main" data-act="start">Deal the first card</button><span class="small">Your progress lives in this tab only. Reloading restarts the game.</span></div>
+  </section>`;
+}
+function pipsHtml(n){return '<span class="pips" aria-label="'+n+' of 3 practice answers correct">'+[0,1,2].map(i=>'<i class="pip'+(i<n?' on':'')+'"></i>').join('')+'</span>';}
+function header(){
+  const c=G.cur,r=G.res[c.sid],sk=byId(c.sid);
+  const mode=r.status==='practice'?'<span class="mode prac">Practice</span>'+pipsHtml(r.pr):'<span class="mode">New card</span>';
+  return `<div class="top"><span class="tag">Card ${SKILLS.indexOf(sk)+1} of ${TOTAL}</span><span class="row" style="gap:8px">${mode}</span></div><h3 class="title">${esc(sk.title)}</h3>`;
+}
+function renderQuestion(){
+  const c=G.cur,q=c.q,sk=byId(c.sid);
+  let body='';
+  if(q.type==='mc'){
+    body='<div class="opts" id="opts">'+q.options.map((o,i)=>`<button class="opt" data-act="pick" data-i="${i}" aria-pressed="false"><span class="k">${'ABCD'[i]}</span><span>${o.t}</span></button>`).join('')+'</div>';
+  }else{
+    const tabs=`<div class="tabs" role="tablist"><button class="tab" role="tab" data-act="mode" data-m="type" aria-selected="${c.mode==='type'}">Type my answer</button><button class="tab" role="tab" data-act="mode" data-m="photo" aria-selected="${c.mode==='photo'}">Answer on paper</button></div>`;
+    let area='';
+    if(c.mode==='type'){
+      if(q.type==='nums')area='<div class="fields">'+q.fields.map(f=>`<label for="f_${f.id}">${esc(f.label)}<input type="text" id="f_${f.id}" autocomplete="off" inputmode="text"></label>`).join('')+'</div>';
+      else if(q.type==='code')area='<textarea id="ans" data-code="1" spellcheck="false" autocapitalize="off" aria-label="Your code" placeholder="Type your C++ here. Tab inserts four spaces."></textarea>';
+      else area='<textarea id="ans" class="prose" aria-label="Your answer" placeholder="Write your answer in your own words."></textarea>';
+    }else{
+      area=`<div class="photo"><p class="small">Write your answer on paper, then take a photo and choose it here. Make sure the writing is dark and the whole answer is in the frame.</p><input type="file" id="photo" accept="image/*" capture="environment" aria-label="Photo of your written answer"><div id="pv"></div><div class="row" id="photoBtns"></div></div>`;
+    }
+    body=tabs+area;
+  }
+  const other=c.fmt==='mc'?'Write it out instead':'Switch to multiple choice';
+  stage.innerHTML=`<section class="card">${header()}<div class="q">${q.prompt}</div>${body}
+    <div id="hintbox"></div>
+    <div class="row">${(q.type==='mc'||c.mode==='type')?'<button class="btn main" data-act="check" id="checkBtn"'+(q.type==='mc'?' disabled':'')+'>Check my answer</button>':''}
+    <button class="btn quiet" data-act="hint">Show a hint</button>
+    <button class="btn quiet" data-act="switch">${other}</button>
+    <button class="btn quiet" data-act="skip">Skip this topic</button></div></section>`;
+  if(c.mode==='photo'&&q.type!=='mc')wirePhoto();
+  const ta=$('ans'); if(ta&&ta.dataset.code)wireTab(ta);
+}
+function wireTab(ta){
+  let free=false;
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){free=true;return;}
+    if(e.key==='Tab'&&!free&&!e.shiftKey){e.preventDefault();const s=ta.selectionStart,t=ta.selectionEnd;ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(t);ta.selectionStart=ta.selectionEnd=s+4;}
+    else if(e.key!=='Tab')free=false;
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter')check();
+  });
+}
+function wirePhoto(){
+  const inp=$('photo');
+  inp.addEventListener('change',()=>{
+    const f=inp.files&&inp.files[0]; if(!f)return;
+    G.cur.file=f;
+    const url=URL.createObjectURL(f);
+    $('pv').innerHTML='<img alt="Your photo" src="'+url+'">';
+    const canClaude=SAMPLE&&SAMPLE_IMG;
+    $('photoBtns').innerHTML=(canClaude?'<button class="btn main" data-act="claudePhoto">Grade my photo with Claude</button>':'')+'<button class="btn '+(canClaude?'':'main')+'" data-act="selfcheck">'+(canClaude?'Self-check instead':'Show the model answer and self-check')+'</button>'+(canClaude?'<span class="small">Claude uses your own claude.ai account.</span>':'');
+  });
+}
+
+/* ---------- grading ---------- */
+function gradeTyped(q,raw){
+  if(q.type==='mc')return null;
+  if(q.type==='nums'){
+    const items=q.fields.map(f=>{const got=ints(document.getElementById('f_'+f.id).value);const ok=got.length===f.ans.length&&got.every((v,i)=>v===f.ans[i]);
+      return {ok,label:f.label+': '+f.ans.join(', '),tip:ok?'':'You wrote: '+(got.length?got.join(', '):'nothing')};});
+    return {items,pass:items.every(i=>i.ok),user:q.fields.map(f=>f.label+' = '+document.getElementById('f_'+f.id).value).join('\n')};
+  }
+  if(q.type==='code'){
+    if(!raw.trim())return {items:q.labels.map(l=>({ok:false,label:l})),pass:false,user:raw};
+    let res;try{res=q.check(squash(raw),raw);}catch(e){res=null;}
+    if(!res)return {unverified:true,why:'Your code uses something this checker does not handle (a different parameter name, loops, or unusual syntax), so it cannot judge it automatically.',items:[],user:raw};
+    const items=q.labels.map((l,i)=>({ok:!!res[i],label:l}));
+    return {items,pass:items.every(i=>i.ok),user:raw};
+  }
+  const n=norm(raw); const m=q.rubric.map(r=>r.re.test(n));
+  if(true)return {unverified:true,prose:true,why:'A program cannot reliably judge written explanations, so you decide: compare your answer with the model answer.',items:q.rubric.map((r,i)=>({ok:m[i],label:r.label})),user:raw};
+  const got=m.filter(Boolean).length;
+  let items;
+  if(q.need<q.rubric.length){
+    items=q.rubric.filter((r,i)=>m[i]).map(r=>({ok:true,label:r.label}));
+    items.push({ok:got>=q.need,label:'Name at least '+q.need+' (you named '+got+')',tip:got>=q.need?'':'Think about where order of arrival matters.'});
+    return {items,pass:got>=q.need,user:raw};
+  }
+  items=q.rubric.map((r,i)=>({ok:m[i],label:r.label,tip:m[i]?'':r.tip}));
+  return {items,pass:got>=q.need&&n.length>0,user:raw};
+}
+function check(){
+  const c=G.cur;if(!c||c.answered)return;
+  const q=c.q;
+  if(q.type==='mc'){
+    if(c.sel===null)return;
+    const ok=q.options[c.sel].ok;
+    const items=[{ok,label:'You chose: '+plain(q.options[c.sel].t)}];
+    if(!ok)items.push({ok:true,label:'Correct choice: '+plain(q.options.find(o=>o.ok).t)});
+    finish({items,pass:ok,user:'',mc:true});return;
+  }
+  const raw=q.type==='nums'?'':($('ans')?$('ans').value:'');
+  if(q.type!=='nums'&&!raw.trim()){$('hintbox').innerHTML='<div class="hint">Type something first, even a partial answer. A wrong attempt teaches more than a blank.</div>';return;}
+  const g=gradeTyped(q,raw);
+  if(g.unverified){G.cur.typed=raw;compareScreen(q,g);return;}
+  finish(g);
+}
+function compareScreen(q,g){
+  const c=G.cur,labels=selfLabels(q);
+  const hints=g.prose?'<div><h3>Keyword scan (a hint, not a grade)</h3><ul class="checks">'+g.items.map(i=>`<li class="${i.ok?'ok':'no'}"><span class="m" aria-hidden="true">${i.ok?'&#10003;':'?'}</span><span>${esc(i.label)}<span class="tip">${i.ok?'Keywords noticed':'No matching keywords found'}</span></span></li>`).join('')+'</ul></div>':'';
+  const model=q.type==='code'?'<div><h3>Model solution</h3><pre>'+esc(q.model)+'</pre></div>':'<div><h3>Model answer</h3><div class="box">'+esc(q.model)+'</div></div>';
+  stage.innerHTML=`<section class="card fb">${header()}
+    <div class="verdict" style="background:var(--card2,transparent);border:1px solid var(--line)"><span>Could not automatically verify: compare with the model answer</span><span></span></div>
+    <p class="small" style="margin:0">${esc(g.why)}</p>
+    <div><h3>Your answer</h3><div class="draft">${esc(g.user)}</div></div>
+    ${hints}${model}
+    <div><h3>Why</h3><div class="box">${q.explain}</div></div>
+    <h3>Be honest: tick each point your own answer really had.</h3>
+    <div class="self">${labels.map((l,i)=>`<label><input type="checkbox" class="sc" data-i="${i}"><span>${esc(l)}</span></label>`).join('')}</div>
+    <div class="row"><button class="btn main" data-act="submitSelf">Submit my self-check</button></div></section>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function selfLabels(q){return q.type==='text'?q.rubric.map(r=>r.label):q.type==='code'?q.labels:q.fields.map(f=>f.label+' matches: '+f.ans.join(', '));}
+function selfCheck(){
+  const c=G.cur,q=c.q,labels=selfLabels(q);
+  const model=q.type==='nums'?'':'<h3>Model answer</h3>'+(q.type==='code'?'<pre>'+esc(q.model)+'</pre>':'<div class="box">'+esc(q.model)+'</div>');
+  $('photoBtns').innerHTML='';
+  $('pv').insertAdjacentHTML('beforeend','<div class="fb">'+model+'<h3 style="margin-top:10px">Compare your paper answer. Tick each point you really had.</h3><div class="self">'+labels.map((l,i)=>`<label><input type="checkbox" class="sc" data-i="${i}"><span>${esc(l)}</span></label>`).join('')+'</div><div class="row"><button class="btn main" data-act="submitSelf">Submit my self-check</button></div></div>');
+}
+function submitSelf(){
+  const q=G.cur.q,labels=selfLabels(q);
+  const ticks=[...document.querySelectorAll('.sc')].map(x=>x.checked);
+  const items=labels.map((l,i)=>({ok:ticks[i],label:l,tip:ticks[i]?'':'Not in your paper answer yet.'}));
+  finish({items,pass:items.every(i=>i.ok),user:G.cur.typed||'(answered on paper)',self:true});
+}
+async function claudePhoto(){
+  const c=G.cur,q=c.q;if(!SAMPLE||!c.file)return;
+  const labels=selfLabels(q);
+  $('photoBtns').innerHTML='<span class="small" id="thk">Claude is reading your photo...</span>';
+  const prompt='You are grading a student\'s handwritten answer (photo attached) to a data-structures flashcard about breadth-first search in C++.\nQuestion: '+plain(q.prompt)+'\nReference answer: '+(q.model?q.model:plain(q.explain))+'\nChecklist:\n'+labels.map((l,i)=>(i+1)+'. '+l).join('\n')+'\nFor each checklist item decide whether the photo clearly shows it. Be fair about wording and handwriting. Reply with only JSON: {"parts":[{"ok":true,"note":"short reason"}],"feedback":"2 or 3 kind, specific sentences"} with one part per checklist item in order. If the photo is unreadable, set every ok to false and say so in feedback.';
+  try{
+    const out=await SAMPLE.json(prompt,{images:c.file,modelTier:'default'});
+    const parts=out.parts||[];
+    const items=labels.map((l,i)=>({ok:!!(parts[i]&&parts[i].ok),label:l,tip:parts[i]&&parts[i].note||''}));
+    finish({items,pass:items.every(i=>i.ok),user:'(photo)',claudeNote:out.feedback||''});
+  }catch(e){
+    $('photoBtns').innerHTML='<span class="small">Claude could not grade the photo ('+esc(e.code||'error')+'). You can self-check instead.</span> <button class="btn main" data-act="selfcheck">Self-check</button>';
+  }
+}
+async function askClaude(){
+  const c=G.cur,q=c.q,box=$('claudeBox');if(!SAMPLE||!box)return;
+  box.innerHTML='<p class="small">Claude is reading your answer...</p>';
+  const ref=q.model?q.model:plain(q.explain);
+  const prompt='You are a kind teaching assistant for a college data-structures class (C++, breadth-first search and queues). A student answered a flashcard.\nQuestion: '+plain(q.prompt)+'\nReference solution: '+ref+'\nStudent answer:\n'+String(c.user||'').slice(0,4000)+'\nIn 3 to 5 short sentences: say what is right, what is missing or wrong (be specific, and point to the exact line or idea), and give one tip. Do not rewrite the whole solution.';
+  try{
+    await SAMPLE(prompt,{modelTier:'quick',onText:({text})=>{box.innerHTML='<h3>Claude\'s review</h3><p style="white-space:pre-wrap">'+esc(text)+'</p>';}});
+  }catch(e){box.innerHTML='<p class="small">Claude could not review this answer ('+esc(e.code||'error')+'). The model solution above still applies.</p>';}
+}
+
+/* ---------- feedback and progression ---------- */
+function finish(g){
+  const c=G.cur,q=c.q,r=G.res[c.sid];
+  c.answered=true;c.user=g.user;r.att++;
+  const wasNew=r.status==='new';
+  let pts=0,note='';
+  if(g.pass){
+    pts=(wasNew?10:6)+Math.min(G.streak,5)-(c.hint?3:0);pts=Math.max(pts,3);
+    G.streak++;G.best=Math.max(G.best,G.streak);G.score+=pts;
+    if(wasNew){r.status='done';r.first=true;note='Done: first try.';}
+    else{r.pr++;if(r.pr>=3){r.status='done';G.practice=null;note='Topic mastered after practice.';}else note='Practice '+r.pr+' of 3.';}
+  }else{
+    G.streak=0;
+    if(wasNew){r.status='practice';r.first=false;r.pr=0;G.practice=c.sid;note='This card goes to practice: you need three correct answers.';}
+    else note='Practice stays at '+r.pr+' of 3.';
+  }
+  updateStats();
+  const sk=byId(c.sid);
+  const checks='<ul class="checks">'+g.items.map(i=>`<li class="${i.ok?'ok':'no'}"><span class="m" aria-hidden="true">${i.ok?'&#10003;':'&#10005;'}</span><span>${esc(i.label)}${i.tip?'<span class="tip">'+esc(i.tip)+'</span>':''}</span></li>`).join('')+'</ul>';
+  const user=(!g.mc&&!g.self&&g.user&&q.type!=='nums')?'<div><h3>Your answer</h3><div class="draft">'+esc(g.user)+'</div></div>':(q.type==='nums'&&g.user?'<div><h3>Your answer</h3><div class="draft">'+esc(g.user)+'</div></div>':'');
+  const model=q.type==='code'?'<div><h3>Model solution</h3><pre>'+esc(q.model)+'</pre></div>':(q.type==='text'?'<div><h3>Model answer</h3><div class="box">'+esc(q.model)+'</div></div>':'');
+  let btns='';
+  const practiceNow=G.practice===c.sid&&r.status==='practice';
+  if(g.pass)btns='<button class="btn go" data-act="next" id="nextBtn">'+(practiceNow?'Next practice problem':'Next card')+'</button>';
+  else btns='<button class="btn main" data-act="next" id="nextBtn">Try a similar problem</button>';
+  btns+=(!g.pass?'<button class="btn" data-act="switch2">'+(c.fmt==='mc'?'Write it out instead':'Switch to multiple choice')+'</button>':'')+(r.status==='practice'?'<button class="btn quiet" data-act="skip2">Skip this topic for now</button>':'');
+  const askBtn=(SAMPLE&&!g.mc&&!g.self&&!g.claudeNote&&String(c.user||'').trim()&&c.user!=='(photo)')?'<button class="btn" data-act="askclaude">Ask Claude to review my answer</button>':'';
+  stage.innerHTML=`<section class="card fb">${header()}
+    <div class="verdict ${g.pass?'ok':'no'}"><span>${g.pass?'Correct':'Not yet'} &middot; ${g.items.filter(i=>i.ok).length} of ${g.items.length} parts</span><span>${g.pass?'+'+pts+' points':'0 points'}</span></div>
+    <p class="small" style="margin:0">${esc(note)}</p>
+    ${checks}${user}
+    ${g.claudeNote?'<div class="box"><h3>Claude\'s feedback</h3><p style="white-space:pre-wrap;margin:0">'+esc(g.claudeNote)+'</p></div>':''}
+    <div><h3>Why</h3><div class="box">${q.explain}</div></div>${model}
+    <div id="claudeBox" class="box" ${askBtn?'':'hidden'}></div>
+    <div class="row">${btns}${askBtn}</div></section>`;
+  if(askBtn)$('claudeBox').hidden=true;
+  const nb=$('nextBtn');if(nb)nb.focus({preventScroll:true});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function summary(){
+  $('prog').style.width='100%';
+  const rs=SKILLS.map(s=>({s,r:G.res[s.id]}));
+  const first=rs.filter(x=>x.r.first===true).length;
+  const prac=rs.filter(x=>x.r.first===false&&x.r.status==='done').length;
+  const open=rs.filter(x=>x.r.status!=='done').length;
+  stage.innerHTML=`<section class="card"><span class="tag">Round complete</span><h2>You finished the deck.</h2>
+    <p><b>${G.score}</b> points &middot; best streak <b>${G.best}</b> &middot; ${first} cards right on the first try &middot; ${prac} mastered through practice${open?' &middot; '+open+' still open':''}.</p>
+    <div class="sumgrid">${rs.map(({s,r})=>`<div class="box"><b>${esc(s.title)}</b><span class="st ${r.status==='done'?(r.first?'first':'prac'):'skip'}">${r.status==='done'?(r.first?'First try':'Practiced, mastered'):'Not finished'}</span><span class="small">${r.att} attempt${r.att===1?'':'s'}</span></div>`).join('')}</div>
+    <div class="row"><button class="btn main" data-act="start">Play again with a new shuffle</button></div></section>`;
+}
+
+/* ---------- events ---------- */
+stage.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,c=G&&G.cur;
+  if(a==='start'){newGame();return;}
+  if(a==='pick'){c.sel=+b.dataset.i;document.querySelectorAll('.opt').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));$('checkBtn').disabled=false;return;}
+  if(a==='check'){check();return;}
+  if(a==='mode'){if(c.mode!==b.dataset.m){c.mode=b.dataset.m;renderQuestion();}return;}
+  if(a==='hint'){const h=c.q.hint||'Re-read the question and take it one step at a time.';c.hint=true;$('hintbox').innerHTML='<div class="hint"><b>Hint</b> (costs 3 points): '+esc(h)+'</div>';return;}
+  if(a==='switch'||a==='switch2'){G.fmt[c.sid]=c.fmt==='mc'?'open':'mc';deal();return;}
+  if(a==='skip'||a==='skip2'){const r=G.res[c.sid];if(r.status==='practice'){r.status='skipped';}if(r.status==='new'||r.status==='skipped'){G.order=G.order.filter(i=>i!==c.sid).concat(c.sid);}if(G.practice===c.sid)G.practice=null;G.streak=0;updateStats();deal();return;}
+  if(a==='next'){deal();return;}
+  if(a==='selfcheck'){selfCheck();return;}
+  if(a==='submitSelf'){submitSelf();return;}
+  if(a==='claudePhoto'){claudePhoto();return;}
+  if(a==='askclaude'){$('claudeBox').hidden=false;b.disabled=true;askClaude();return;}
+});
+intro();
+</script>
+
+</body>
+</html>
