@@ -171,7 +171,7 @@
 <div class="header">
   <h1>Project 3: Make 24</h1>
   <div class="subtitle">CSCI 235 &mdash; Data Structures and Algorithms &middot; Hunter College, CUNY</div>
-  <div class="due">Due: Thursday, October 29 at 11:59 PM</div>
+  <div class="due">Due: Thursday, November 19 at 11:59 PM</div>
 </div>
 
 <div class="container">
@@ -313,7 +313,7 @@ cloneVec.pop_back();</code></pre>
   <code>50</code>):
   <div class="trace">start:               {10, 20, 30, 40, 50}
 swap(i, size-1):     {10, 50, 30, 40, 20}   // 20 and 50 swap places
-swap(j, size-2):     {10, 50, 30, 20, 40}   // index j=4 now holds 40, not 50!
+swap(j, size-2):     {10, 50, 30, 20, 40}   // wrong: index j=4 held 20 (not 50) after the first swap
 pop_back(); pop_back():  {10, 50, 30}</div>
   You meant to remove <code>20</code> and <code>50</code>, leaving
   <code>{10, 30, 40}</code>. Instead the method removes <code>20</code> and
@@ -348,6 +348,12 @@ return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;</code></pre>
 <pre><code class="language-cpp">if (std::fabs(num2) &gt; DELTA) {
   result.push_back(num / num2);
 }</code></pre>
+<div class="note">
+  <strong>About the value of <code>DELTA</code>:</strong> <code>1e-6</code> means
+  <code>0.000001</code> (one millionth). In lecture we used <code>1e-9</code>; for
+  the inputs in this project either value works. The exact cutoff is a numerical
+  policy that suits small inputs such as card values, not an exact test.
+</div>
 
 <h2>4. Complexity Analysis <span class="badge-optional">optional</span></h2>
 <p style="color:var(--muted); font-style:italic; font-size:0.94em;">
@@ -409,6 +415,72 @@ return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;</code></pre>
   can stop and unwind immediately. Task C is different: because it must collect
   <em>every</em> required solution, it does not short-circuit and must exhaust
   the full search space.
+</div>
+
+<h3>Optional extension: skipping duplicate states <span class="badge-optional">optional</span></h3>
+<p>
+  This connects to Class&nbsp;16 and is not required for any task. Different move
+  orders can lead to the <em>same</em> hand of numbers. For example,
+  <code>{1, 1, 2}</code> and <code>{1, 2, 1}</code> are the same hand, because the
+  order of the cards on the table does not matter. If the solver has already
+  searched a hand and failed, searching it again cannot succeed either, so we can
+  skip it.
+</p>
+<p>
+  <strong>Key idea:</strong> remember the hands you have already visited in a
+  <code>std::set</code>. Before expanding a hand, build a <em>key</em> for it, and if
+  the key is already in the set, return <code>false</code> at once. A set ignores
+  insertion order and keeps each element at most once, which is why the key is
+  sorted first.
+</p>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;set&gt;
+
+typedef std::vector&lt;long long&gt; Key;
+
+Key makeKey(const std::vector&lt;double&gt;&amp; nums) {
+  Key key;
+  for (double x : nums) key.push_back(std::llround(x * 1e6));  // scale and round
+  std::sort(key.begin(), key.end());                            // order must not matter
+  return key;
+}
+
+bool make24(std::vector&lt;double&gt; nums, std::set&lt;Key&gt;&amp; seen) {
+  if (nums.size() == 1) return std::fabs(nums[0] - GOAL) &lt;= DELTA;
+  if (!seen.insert(makeKey(nums)).second) return false;  // key was already there
+  // ... same pair loops as before, passing seen to every recursive call ...
+}</code></pre>
+<p>
+  Create a fresh <code>seen</code> set for every new hand.
+  <code>seen.insert(key).second</code> is <code>true</code> when the key is new and
+  <code>false</code> when it was already present.
+</p>
+<table>
+  <tr><th>Hand <code>{1, 1, 1, 1}</code> (no solution)</th><th>Calls</th></tr>
+  <tr><td>Unordered pairs, 6 results, no <code>seen</code></td><td>4,141</td></tr>
+  <tr><td>Same search with <code>seen</code></td><td>139</td></tr>
+</table>
+<p>
+  The search visits only 13 different hands (1 + 3 + 9), so repeats cost one cheap
+  call instead of a whole subtree. These are reference counts for one
+  implementation; your counts can differ if your division guard or operation order
+  differs. Call counts also depend on the order in which <code>arithmetic()</code>
+  lists its results, so they may differ from numbers shown in lecture.
+</p>
+<div class="warn">
+  <strong>Two warnings.</strong>
+  <ul>
+    <li><strong>Do not use it for Task C.</strong> Task C must return <em>every</em>
+      distinct expression string. Two different expressions can produce the same hand
+      of numbers, and skipping the second one would lose a solution the autograder
+      expects. Duplicate-state pruning is safe for Tasks A and B, where you only need
+      to know whether <em>one</em> solution exists.</li>
+    <li><strong>Rounded keys are approximate.</strong> Scaling by <code>1e6</code> and
+      rounding can give two nearby but different hands the same key, which could hide
+      a real solution, and two nearly equal hands can also land on different keys. The
+      idea is exact for integer hands; with division it is a practical heuristic, not
+      a guarantee.</li>
+  </ul>
 </div>
 
 <h2>5. From Idea to Code</h2>
@@ -527,20 +599,41 @@ return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;</code></pre>
   to follow the same construction convention as the reference: always wrap
   every binary operation in parentheses, and write each operand's leaf text as
   the plain integer (e.g. <code>"4"</code>, not <code>"4.0"</code> or
-  <code>" 4"</code>). You may explore those pairs and candidate results in any
-  order you like &mdash; only the final <em>set</em> of strings you collect is
-  checked, not the order you found them in.
+  <code>" 4"</code>).
 </p>
+<div class="warn">
+  <strong>Required for Task C: the exact swap-and-pop construction.</strong>
+  For every pair <code>i &lt; j</code> and every result from
+  <code>arithmetic()</code>, build the smaller hand exactly as described in
+  Section 2:
+  <ol>
+    <li>Copy the current vector.</li>
+    <li>Swap element <code>j</code> with the last element, then <code>pop_back()</code>.</li>
+    <li>Swap element <code>i</code> with the new last element, then <code>pop_back()</code>.</li>
+    <li>Append the arithmetic result.</li>
+    <li>Recurse on that vector.</li>
+  </ol>
+  Do <strong>not</strong> replace this with a stable-order copy of all elements
+  except <code>i</code> and <code>j</code>. Both are mathematically valid
+  searches, but they place the remaining elements in different positions, so
+  later calls pair them in different left/right order and produce different
+  expression strings. For <code>{1, 2, 3, 4}</code> the swap-and-pop
+  construction yields 61 distinct strings (the published self-test); a
+  stable-order removal yields 59. Task C's expected set is defined by this
+  vector construction together with the expression rules above, not merely by
+  mathematical equivalence. You may still visit the pairs and the candidate
+  results in any order you like &mdash; only the final <em>set</em> of strings is
+  checked.
+</div>
 <div class="note">
   <strong>What &ldquo;every distinct expression&rdquo; means here:</strong> Task C
   is <em>not</em> asking for all mathematically equivalent ways of writing 24.
   It asks for all distinct expression strings generated by the recursive
   algorithm and expression-construction rules specified in this project. Two
-  expressions that are mathematically equivalent but structured
-  differently &mdash; for instance, by exploiting commutativity to combine the
-  same operands in a different grouping than the reference's traversal would
-  ever produce &mdash; are different demands: the second is a harder, open-ended
-  problem this project does not ask you to solve. Task C is an exercise in
+  expressions can be mathematically equivalent yet written differently, for
+  instance by grouping the same operands in a way the reference's traversal would
+  never produce. Finding every such rewriting is a harder, open-ended problem that
+  this project does not ask you to solve. Task C is an exercise in
   <em>extending</em> the supplied algorithm to collect everything it can
   produce, not in enumerating every algebraically distinct way to reach 24.
 </div>
@@ -620,10 +713,10 @@ return std::fabs(numsVec[0] - GOAL) &lt;= DELTA;</code></pre>
   <em>exact</em> set of expression strings the reference search algorithm
   produces for that hand (well-defined by the required pair selection,
   arithmetic results, and expression-construction rules &mdash; see Section 6),
-  strips a single pair of outermost parentheses from every string you
-  return (the same normalization the reference's own <code>main()</code> applies
-  before printing), and requires your <em>normalized</em> set to match the
-  reference's <em>exactly</em>:
+  strips one optional pair of outermost parentheses from each returned
+  expression before comparing it with the reference-generated set, and
+  requires your <em>normalized</em> set to match the reference's
+  <em>exactly</em>:
 </p>
 <pre><code class="language-cpp">std::vector&lt;std::string&gt; normalized;
 for (const std::string&amp; s : student) {
@@ -1095,7 +1188,11 @@ void print(const std::vector&lt;double&gt;&amp; numsVec) {
 // "All solutions" means all distinct expression strings generated by the
 // algorithm specified in the project handout. Follow arithmetic() exactly:
 // generate one addition result and one multiplication result; do NOT add
-// the commutative duplicates ev2+ev1 or ev2*ev1. Task C's contract is
+// the commutative duplicates ev2+ev1 or ev2*ev1. Also build every smaller
+// hand with the exact swap-and-pop construction from Section 2 (copy;
+// swap j with last, pop_back; swap i with new last, pop_back; append the
+// result; recurse). A stable-order removal gives a DIFFERENT expression
+// set (59 instead of 61 for {1,2,3,4}). Task C's contract is
 // stricter than Task B's: Task B accepts any one valid solution, but Task C
 // must produce the complete required set, built the required way.
 //
