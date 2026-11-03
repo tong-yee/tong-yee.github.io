@@ -448,27 +448,37 @@
   <tr>
     <td class="lec-num">17</td>
     <td>Tu, 11/3</td>
-    <td>Expression Parsing &amp; Shunting-Yard Algorithm
-        <div class="sub"><a href="slides/day17_shunting_yard.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
-    <td>Infix / prefix / postfix notation, operator precedence, step-by-step trace; expression trees as motivation and visualization; preview of P4 Expression Evaluator</td>
-    <td><span class="badge b-due">Ex&nbsp;7 Due</span> <span class="badge b-ex">Ex&nbsp;8 Posted</span>
-        <div class="sub">Shunting-Yard Trace</div></td>
+    <td>Operator Combinations, Unique Strings, Task B &amp; Expression Trees
+        <div class="sub"><a href="slides/day17_expression_trees.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
+    <td>Growing expressions with recursion, <code>printUnique</code> with <code>std::set</code>, Task B (returning an expression string), expression trees, pre-/in-/post-order traversal and parenthesized in-order output</td>
+    <td><span class="badge b-due">Ex&nbsp;7 Due</span></td>
     <td></td>
   </tr>
 
   <tr>
     <td class="lec-num">18</td>
     <td>Th, 11/5</td>
-    <td>Searching Algorithms and Complexity
-        <div class="sub"><a href="slides/day18_searching.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
-    <td>Linear search O(n), binary search O(log n), sorted-array requirement</td>
-    <td></td>
+    <td>Infix, Postfix &amp; the Shunting-Yard Algorithm
+        <div class="sub"><a href="slides/day18_shunting_yard.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
+    <td>Infix / prefix / postfix notation, operator precedence, evaluating postfix with a stack, tokenizing, shunting-yard conversion with step-by-step traces; preview of P4 Expression Evaluator</td>
+    <td><span class="badge b-ex">Ex&nbsp;8 Posted</span>
+        <div class="sub">Shunting-Yard Trace</div></td>
     <td></td>
   </tr>
 
   <tr>
     <td class="lec-num">19</td>
     <td>Tu, 11/10</td>
+    <td>Searching Algorithms and Complexity
+        <div class="sub"><a href="slides/day19_searching.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
+    <td>Linear search O(n), binary search O(log n), sorted-array requirement</td>
+    <td></td>
+    <td></td>
+  </tr>
+
+  <tr>
+    <td class="lec-num">20</td>
+    <td>Th, 11/12</td>
     <td>Sorting I &mdash; Quadratic Sorts</td>
     <td>Bubble, selection, insertion sort; O(n&sup2;) analysis; stability and in-place properties; when quadratic sorts are practical</td>
     <td><span class="badge b-due">Ex&nbsp;8 Due</span> <span class="badge b-ex">Ex&nbsp;9 Posted</span>
@@ -477,45 +487,35 @@
   </tr>
 
   <tr>
-    <td class="lec-num">20</td>
-    <td>Th, 11/12</td>
+    <td class="lec-num">21</td>
+    <td>Tu, 11/17</td>
     <td>Sorting II &mdash; Merge Sort</td>
     <td>Divide-and-conquer; recursive halving; merge step; O(n log n) time, O(n) auxiliary space; recurrence T(n) = 2T(n/2) + O(n)</td>
     <td></td>
     <td></td>
   </tr>
 
-  <tr>
-    <td class="lec-num">21</td>
-    <td>Tu, 11/17</td>
-    <td>Sorting III &mdash; Quicksort</td>
-    <td>Pivot selection, partitioning, recursive structure; average O(n log n), worst-case O(n&sup2;); comparison with Merge Sort; Heap Sort and Shell Sort if time permits</td>
-    <td><span class="badge b-due">Ex&nbsp;9 Due</span></td>
-    <td></td>
-  </tr>
-
   <tr class="project-due">
     <td class="lec-num">22</td>
     <td>Th, 11/19</td>
-    <td>Binary Trees &amp; Binary Search Trees</td>
-    <td>Tree structure; in-order / pre-order / post-order traversal; BST property, insert and search; deletion and height analysis as time permits</td>
-    <td><span class="badge b-ex">Ex&nbsp;10 Posted</span>
-        <div class="sub">BST Traversal</div></td>
+    <td>Sorting III &mdash; Quicksort</td>
+    <td>Pivot selection, partitioning, recursive structure; average O(n log n), worst-case O(n&sup2;); comparison with Merge Sort; Heap Sort and Shell Sort if time permits</td>
+    <td><span class="badge b-due">Ex&nbsp;9 Due</span></td>
     <td><span class="badge b-due">&#35;3 Due</span>&nbsp;<a href="projects/p4/p4_expression_evaluator.html" data-available="2026-11-19" style="text-decoration:none;"><span class="badge b-proj">&#35;4 Posted</span></a></td>
   </tr>
 
   <!-- ═══ ADVANCED TOPICS BANNER ═══ -->
   <tr class="unit-banner">
-    <td colspan="6">&#128300;&nbsp; ADVANCED TOPICS &mdash; Tries, Hashing, Graphs &amp; STL  &nbsp;&bull;&nbsp; <span style="font-weight:400; font-style:italic; opacity:.8;">No new project — finish P4. These topics preview CSCI 335 depth coverage.</span></td>
+    <td colspan="6">&#128300;&nbsp; ADVANCED TOPICS &mdash; Tries, Hashing &amp; Graphs  &nbsp;&bull;&nbsp; <span style="font-weight:400; font-style:italic; opacity:.8;">No new project — finish P4. These topics preview CSCI 335 depth coverage.</span></td>
   </tr>
 
   <tr>
     <td class="lec-num">23</td>
     <td>Tu, 11/24</td>
-    <td>Tries &mdash; Insert, Search &amp; Prefix Matching</td>
-    <td>Trie nodes, insert, prefix enumeration, time complexity vs. BST/hash map</td>
-    <td><span class="badge b-ex">Ex&nbsp;11 Posted</span>
-        <div class="sub">Trie Operations</div></td>
+    <td>Binary Trees &amp; Binary Search Trees</td>
+    <td>Tree structure; in-order / pre-order / post-order traversal; BST property, insert and search; deletion and height analysis as time permits</td>
+    <td><span class="badge b-ex">Ex&nbsp;10 Posted</span>
+        <div class="sub">BST Traversal</div></td>
     <td></td>
   </tr>
 
@@ -529,18 +529,19 @@
   <tr>
     <td class="lec-num">24</td>
     <td>Tu, 12/1</td>
-    <td>Hash Tables (overview) &mdash; Hash Functions, Collisions &amp; Chaining</td>
-    <td>Hash function design, collision resolution, chaining vs. open addressing, load factor</td>
-    <td><span class="badge b-due">Ex&nbsp;10 Due</span></td>
+    <td>Tries &mdash; Insert, Search &amp; Prefix Matching</td>
+    <td>Trie nodes, insert, prefix enumeration, time complexity vs. BST/hash map</td>
+    <td><span class="badge b-ex">Ex&nbsp;11 Posted</span>
+        <div class="sub">Trie Operations</div></td>
     <td></td>
   </tr>
 
   <tr>
     <td class="lec-num">25</td>
     <td>Th, 12/3</td>
-    <td>Graphs (overview) &mdash; Representations, DFS, BFS &amp; Dijkstra&rsquo;s</td>
-    <td>Adjacency list vs. matrix, directed/undirected, weighted edges, shortest path intuition</td>
-    <td><span class="badge b-due">Ex&nbsp;11 Due</span> <span class="badge b-ex">Ex&nbsp;12 Posted</span>
+    <td>Hash Tables (overview) &mdash; Hash Functions, Collisions &amp; Chaining</td>
+    <td>Hash function design, collision resolution, chaining vs. open addressing, load factor; brief look at STL containers (<code>std::map</code>, <code>std::unordered_map</code>)</td>
+    <td><span class="badge b-due">Ex&nbsp;10 Due</span> <span class="badge b-ex">Ex&nbsp;12 Posted</span>
         <div class="sub">STL &amp; Graph Concepts</div></td>
     <td></td>
   </tr>
@@ -548,9 +549,9 @@
   <tr>
     <td class="lec-num">26</td>
     <td>Tu, 12/8</td>
-    <td>STL Containers &amp; Modern C++ (Overview)</td>
-    <td><code>std::vector</code>, <code>std::map</code>, <code>std::unordered_map</code>; why modern C++ uses smart pointers; <code>unique_ptr</code> (brief overview); why we implemented raw pointers first</td>
-    <td></td>
+    <td>Graphs (overview) &mdash; Representations, DFS, BFS &amp; Dijkstra&rsquo;s</td>
+    <td>Adjacency list vs. matrix, directed/undirected, weighted edges, shortest path intuition</td>
+    <td><span class="badge b-due">Ex&nbsp;11 Due</span></td>
     <td></td>
   </tr>
 
@@ -582,7 +583,7 @@
 <footer>
   CSCI 235 &bull; Data Structures &bull; Hunter College, CUNY &bull; Fall 2026
   &nbsp;&mdash;&nbsp;
-  Last updated: October 2026
+  Last updated: November 3, 2026
 </footer>
 
 
