@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 8: Shunting-Yard Trace</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: .55rem;
+    right: .6rem;
+    z-index: 2;
+    font: 600 .78rem/1 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--navy);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(30,39,97,.08);
+  }
+  .copy-btn:hover { background: #f0f2f8; border-color: var(--navy-light); }
+  .copy-btn:focus-visible { outline: 2px solid var(--navy-light); outline-offset: 2px; }
+  .copy-btn.done { color: #2e7d32; border-color: #2e7d32; }
+  .copy-btn.failed { color: #b3261e; border-color: #b3261e; }
+  @media print { .copy-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 8 &mdash; Shunting-Yard Trace</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Posted: Thursday, November 5, 2026 &middot; Due: Thursday, November 12, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#warmup">Warm-Up &mdash; Trace by Hand (not graded)</a></li>
+    <li><a href="#taskA">Task A &mdash; <code>tokenize()</code></a></li>
+    <li><a href="#taskB">Task B &mdash; <code>evalPostfix()</code></a></li>
+    <li><a href="#taskC">Task C &mdash; <code>toPostfix()</code></a></li>
+    <li><a href="#taskD">Task D &mdash; <code>evaluate()</code></a></li>
+    <li><a href="#edges">Edge Cases to Test</a></li>
+    <li><a href="#grading">Grading</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>
+  This exercise turns Class 18 into code, and it is the engine inside Project 4. By the end of it you should be
+  able to:
+</p>
+<ul>
+  <li>split a string into <strong>tokens</strong>, keeping a multi-digit number together as one token;</li>
+  <li>evaluate a <strong>postfix</strong> expression with a <code>std::stack</code>, remembering that the
+      first value popped is the <em>right</em> operand;</li>
+  <li>convert <strong>infix to postfix</strong> with the shunting-yard algorithm, using an operator stack
+      and an output queue;</li>
+  <li>explain how <strong>precedence</strong>, <strong>left associativity</strong> and
+      <strong>parentheses</strong> decide when an operator leaves the stack;</li>
+  <li>combine three small, separately tested functions into one working program.</li>
+</ul>
+<div class="note">
+  <span class="label">An analogy: a railway siding</span>
+  Numbers are cars that roll straight through to the output track. Operators are cars that must wait on a
+  short siding (the stack). When a new operator arrives, any waiting operator that is at least as strong
+  rolls out first; a ( &ldquo;locks&rdquo; the siding until its matching ) arrives. The name
+  <em>shunting yard</em> is exactly this picture.
+</div>
+
+<h2 id="files">Files</h2>
+<table>
+  <thead><tr><th>File</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>Postfix.hpp</code></td><td>Provided. Declares the four functions and documents each one. Do not modify, do not submit.</td></tr>
+    <tr><td><code>Postfix.cpp</code></td><td><strong>Submit this.</strong> Tasks A, B, C and D. It also contains two small helpers, <code>isOp</code> and <code>prec</code>, that are already written.</td></tr>
+    <tr><td><code>Ex8Demo.cpp</code></td><td>Provided. A program that exercises your code so you can see what it does. Do not submit.</td></tr>
+    <tr><td><code>demo_output.txt</code></td><td>What <code>Ex8Demo</code> prints when everything is correct.</td></tr>
+  </tbody>
+</table>
+<p>
+  All four files are available together as <code>ex8_starter.zip</code> on the course website and on
+  Brightspace, and the header and the demo files are also listed in full at the
+  <a href="#listings">end of this handout</a>.
+</p>
+<p>
+  Your work is the <code>TODO</code> sections of <code>Postfix.cpp</code>. You may add helper functions of your own, but do not change the signatures of the four required functions. The stubs compile as given, so you
+  can build and run the demo before you have written anything. <strong>Gradescope compiles your
+  <code>Postfix.cpp</code> against the original header</strong>, so any change you make to
+  <code>Postfix.hpp</code> is ignored &mdash; and if your code depended on that change, it will not compile.
+</p>
+<div class="note">
+  <span class="label">Valid input only</span>
+  You may assume that all expressions are syntactically valid: they contain nonnegative integer literals, the four binary operators <code>+ - * /</code>, and correctly matched parentheses. Division is <strong>real division</strong> (<code>7 / 2</code> is <code>3.5</code>), so values are <code>double</code>, as in Project 4. Division by zero is the only evaluation error you must handle; throw <code>std::runtime_error</code>. Rejecting malformed expressions is part of Project 4, not this exercise. The one empty-input case that is specified is <code>tokenize()</code>: it returns an empty vector for <code>""</code> or an all-space string. The other functions assume a nonempty, valid expression or postfix sequence.
+</div>
+
+<h2 id="warmup">Warm-Up &mdash; Trace by Hand (not graded)</h2>
+<p>
+  Do this on paper before you write any code. Nothing here is submitted or graded.
+</p>
+
+<p><strong>1. Tokens.</strong> Write the tokens of <code>12+3*(4-1)</code>. How many are there? Which token would
+be wrong if you pushed one digit at a time?</p>
+
+<p><strong>2. The shunting-yard table.</strong> Convert <code>5 + (1 + 2) * 4 - 3</code> to postfix. Complete the
+table: for each token, show the operator stack (top on the right) and the output after handling it.</p>
+<table>
+  <thead><tr><th>Token</th><th>Operator stack</th><th>Output</th><th>What happened</th></tr></thead>
+  <tbody>
+    <tr><td><code>5</code></td><td>&nbsp;</td><td><code>5</code></td><td>number goes straight out</td></tr>
+    <tr><td><code>+</code></td><td><code>+</code></td><td><code>5</code></td><td>stack empty, push</td></tr>
+    <tr><td><code>(</code></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>1</code></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>+</code></td><td>&nbsp;</td><td>&nbsp;</td><td>top is ( : nothing leaves</td></tr>
+    <tr><td><code>2</code></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>)</code></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>*</code></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>4</code></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td><code>-</code></td><td>&nbsp;</td><td>&nbsp;</td><td>which operators leave, and why?</td></tr>
+    <tr><td><code>3</code></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>(end)</td><td>&nbsp;</td><td>&nbsp;</td><td>pop what is left</td></tr>
+  </tbody>
+</table>
+
+<p><strong>3. Evaluate it.</strong> Now run your postfix result through a value stack, one token at a time. What
+does the value stack look like after the first <code>*</code>? What is the final answer? (It should equal the value of
+the original infix expression; check by working the infix expression by hand.)</p>
+
+<p><strong>4. Why equal operators leave.</strong> Convert <code>8 - 3 - 2</code> twice: once letting an equal-precedence
+operator <em>stay</em> on the stack, once letting it <em>leave</em>. Evaluate both postfix results. Which one
+agrees with ordinary arithmetic?</p>
+
+<h2 id="taskA">Task A &mdash; <code>tokenize()</code></h2>
+<p>
+  Split the text into tokens: a whole number is one token, and each operator or parenthesis is one token. Spaces
+  are skipped and never become tokens (skipping any whitespace character with <code>std::isspace</code> is fine; the tests use ordinary spaces). Spaces are optional, so <code>"12+3"</code> and <code>"12 + 3"</code>
+  both give <code>{"12", "+", "3"}</code>.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Walk through the string with an index. When you meet a digit, keep going while the next characters are still
+  digits, then push the number <em>once</em>. The index must move forward in every branch of your loop.
+</div>
+
+<h2 id="taskB">Task B &mdash; <code>evalPostfix()</code></h2>
+<p>
+  Evaluate a postfix expression held in a queue of tokens. Use a <code>std::stack&lt;double&gt;</code>. A number is
+  pushed; an operator pops two values, applies the operator, and pushes the result. The queue is passed
+  <em>by value</em>, so you may empty your copy.
+</p>
+<p>
+  The order of the two pops matters for <code>-</code> and <code>/</code>: the value popped <strong>first</strong>
+  is the <strong>right</strong> operand. If the operator is <code>/</code> and the right operand is zero (test <code>b == 0.0</code>, an exact comparison), throw
+  <code>std::runtime_error</code> instead of dividing. (<code>std::invalid_argument</code> is a different class and will not match what the tests expect.)
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  For <code>8 3 -</code>, the stack holds 8 then 3 with 3 on top. Which of the two is the left operand?
+</div>
+
+<h2 id="taskC">Task C &mdash; <code>toPostfix()</code></h2>
+<p>
+  Convert a vector of infix tokens to a queue of postfix tokens with the shunting-yard algorithm. Use an output
+  queue and a <code>std::stack&lt;std::string&gt;</code> of operators. Parentheses are used but never written
+  to the output. All four operators are <strong>left-associative</strong>: when a new operator arrives, an
+  operator of <em>equal or higher</em> precedence on top of the stack leaves first.
+</p>
+<p>
+  For example, <code>3 + 4 * 2</code> becomes <code>3 4 2 * +</code>, while <code>(3 + 4) * 2</code> becomes
+  <code>3 4 + 2 *</code>, and <code>8 - 3 - 2</code> becomes <code>8 3 - 2 -</code>.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Your warm-up table already is the algorithm. For an operator, the question is a <code>while</code> loop: while
+  the stack is not empty, the top is an operator (not a <code>(</code>), and the top is at least as strong as the
+  new one, move the top to the output.
+</div>
+
+<h2 id="taskD">Task D &mdash; <code>evaluate()</code></h2>
+<p>
+  Evaluate infix text from start to finish: tokenize it, convert it to postfix, and evaluate the postfix result.
+  This function is short; its point is to see that three small, tested pieces make a calculator. A division by
+  zero is not caught here: the exception from Task B passes straight through.
+</p>
+
+<h2 id="edges">Edge Cases to Test</h2>
+<p>Write a few small calls of your own in a scratch <code>main</code> before submitting. Check at least:</p>
+<ul>
+  <li><code>tokenize("")</code> and <code>tokenize("   ")</code>: no tokens, and no crash;</li>
+  <li>a number with several digits, such as <code>120</code>, in the middle of an expression;</li>
+  <li>no spaces at all: <code>"100/(5*4)"</code>;</li>
+  <li><code>8 - 3 - 2</code> and <code>12 / 3 / 2</code>: equal operators must leave left to right;</li>
+  <li>nested parentheses: <code>((1 + 2) * 3)</code>;</li>
+  <li>an expression that is just <code>(7)</code>;</li>
+  <li>a division whose right side is computed to zero, such as <code>8 / (4 - 4)</code>;</li>
+  <li>real division: <code>7 / 2</code> is <code>3.5</code>, and <code>9 / 4</code> is <code>2.25</code>;</li>
+</ul>
+
+<h2 id="grading">Grading</h2>
+<table>
+  <thead><tr><th>Item</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td>Task A &mdash; <code>tokenize()</code></td><td>20</td></tr>
+    <tr><td>Task B &mdash; <code>evalPostfix()</code></td><td>25</td></tr>
+    <tr><td>Task C &mdash; <code>toPostfix()</code></td><td>35</td></tr>
+    <tr><td>Task D &mdash; <code>evaluate()</code></td><td>20</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>100</strong></td></tr>
+  </tbody>
+</table>
+<div class="note">
+  <span class="label">How credit is earned</span>
+  Each task is graded by its own set of checks, and partial credit is given for the checks you pass. A task
+  earns credit only once its core behavior works: an unfinished stub that happens to return the right value
+  for one input does not earn points on its own. Tasks B and C are tested with inputs that do not depend on
+  your <code>tokenize()</code>, so a bug in Task A does not cost you points there. The autograder uses
+  different inputs from <code>Ex8Demo.cpp</code>, so matching the demo output is necessary but not sufficient.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>
+  When all four tasks are correct, <code>Ex8Demo</code> prints exactly the contents of
+  <code>demo_output.txt</code>:
+</p>
+<pre class="copyable" data-filename="demo_output.txt"><code class="language-plaintext">=== Task A: tokenize ===
+  &quot;3 + 4 * 2&quot; -&gt; 5 tokens: [3] [+] [4] [*] [2]
+  &quot;12+3*(4-1)&quot; -&gt; 9 tokens: [12] [+] [3] [*] [(] [4] [-] [1] [)]
+  &quot;(7)&quot; -&gt; 3 tokens: [(] [7] [)]
+
+=== Task B: evalPostfix ===
+  3 4 2 * +  =  11
+  3 4 + 2 *  =  14
+  8 3 - 2 -  =  3
+  7 2 /  =  3.5
+  5 0 /  throws: division by zero
+
+=== Task C: toPostfix ===
+  3 + 4 * 2  -&gt;  3 4 2 * +
+  (3 + 4) * 2  -&gt;  3 4 + 2 *
+  8 - 3 - 2  -&gt;  8 3 - 2 -
+  5 + (1 + 2) * 4 - 3  -&gt;  5 1 2 + 4 * + 3 -
+  12 / (2 + 1) - 1  -&gt;  12 2 1 + / 1 -
+
+=== Task D: evaluate ===
+  3 + 4 * 2  =  11
+  (3 + 4) * 2  =  14
+  8 - 3 - 2  =  3
+  5 + (1 + 2) * 4 - 3  =  14
+  12 / (2 + 1) - 1  =  3
+  7 / 2  =  3.5
+  9 / 4  =  2.25
+  (2 + 3) * (4 - 1)  =  15
+  100/(5*4)  =  5</code></pre>
+
+<h2 id="compile">Compile and Run</h2>
+<pre><code class="language-bash">g++ -std=c++17 -g Postfix.cpp Ex8Demo.cpp -o ex8demo
+./ex8demo</code></pre>
+
+<h2 id="listings">Provided File Listings</h2>
+<h3>Postfix.hpp</h3>
+<pre class="copyable" data-filename="Postfix.hpp"><code class="language-cpp">// Postfix.hpp
+// CSCI 235 -- Exercise 8: Shunting-Yard Trace
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef POSTFIX_HPP
+#define POSTFIX_HPP
+
+#include &lt;queue&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+// Input assumptions for every function below (a VALID-INPUT exercise):
+//   * numbers are nonnegative integers such as 7 or 120 (no decimals, no
+//     unary minus);
+//   * operators are the four binary operators + - * /;
+//   * parentheses are balanced;
+//   * &quot;/&quot; is real (floating-point) division: 7 / 2 is 3.5, as in Project 4.
+// Project 4 will ask you to reject bad input; this exercise does not.
+// The only empty-input case that is specified is tokenize() (see Task A);
+// the other functions assume a nonempty, valid expression.
+
+// Task A -- split text into tokens. A token is one whole number (&quot;12&quot;), or a
+// single operator or parenthesis character. Spaces separate tokens but are
+// never tokens themselves, and spaces are optional: &quot;12+3&quot; and &quot;12 + 3&quot;
+// give the same tokens {&quot;12&quot;, &quot;+&quot;, &quot;3&quot;}. Skipping any whitespace character
+// (std::isspace) is fine. tokenize(&quot;&quot;) and tokenize(&quot;   &quot;) return an
+// empty vector.
+std::vector&lt;std::string&gt; tokenize(const std::string&amp; text);
+
+// Task B -- evaluate a postfix expression with a stack. The queue holds
+// tokens in postfix order, for example 3 4 2 * +  (which is 11).
+// For each operator, the value popped FIRST is the RIGHT operand.
+// If an operator &quot;/&quot; would divide by zero (right operand == 0.0, an exact
+// test), throw std::runtime_error.
+// Values are doubles, so the result can have a fractional part.
+double evalPostfix(std::queue&lt;std::string&gt; postfix);
+
+// Task C -- convert infix tokens to postfix with the shunting-yard
+// algorithm. All four operators are left-associative: * and / bind tighter
+// than + and -, and an operator of EQUAL precedence already on the stack
+// leaves first, so 8 - 3 - 2 becomes 8 3 - 2 - . Parentheses are never
+// written to the output.
+std::queue&lt;std::string&gt; toPostfix(const std::vector&lt;std::string&gt;&amp; tokens);
+
+// Task D -- evaluate infix text from start to finish by combining the three
+// tasks above: tokenize, convert, then evaluate. A division by zero throws
+// std::runtime_error, exactly as in Task B.
+double evaluate(const std::string&amp; text);
+
+#endif</code></pre>
+<h3>Ex8Demo.cpp</h3>
+<pre class="copyable" data-filename="Ex8Demo.cpp"><code class="language-cpp">// Ex8Demo.cpp
+// CSCI 235 -- Exercise 8: Shunting-Yard Trace
+//
+// Provided file -- do not submit this. Build it with:
+//
+//     g++ -std=c++17 -g Postfix.cpp Ex8Demo.cpp -o ex8demo
+//     ./ex8demo
+//
+// The expected output is in demo_output.txt. Your output should match it
+// exactly once all four tasks are done.
+
+#include &quot;Postfix.hpp&quot;
+
+#include &lt;iostream&gt;
+#include &lt;queue&gt;
+#include &lt;stdexcept&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+static std::string join(std::queue&lt;std::string&gt; q) {
+    std::string s;
+    while (!q.empty()) {
+        s += q.front();
+        q.pop();
+        if (!q.empty()) { s += &quot; &quot;; }
+    }
+    return s;
+}
+
+int main() {
+    std::cout &lt;&lt; &quot;=== Task A: tokenize ===\n&quot;;
+    for (const char* text : {&quot;3 + 4 * 2&quot;, &quot;12+3*(4-1)&quot;, &quot;(7)&quot;}) {
+        std::vector&lt;std::string&gt; t = tokenize(text);
+        std::cout &lt;&lt; &quot;  \&quot;&quot; &lt;&lt; text &lt;&lt; &quot;\&quot; -&gt; &quot; &lt;&lt; t.size() &lt;&lt; &quot; tokens:&quot;;
+        for (const std::string&amp; tok : t) { std::cout &lt;&lt; &quot; [&quot; &lt;&lt; tok &lt;&lt; &quot;]&quot;; }
+        std::cout &lt;&lt; &quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task B: evalPostfix ===\n&quot;;
+    for (const char* text : {&quot;3 4 2 * +&quot;, &quot;3 4 + 2 *&quot;, &quot;8 3 - 2 -&quot;, &quot;7 2 /&quot;}) {
+        std::queue&lt;std::string&gt; q;
+        for (const std::string&amp; tok : tokenize(text)) { q.push(tok); }
+        std::cout &lt;&lt; &quot;  &quot; &lt;&lt; text &lt;&lt; &quot;  =  &quot; &lt;&lt; evalPostfix(q) &lt;&lt; &quot;\n&quot;;
+    }
+    try {
+        std::queue&lt;std::string&gt; q;
+        for (const std::string&amp; tok : tokenize(&quot;5 0 /&quot;)) { q.push(tok); }
+        evalPostfix(q);
+        std::cout &lt;&lt; &quot;  5 0 /  did not throw\n&quot;;
+    } catch (const std::runtime_error&amp; e) {
+        std::cout &lt;&lt; &quot;  5 0 /  throws: &quot; &lt;&lt; e.what() &lt;&lt; &quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task C: toPostfix ===\n&quot;;
+    for (const char* text : {&quot;3 + 4 * 2&quot;, &quot;(3 + 4) * 2&quot;, &quot;8 - 3 - 2&quot;,
+                             &quot;5 + (1 + 2) * 4 - 3&quot;, &quot;12 / (2 + 1) - 1&quot;}) {
+        std::cout &lt;&lt; &quot;  &quot; &lt;&lt; text &lt;&lt; &quot;  -&gt;  &quot; &lt;&lt; join(toPostfix(tokenize(text))) &lt;&lt; &quot;\n&quot;;
+    }
+
+    std::cout &lt;&lt; &quot;\n=== Task D: evaluate ===\n&quot;;
+    for (const char* text : {&quot;3 + 4 * 2&quot;, &quot;(3 + 4) * 2&quot;, &quot;8 - 3 - 2&quot;,
+                             &quot;5 + (1 + 2) * 4 - 3&quot;, &quot;12 / (2 + 1) - 1&quot;,
+                             &quot;7 / 2&quot;, &quot;9 / 4&quot;, &quot;(2 + 3) * (4 - 1)&quot;, &quot;100/(5*4)&quot;}) {
+        std::cout &lt;&lt; &quot;  &quot; &lt;&lt; text &lt;&lt; &quot;  =  &quot; &lt;&lt; evaluate(text) &lt;&lt; &quot;\n&quot;;
+    }
+    return 0;
+}</code></pre>
+<h3>Postfix.cpp (starter)</h3>
+<pre class="copyable" data-filename="Postfix.cpp"><code class="language-cpp">// Postfix.cpp
+// CSCI 235 -- Exercise 8: Shunting-Yard Trace
+// Complete the four functions below by finishing the TODO sections.
+// Submit this file (and only this file) to Gradescope.
+// You may add your own helper functions here, but do not change the
+// signatures of the four required functions.
+
+#include &quot;Postfix.hpp&quot;
+
+#include &lt;cctype&gt;
+#include &lt;cstddef&gt;
+#include &lt;stack&gt;
+#include &lt;stdexcept&gt;
+
+// ---- Provided helpers: you may use them, keep them as they are ------------
+static bool isOp(const std::string&amp; t) {
+    return t == &quot;+&quot; || t == &quot;-&quot; || t == &quot;*&quot; || t == &quot;/&quot;;
+}
+
+static int prec(const std::string&amp; op) {
+    if (op == &quot;*&quot; || op == &quot;/&quot;) { return 2; }
+    return 1;                                  // &quot;+&quot; and &quot;-&quot;
+}
+
+// Task A
+std::vector&lt;std::string&gt; tokenize(const std::string&amp; text) {
+    // TODO: walk through text with an index.
+    //   * skip a space;
+    //   * if you see a digit, keep reading digits and push the WHOLE number
+    //     as one token;
+    //   * otherwise push the single character as a token.
+    (void)text;
+    return {};
+}
+
+// Task B
+double evalPostfix(std::queue&lt;std::string&gt; postfix) {
+    // TODO: use a std::stack&lt;double&gt;.
+    //   * a number: convert it with std::stod and push it;
+    //   * an operator: pop the right operand, then the left operand, apply
+    //     the operator, and push the result;
+    //   * &quot;/&quot; by zero: throw std::runtime_error(&quot;division by zero&quot;).
+    // When the queue is empty, one value is left: return it.
+    (void)postfix; (void)isOp;
+    return 0.0;
+}
+
+// Task C
+std::queue&lt;std::string&gt; toPostfix(const std::vector&lt;std::string&gt;&amp; tokens) {
+    // TODO: an output queue and a std::stack&lt;std::string&gt; of operators.
+    //   * a number goes straight to the output;
+    //   * an operator: first move to the output every operator on top of the
+    //     stack that should leave before it (see prec), then push it;
+    //   * &quot;(&quot; is pushed; &quot;)&quot; moves operators to the output until the &quot;(&quot; is
+    //     found, and that &quot;(&quot; is discarded;
+    //   * at the end, move whatever is left on the stack to the output.
+    (void)tokens; (void)prec;
+    return {};
+}
+
+// Task D
+double evaluate(const std::string&amp; text) {
+    // TODO: three calls, one per earlier task.
+    (void)text;
+    return 0.0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>
+  Submit <strong>exactly one file</strong>, named <code>Postfix.cpp</code>, to the Exercise 8 assignment on
+  Gradescope. Do not rename it, do not put it in a folder, and do not submit <code>Postfix.hpp</code> or
+  <code>Ex8Demo.cpp</code>. All four functions must be defined, even if one is unfinished, or the program
+  will not link. You may resubmit as many times as you like before the deadline; the last submission is
+  graded.
+</p>
+
+</main>
+
+<footer>
+  CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026
+</footer>
+
+<script>hljs.highlightAll();</script>
+<script>
+// Add a "Copy" button to each provided header / demo listing.
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('pre.copyable').forEach(function (pre) {
+    var wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy ' + (pre.dataset.filename || 'code') + ' to clipboard');
+    btn.addEventListener('click', function () {
+      copyText(pre.textContent).then(function (ok) {
+        btn.textContent = ok ? 'Copied!' : 'Copy failed';
+        btn.classList.toggle('done', ok);
+        btn.classList.toggle('failed', !ok);
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('done', 'failed');
+        }, 1800);
+      });
+    });
+    wrap.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>
