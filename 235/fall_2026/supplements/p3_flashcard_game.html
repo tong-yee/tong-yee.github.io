@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 3 Flashcard Game</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one centered column; a home screen with three game modes, each mode swaps into the same stage. */
+:root{
+  --bg:#f3f5ef; --surface:#ffffff; --surface2:#e8ede2; --fg:#1b2a22; --muted:#5b6b61;
+  --line:#cdd6c8; --accent:#1f6b4a; --accent-fg:#ffffff; --cut:#c2641a; --good:#1d7a4a; --bad:#b3342b;
+  --good-bg:#dcf0e3; --bad-bg:#f6dcd8; --code-bg:#e4eadd;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101a15; --surface:#18251e; --surface2:#213229; --fg:#e6efe8; --muted:#97a99d;
+    --line:#2f4438; --accent:#6fcf9b; --accent-fg:#0e1a13; --cut:#f0a45f; --good:#6fcf9b; --bad:#f08a80;
+    --good-bg:#1c3b2b; --bad-bg:#432421; --code-bg:#243a2d; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101a15; --surface:#18251e; --surface2:#213229; --fg:#e6efe8; --muted:#97a99d;
+  --line:#2f4438; --accent:#6fcf9b; --accent-fg:#0e1a13; --cut:#f0a45f; --good:#6fcf9b; --bad:#f08a80;
+  --good-bg:#1c3b2b; --bad-bg:#432421; --code-bg:#243a2d; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+code{font-family:var(--mono);font-size:.92em;background:var(--code-bg);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--cut);outline-offset:2px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand svg{flex:none}
+.brand h1{font-size:1.5rem;font-weight:800}
+.brand p{margin:0;color:var(--muted);font-size:.85rem}
+.home-btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:500}
+.home-btn:hover{background:var(--surface2)}
+.lede{margin:0;color:var(--muted);max-width:60ch}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.mode{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.mode:hover{border-color:var(--accent);transform:translateY(-2px)}
+.mode h2{font-size:1.25rem;font-weight:800;color:var(--accent)}
+.mode p{margin:0;color:var(--muted);font-size:.92rem}
+.mode .best{margin-top:auto;font-size:.82rem;font-family:var(--mono);color:var(--fg)}
+.mode{transition:transform .15s,border-color .15s}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:.9rem;color:var(--muted)}
+.bar .grow{flex:1;min-width:120px}
+.meter{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.stat{font-family:var(--mono);color:var(--fg)}
+.lives{letter-spacing:3px;color:var(--cut)}
+/* study */
+.flip{perspective:1200px;cursor:pointer;border:0;background:none;padding:0;text-align:left;width:100%}
+.flip-in{display:grid;transition:transform .45s;transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;min-height:19rem;border-radius:14px;padding:22px;
+  display:flex;flex-direction:column;gap:12px;border:1px solid var(--line)}
+.face.q{background:var(--surface)}
+.face.a{background:var(--surface2);transform:rotateY(180deg);border-color:var(--accent)}
+.tag{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.face .text{font-size:1.2rem;line-height:1.5;margin:auto 0}
+.face.a .text{font-size:1.1rem}
+.hint{font-size:.8rem;color:var(--muted);margin-top:auto}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);padding:12px 18px;border-radius:10px;font-weight:600;flex:1;min-width:130px}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.miss{border-color:var(--cut);color:var(--cut)}
+.btn[disabled]{opacity:.45;cursor:default}
+/* quiz */
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.qcard h2{font-size:1.3rem;font-weight:600;font-family:var(--body);line-height:1.45}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:12px 14px;min-width:0;align-items:flex-start}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt .k{font-family:var(--mono);color:var(--muted);flex:none}
+.opt span:last-child{min-width:0;overflow-wrap:anywhere}
+.opt.good{background:var(--good-bg);border-color:var(--good)}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad)}
+.note{font-size:.95rem;padding:10px 14px;border-radius:10px;background:var(--surface2)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.flip:focus-visible{outline:3px solid var(--cut);outline-offset:3px}
+.pop{animation:pop .25s}
+@keyframes pop{0%{transform:scale(.97)}100%{transform:scale(1)}}
+/* match */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.tile{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:.88rem;min-width:0;overflow-wrap:anywhere}
+.tile:hover:not([disabled]){border-color:var(--accent)}
+.tile.sel{border-color:var(--cut);box-shadow:0 0 0 2px var(--cut)}
+.tile.done{background:var(--good-bg);border-color:var(--good);opacity:.55;cursor:default}
+.tile.shake{animation:shake .3s;border-color:var(--bad)}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.result{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.result h2{font-size:1.8rem;font-weight:800}
+.big{font-family:var(--mono);font-size:2.2rem;color:var(--accent)}
+.review{display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.review li{margin-bottom:6px}
+.review ul{margin:0;padding-left:20px}
+@media (max-width:520px){.mgrid{gap:8px}.tile{font-size:.8rem;padding:8px}.face{padding:16px}.face .text{font-size:1.05rem}}
+@media (prefers-reduced-motion:reduce){.flip-in,.mode,.meter i{transition:none}.pop,.tile.shake{animation:none}}
+</style>
+</head>
+<body>
+
+<main>
+  <div class="top">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 36V20M20 20L9 11M20 20L31 11M9 11L4 4M9 11L14 4" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M31 11L36 4" stroke="var(--cut)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 5" fill="none"/>
+        <circle cx="20" cy="36" r="3" fill="var(--accent)"/>
+      </svg>
+      <div><h1>Project 3 Flashcard Game</h1><p>CSCI 235 &bull; Project 3 &bull; 24 cards</p></div>
+    </div>
+    <button class="home-btn" id="homeBtn" hidden>Home</button>
+  </div>
+  <div id="stage"></div>
+</main>
+
+<script>
+const CARDS=[["The goal", "What does the Make 24 solver decide?", "Given some numbers (usually four), can we combine them with +, -, ×, ÷, **using each number exactly once**, to make **24**?\n\n`solve(nums)` answers `true` or `false`."], ["A state", "What is one state of the search?", "The numbers **currently on the table**, stored in a `vector<double>`. A move shrinks the table by one number."], ["A move", "What is a move?", "Pick **two** numbers, replace them by **one** result. So n numbers become n-1, and the same problem repeats on a smaller vector."], ["Base case", "What does `solve` do when only one number is left?", "There is no pair left to merge. Return whether that number is 24: `std::abs(nums[0] - 24) < 1e-9`."], ["Tolerance", "Why not write `nums[0] == 24`?", "Floating-point calculations can introduce small rounding errors. A result mathematically equal to 24 may be represented slightly above or below 24. The tolerance `1e-9` accepts such differences. It is a numerical policy for small inputs such as card values, not an exact test."], ["Pair loops", "How do we visit every pair exactly once?", "`for (i = 0; i < n; ++i)` and `for (j = i + 1; j < n; ++j)`. Starting `j` at `i + 1` skips i = j and skips the same pair in the other order."], ["Building rest", "How is `rest` built for the pair at `i` and `j`?", "Copy every `nums[t]` with `t != i && t != j`. Compare **positions**, not values: with `{3, 3, 8, 8}`, comparing values would remove all four numbers."], ["The results", "Which results do we list for a pair `a, b`?", "`a+b`, `a*b`, `a-b`, `b-a`, and `a/b` and `b/a`. Subtraction and division need **both orders**; addition and multiplication do not."], ["Division guard", "When may we add `a / b`?", "Only when `b` is not zero: `if (std::abs(b) > 1e-9)`. Likewise add `b / a` only when `a` is not zero. A tolerance is used because a computed value can be tiny but not exactly 0. The cutoff `1e-9` is a numerical policy, chosen for small inputs such as the usual card values; it is not an exact test."], ["Push, test, pop", "For each result `r`, in what order do we push, test and pop?", "`rest.push_back(r);` then `if (solve(rest)) return true;` then `rest.pop_back();`\n\n`pop_back()` restores `rest` after a **failed** recursive call, ready for the next result. If the recursive call succeeds, the function returns `true` immediately."], ["Early termination", "What does `if (solve(rest)) { return true; }` do?", "It **stops the whole search** at the first success: `true` is returned up through every active call. The `if` checks the recursive result; ignoring it would lose a success."], ["return false", "Where does `return false;` go, and what does it mean?", "After **both** loops, outside them. It means every pair and every result failed, so this state has no solution."], ["First moves", "How many first moves are there with four numbers and six results per pair?", "C(4, 2)×6 = 6×6 = 36. With 3 numbers left: 3×6 = 18. With 2 left: 1×6 = 6. Maximum candidate sequences: 36×18×6 = 3,888 (before division guards, duplicate-state skipping, and early termination, so a call counter will not show exactly this number)."], ["Ordered pairs", "Why does the ordered-pair version (4 operations) make 12×4 = 48 first moves?", "4 numbers, each with 3 friends: 4×3 = 12 ordered pairs, times 4 operations. Maximum candidate sequences: 48×24×8 = 9,216.\n\nIt repeats x+y = y+x and x× y = y× x, so the unordered version with 6 results is better."], ["Duplicate states", "Why are {1_a,1_b,1_c,1_d} reaching {2,2} by two paths a problem?", "Path 1 merges 1_a+1_b then 1_c+1_d; path 2 merges them in the opposite order. Both end at {2,2}, so the search below it is **identical** and is done twice."], ["State key", "How do we recognize that two states are the same?", "Build a key: scale each number by 10^6, round with `std::llround`, store in a `vector<long long>`, and **sort** it. Then {2,1,1} and {1,2,1} have the same key."], ["seen.insert", "What does `seen.insert(key).second` tell us?", "`true` if the key was **new**, `false` if it was **already there**. `if (!seen.insert(key).second) { return false; }` skips a state we have visited."], ["Seen means no solution", "Why is `return false` correct for a state already in `seen`?", "A key already in `seen` means only that the **key** was encountered before. We may say \"no solution\" only if (1) equal keys mean equivalent states exactly, and (2) success returns `true` immediately, so a visited state that succeeded would have ended the search. Rounded keys can collide, so (1) is not guaranteed."], ["Approximate keys", "What is the weakness of rounded keys?", "Rounded keys are **approximate**. Some nearby values receive the same key, so two different states may collide, causing the solver to skip a state that could contain a solution.\n\nRounded-key duplicate detection is **not guaranteed** to preserve correctness for arbitrary floating-point states."], ["One seen set", "When must you create a new `seen` set?", "For **every new puzzle** in this implementation. `seen` stores every state **visited**, including states on a path that later succeeded, so a set left over from another puzzle could wrongly skip a state.\n\nA different design is a cache of states **fully explored and proven unsolvable**. For the same target and rules, an exact unsolvable state stays unsolvable and could be reused, but that cache must be built carefully and is not what this `seen` set does."], ["No solution", "`{1, 1, 1, 1}` has no solution. Which call counts should you see?", "With a call counter, the **lecture implementations** make **9,841** calls (ordered pairs), **4,141** (unordered, 6 results), and **139** with `seen`. Only 13 different states are expanded.\n\nThese are **reference counts** for those implementations, not universal counts for every solver."], ["A hard one", "Which solution does `{3, 3, 8, 8}` have, and why is it a good test?", "8÷(3-8÷3) = 24; in C++ this is `8.0 / (3.0 - 8.0 / 3.0)`. It needs a **fraction** along the way, so it tests your division handling and your tolerance.\n\n**Reference counts** (lecture implementation, unordered pairs, operation order `a+b, a*b, a-b, b-a, a/b, b/a`): **1,401** calls without memoization and **749** with it. Your counts may differ if your order differs."], ["Common mistakes", "Name common bugs in a Make 24 solver.", "**1.** Removing numbers by value instead of by position.\n\n**2.** Forgetting `pop_back()` after a failed result.\n\n**3.** Comparing a `double` with `== 24`.\n\n**4.** Dividing by zero (no guard)."], ["Testing", "How can you test your solver quickly?", "Run known cases: `{4, 7, 8, 8}` (has solutions), `{1, 1, 1, 1}` (must return `false`), `{3, 3, 8, 8}` (needs fractions). Add a **call counter** and compare it with the reference counts above."]].map((c,i)=>({id:i,t:c[0],q:c[1],a:c[2]}));
+const QUIZ=[["What is a move in the Make 24 solver?", "Replace two numbers by one result", "Remove one number", "Sort the vector", "Pick an operation only", 2], ["What should `solve` do when one number is left?", "Check whether it is 24 within a tolerance", "Return `true`", "Return `false`", "Pick another pair", 3], ["Why use `std::abs(x - 24) < 1e-9`?", "`double` arithmetic can carry tiny rounding errors", "`24` is not an integer", "`abs` is faster than `==`", "The target is stored as a string", 4], ["How do the pair loops visit each unordered pair once?", "`j` starts at `i + 1`", "`j` starts at `0`", "`j` starts at `i`", "`j` runs backwards from `n`", 5], ["How should `rest` be built?", "Copy `nums[t]` for every `t` with `t != i && t != j`", "Copy every `nums[t]` that is not equal to `a` or `b`", "Copy only `a` and `b`", "Copy all of `nums`", 6], ["Which results are listed for a pair `a, b`?", "`a+b`, `a*b`, `a-b`, `b-a`, `a/b`, `b/a`", "`a+b`, `a-b`, `a*b`, `a/b`", "`a+b` and `a*b` only", "`a+b`, `b+a`, `a*b`, `b*a`", 7], ["When may `a / b` be added?", "When `std::abs(b) > 1e-9`", "Always", "When `a` is larger than `b`", "Only when `a` is zero", 8], ["For each result `r`, which order is correct?", "Push `r`, test `solve(rest)`, and pop if the test fails", "Pop, push `r`, then test", "Push `r`, pop, then test", "Push `r` and test, with no pop", 9], ["What does `if (solve(rest)) { return true; }` do?", "Stops the whole search at the first success", "Prints the solution", "Skips the current pair", "Restarts the search", 10], ["Where does the final `return false;` belong?", "After both loops", "Inside the inner loop", "Before the loops", "Inside the `if` for the base case", 11], ["With four numbers and 6 results per pair, how many first moves?", "36", "24", "12", "48", 12], ["Why does the ordered-pair version make 12×4 = 48 first moves?", "4 numbers, 3 friends each, times 4 operations", "4 pairs times 12 operations", "12 numbers times 4 pairs", "6 unordered pairs times 8 operations", 13], ["Why is the ordered-pair version wasteful?", "`x+y` and `y+x`, `x*y` and `y*x` are repeated", "It never tries subtraction", "It has too few operations", "It uses recursion", 13], ["What does `seen.insert(key).second == false` mean?", "The key was already present", "The key was newly inserted", "The set is empty", "The insertion failed for lack of memory", 16], ["When is `return false` safe for a state whose key is already in `seen`?", "Only if equal keys mean exactly equivalent states (a visited state that had succeeded would have ended the search)", "Whenever the rounded keys match, however the key was built", "Whenever the state has fewer than four numbers", "Whenever the set already contains at least one key", 17], ["Why sort the key?", "So the same numbers in any order give the same key", "So division never divides by zero", "So the smallest number is removed", "So the key is shorter", 15], ["In the lecture's `seen` implementation, when should you make a new set?", "For every new puzzle", "Only once per program", "Never; reuse it", "Only when the answer is `false`", 19], ["What is the weakness of rounded keys?", "Different states may share a key and hide a solution", "Rounded keys cannot be sorted", "They need more memory than the numbers", "They ignore the target", 18], ["Which input has no solution and returns `false`?", "`{1, 1, 1, 1}`", "`{3, 3, 8, 8}`", "`{4, 7, 8, 8}`", "`{1, 2, 3, 4}`", 20], ["Why is `{3, 3, 8, 8}` a good test?", "The solution needs a fraction: `8.0 / (3.0 - 8.0 / 3.0)`", "It has no solution", "It contains zero", "It has only one pair", 21]];
+const MATCH=[["State", "The numbers on the table"], ["Move", "Replace two numbers by one result"], ["Base case", "One number left: is it 24?"], ["Tolerance test", "`std::abs(x - 24) < 1e-9`"], ["`j` starts at `i + 1`", "Each unordered pair once"], ["`rest`", "Every `nums[t]` with `t != i && t != j`, copied into a new vector"], ["Six results", "`a+b`, `a*b`, `a-b`, `b-a`, `a/b`, `b/a`"], ["Division guard", "Skip when the divisor is zero or near zero"], ["Undo after a failed result", "`rest.pop_back()`"], ["`return true` up the stack", "Early termination"], ["`return false` after the loops", "Every pair and result failed"], ["First moves: four numbers, unordered pairs, six operation choices", "36"], ["Maximum candidate sequences, unordered", "3,888"], ["Maximum candidate sequences, ordered", "9,216"], ["`seen.insert(key).second` is `false`", "The key was already present"], ["Why sort a key", "Same numbers in any order, one key"], ["Calls for `{1,1,1,1}` with `seen`", "139"], ["Solution for `{3, 3, 8, 8}`", "`8.0 / (3.0 - 8.0 / 3.0)`"]].map((c,i)=>({id:i,q:c[0],a:c[1]}));
+const $=s=>document.querySelector(s);
+const stage=$('#stage'), homeBtn=$('#homeBtn');
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function plain(s){return s.replace(/\{\{TREES\}\}/g,'').replace(/[`]/g,'').replace(/\*\*/g,'').replace(/\n\n/g,' ');}
+function fmt(s,rich){
+  s=rich?s.replace(/\{\{TREES\}\}/g,'@@TREES@@'):s.replace(/\{\{TREES\}\}/g,'');
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br><br>').replace(/@@TREES@@/g,TREES);
+}
+function load(k){try{return JSON.parse(localStorage.getItem('p3m24.'+k))}catch(e){return null}}
+function save(k,v){try{localStorage.setItem('p3m24.'+k,JSON.stringify(v))}catch(e){}}
+const TREES='';
+let cleanup=null;
+function go(fn){ if(cleanup){cleanup();cleanup=null} fn(); window.scrollTo(0,0); }
+homeBtn.onclick=()=>go(home);
+
+function home(){
+  homeBtn.hidden=true;
+  const bq=load('quiz'), bm=load('match2');
+  stage.innerHTML=`
+    <p class="lede">Practice the ideas behind Project 3, the Make 24 solver: states, moves, pair loops, results, undo, early termination and duplicate states. Pick a game.</p>
+    <div class="modes" style="margin-top:16px">
+      <button class="mode" data-m="study"><h2>Study deck</h2><p>Flip cards one at a time. Cards you miss come back until you know them.</p><span class="best">24 cards</span></button>
+      <button class="mode" data-m="quiz"><h2>Branch Quiz</h2><p>10 multiple-choice questions. You have 3 branches. Each wrong answer prunes one.</p><span class="best">Best: ${bq!=null?bq+' pts':'none yet'}</span></button>
+      <button class="mode" data-m="match"><h2>Match Rounds</h2><p>Pair each question with its answer. Three rounds of six pairs, 18 randomly selected pairs. Misses add 5 seconds. Transition delays are not timed.</p><span class="best">Best: ${bm!=null?bm+' s':'none yet'}</span></button>
+    </div>`;
+  stage.querySelectorAll('.mode').forEach(b=>b.onclick=()=>go({study,quiz,match}[b.dataset.m]));
+}
+
+/* ---------- Study ---------- */
+function study(){
+  homeBtn.hidden=false;
+  let queue=shuffle(CARDS), total=CARDS.length, known=0, pass=1, flipped=false, missed=new Set();
+  function render(){
+    if(!queue.length){
+      flipped=false;
+      stage.innerHTML=`<div class="result"><h2 id="doneH" tabindex="-1">Deck complete</h2><div class="big">${total} / ${total}</div>
+        <p>${missed.size?`You needed a second look at ${missed.size} card${missed.size>1?'s':''}: `+[...missed].map(i=>CARDS[i].t).join(', ')+'.':'You knew every card on the first pass.'}</p>
+        <div class="row"><button class="btn pri" id="again">Study again</button><button class="btn" id="hm">Home</button></div></div>`;
+      $('#again').onclick=()=>go(study); $('#hm').onclick=()=>go(home); $('#doneH').focus({preventScroll:true}); return;
+    }
+    const c=queue[0]; flipped=false;
+    stage.innerHTML=`
+      <div class="bar"><span class="stat">${known} / ${total} known</span><div class="grow meter"><i style="width:${known/total*100}%"></i></div><span>${queue.length} left</span></div>
+      <div class="flip" id="card" tabindex="-1" role="group" aria-label="Flashcard: ${plain(c.t)}" style="margin-top:14px"><div class="flip-in">
+        <div class="face q"><div class="tag"><span>${fmt(c.t)}</span><span>Question</span></div><div class="text">${fmt(c.q)}</div><div class="hint">Think of your answer, then click the card or press Space.</div></div>
+        <div class="face a" aria-hidden="true"><div class="tag"><span>${fmt(c.t)}</span><span>Answer</span></div><div class="text">${fmt(c.a,true)}</div></div>
+      </div></div>
+      <div class="row" style="margin-top:14px"><button class="btn" id="flip" aria-expanded="false">Show answer (Space)</button><button class="btn miss" id="miss" disabled>Need review (&larr;)</button><button class="btn pri" id="got" disabled>Got it (&rarr;)</button></div>
+      <div class="sr-only" id="sr" aria-live="polite"></div>`;
+    $('#card').onclick=flip; $('#flip').onclick=flip; $('#miss').onclick=()=>next(false); $('#got').onclick=()=>next(true);
+    $('#card').focus({preventScroll:true});
+  }
+  function flip(){ if(!queue.length) return; flipped=!flipped; $('#card').classList.toggle('on',flipped); const fb=$('#flip'); fb.textContent=flipped?'Show question (Space)':'Show answer (Space)'; fb.setAttribute('aria-expanded',String(flipped)); $('#sr').textContent=flipped?'Answer: '+plain(queue[0].a):'Question: '+plain(queue[0].q); $('.face.q').setAttribute('aria-hidden',String(flipped)); $('.face.a').setAttribute('aria-hidden',String(!flipped)); $('#miss').disabled=!flipped; $('#got').disabled=!flipped; }
+  function next(ok){
+    if(!flipped||!queue.length) return;
+    const c=queue.shift();
+    if(ok) known++; else { missed.add(c.id); queue.splice(Math.min(3,queue.length),0,c); }
+    render();
+  }
+  const key=e=>{
+    if(e.key===' '||e.key==='Enter'){ if(document.activeElement&&document.activeElement.tagName==='BUTTON') return; if(queue.length){e.preventDefault();flip()} }
+    else if(e.key==='ArrowRight'){ e.preventDefault(); next(true); } else if(e.key==='ArrowLeft'){ e.preventDefault(); next(false); }
+  };
+  document.addEventListener('keydown',key); cleanup=()=>document.removeEventListener('keydown',key);
+  render();
+}
+
+/* ---------- Quiz ---------- */
+function quiz(){
+  homeBtn.hidden=false;
+  const qs=shuffle(QUIZ.map(z=>({z:z,c:CARDS[z[5]]}))).slice(0,10); let i=0, score=0, streak=0, lives=3, answered=false, wrongs=[];
+  function render(){
+    if(i>=qs.length||lives<=0) return finish();
+    const item=qs[i], c=item.c; answered=false;
+    const qz=item.z;
+    const opts=shuffle(qz.slice(1,5).map((t,n)=>({t,ok:n===0})));
+    stage.innerHTML=`
+      <div class="bar"><span class="stat">Question ${i+1} / ${qs.length}</span><div class="grow meter"><i style="width:${i/qs.length*100}%"></i></div>
+        <span class="stat" id="qScore">${score} pts</span><span class="lives" id="qLives" aria-label="${lives} branches left">${'●'.repeat(lives)}${'○'.repeat(3-lives)}</span></div>
+      <div class="qcard pop" style="margin-top:14px"><div class="tag"><span>${fmt(c.t)}</span><span id="qStreak">${streak>1?streak+' correct in a row':''}</span></div>
+        <h2 id="qh" tabindex="-1">${fmt(qz[0])}</h2>
+        <div class="opts">${opts.map((o,n)=>`<button class="opt" data-ok="${o.ok?1:0}"><span class="k">${n+1}</span><span>${fmt(o.t)}</span></button>`).join('')}</div>
+        <div id="fb" role="status" aria-live="polite"></div></div>`;
+    stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(b,c));
+    $('#qh').focus({preventScroll:true});
+  }
+  function updateBar(){ const sk=$('#qStreak'); if(sk) sk.textContent=streak>1?streak+' correct in a row':''; $('#qScore').textContent=score+' pts'; const L=$('#qLives'); L.textContent='●'.repeat(lives)+'○'.repeat(3-lives); L.setAttribute('aria-label',lives+' branches left'); }
+  function pick(btn,c){
+    if(answered) return; answered=true;
+    const ok=btn.dataset.ok==='1';
+    let right='', mine=btn.lastElementChild.innerHTML; stage.querySelectorAll('.opt').forEach(b=>{b.disabled=true; if(b.dataset.ok==='1'){ b.classList.add('good'); right=b.lastElementChild.innerHTML; }});
+    let msg;
+    if(ok){ streak++; const gain=10+Math.min(streak-1,5)*2; score+=gain; msg=`Correct. +${gain} points.`; }
+    else { btn.classList.add('bad'); streak=0; lives--; wrongs.push({c,prompt:fmt(qs[i].z[0]),mine,right}); msg=`Not quite. The correct answer is: ${right}. ${lives>0?lives+(lives===1?' branch left.':' branches left.'):'No branches left.'}`; }
+    updateBar();
+    $('#fb').innerHTML=`<div class="note">${msg}</div><div class="row" style="margin-top:12px"><button class="btn pri" id="nx">${(i+1>=qs.length||lives<=0)?'See results':'Next question (Enter)'}</button></div>`;
+    $('#nx').onclick=advance; $('#nx').focus();
+  }
+  function advance(){ i++; render(); }
+  function finish(){
+    const best=load('quiz'), isBest=best==null||score>best; if(isBest) save('quiz',score);
+    stage.innerHTML=`<div class="result pop"><h2 id="doneQ" tabindex="-1">${lives<=0?'Out of branches':'Round complete'}</h2><div class="big">${score} pts</div>
+      <p>${isBest?'New best score.':'Best so far: '+best+' pts.'}</p>
+      ${wrongs.length?`<div class="review"><strong>Review these:</strong><ul>${wrongs.map(w=>`<li>${w.prompt}<br><span>Your answer: ${w.mine}</span><br><span>Correct answer: ${w.right}</span><br><span style="color:var(--muted)"><em>Full flashcard (${fmt(w.c.t)}):</em> ${fmt(w.c.q)}<br>${fmt(w.c.a,true)}</span></li>`).join('')}</ul></div>`:'<p>No misses.</p>'}
+      <div class="row"><button class="btn pri" id="again">Play again</button><button class="btn" id="hm">Home</button></div></div>`;
+    $('#again').onclick=()=>go(quiz); $('#hm').onclick=()=>go(home); $('#doneQ').focus({preventScroll:true});
+  }
+  const key=e=>{
+    if(['1','2','3','4'].includes(e.key)){ const b=stage.querySelectorAll('.opt')[+e.key-1]; if(b&&!answered) b.click(); }
+    else if(e.key==='Enter'&&answered){ const ae=document.activeElement; if(ae&&ae.tagName==='BUTTON'&&ae.id!=='nx') return; const n=$('#nx'); if(n&&ae!==n){ e.preventDefault(); n.click(); } }
+  };
+  document.addEventListener('keydown',key); cleanup=()=>document.removeEventListener('keydown',key);
+  render();
+}
+
+/* ---------- Match ---------- */
+function match(){
+  homeBtn.hidden=false;
+  const pool=shuffle(MATCH); let round=0, misses=0, t0=performance.now(), paused=0, pauseStart=null, timer, nextT, sel=null, left=0;
+  const elapsed=()=>((pauseStart||performance.now())-t0-paused)/1000;
+  function startRound(){
+    if(pauseStart){ paused+=performance.now()-pauseStart; pauseStart=null; }
+    const set=pool.slice(round*6,round*6+6); left=6; sel=null;
+    const L=shuffle(set), R=shuffle(set);
+    stage.innerHTML=`
+      <div class="bar"><span class="stat">Round ${round+1} / 3</span><div class="grow meter"><i style="width:${round/3*100}%"></i></div>
+        <span class="stat" id="clock">${elapsed().toFixed(1)} s</span><span class="stat" id="missCount">${misses} miss${misses===1?'':'es'}</span></div>
+      <h2 id="rh" tabindex="-1" class="sr-only">Round ${round+1} of 3</h2><p class="lede" style="margin:12px 0">Click a prompt, then click its matching answer.</p><div class="sr-only" id="msr" role="status" aria-live="polite"></div>
+      <div class="mgrid"><div class="mcol" id="cl">${L.map(c=>`<button class="tile" data-id="${c.id}" data-side="q" aria-pressed="false">${fmt(c.q)}</button>`).join('')}</div>
+      <div class="mcol" id="cr">${R.map(c=>`<button class="tile" data-id="${c.id}" data-side="a" aria-pressed="false">${fmt(c.a)}</button>`).join('')}</div></div>`;
+    stage.querySelectorAll('.tile').forEach(b=>b.onclick=()=>tap(b));
+    $('#rh').focus({preventScroll:true}); say(`Round ${round+1} of 3. Six pairs.`);
+  }
+  function say(t){ const r=$('#msr'); if(r) r.textContent=t; }
+  function setSel(x,on){ x.classList.toggle('sel',on); x.setAttribute('aria-pressed',on?'true':'false'); }
+  function tap(b){
+    if(b.classList.contains('done')) return;
+    if(!sel){ sel=b; setSel(b,true); return; }
+    if(sel===b){ setSel(b,false); sel=null; return; }
+    if(sel.dataset.side===b.dataset.side){ setSel(sel,false); sel=b; setSel(b,true); return; }
+    if(sel.dataset.id===b.dataset.id){
+      [sel,b].forEach(x=>{setSel(x,false);x.classList.add('done');x.disabled=true;}); sel=null; left--;
+      if(left){ say(`Matched. ${left} pair${left===1?'':'s'} left.`); const nx=stage.querySelector('.tile:not(.done)'); if(nx) nx.focus({preventScroll:true}); } else say(round<2?'Matched. Round complete.':'Matched. All pairs done.');
+      if(!left){ stage.querySelectorAll('.tile').forEach(t=>t.disabled=true); round++; pauseStart=performance.now(); if(round>=3) done(); else nextT=setTimeout(startRound,500); }
+    } else {
+      misses++; const a=sel, c=b; setSel(a,false); sel=null; say('Not a match. Try again.');
+      [a,c].forEach(x=>{x.classList.add('shake'); setTimeout(()=>x.classList.remove('shake'),320)});
+      const m=$('#missCount'); if(m) m.textContent=misses+' miss'+(misses===1?'':'es');
+    }
+  }
+  function done(){
+    clearInterval(timer);
+    const secs=elapsed(), score=Math.round((secs+misses*5)*10)/10;
+    const best=load('match2'), isBest=best==null||score<best; if(isBest) save('match2',score);
+    stage.innerHTML=`<div class="result pop"><h2 id="doneM" tabindex="-1">All pairs matched</h2><div class="big">${score} s</div>
+      <p>${secs.toFixed(1)} s on the clock plus ${misses} miss${misses===1?'':'es'} × 5 s. ${isBest?'New best time.':'Best so far: '+best+' s.'}</p>
+      <div class="row"><button class="btn pri" id="again">Play again</button><button class="btn" id="hm">Home</button></div></div>`;
+    $('#again').onclick=()=>go(match); $('#hm').onclick=()=>go(home); $('#doneM').focus({preventScroll:true});
+  }
+  timer=setInterval(()=>{const c=$('#clock'); if(c) c.textContent=elapsed().toFixed(1)+' s'},100);
+  cleanup=()=>{clearInterval(timer);clearTimeout(nextT)};
+  startRound();
+}
+
+home();
+</script>
+</body>
+</html>
