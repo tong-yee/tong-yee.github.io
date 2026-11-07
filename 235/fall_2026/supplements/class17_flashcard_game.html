@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shunting-Yard Flashcard Game</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one centered column; a home screen with three game modes, each mode swaps into the same stage. */
+:root{
+  --bg:#f3f5ef; --surface:#ffffff; --surface2:#e8ede2; --fg:#1b2a22; --muted:#5b6b61;
+  --line:#cdd6c8; --accent:#1f6b4a; --accent-fg:#ffffff; --cut:#c2641a; --good:#1d7a4a; --bad:#b3342b;
+  --good-bg:#dcf0e3; --bad-bg:#f6dcd8; --code-bg:#e4eadd;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101a15; --surface:#18251e; --surface2:#213229; --fg:#e6efe8; --muted:#97a99d;
+    --line:#2f4438; --accent:#6fcf9b; --accent-fg:#0e1a13; --cut:#f0a45f; --good:#6fcf9b; --bad:#f08a80;
+    --good-bg:#1c3b2b; --bad-bg:#432421; --code-bg:#243a2d; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101a15; --surface:#18251e; --surface2:#213229; --fg:#e6efe8; --muted:#97a99d;
+  --line:#2f4438; --accent:#6fcf9b; --accent-fg:#0e1a13; --cut:#f0a45f; --good:#6fcf9b; --bad:#f08a80;
+  --good-bg:#1c3b2b; --bad-bg:#432421; --code-bg:#243a2d; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+code{font-family:var(--mono);font-size:.92em;background:var(--code-bg);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--cut);outline-offset:2px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand svg{flex:none}
+.brand h1{font-size:1.5rem;font-weight:800}
+.brand p{margin:0;color:var(--muted);font-size:.85rem}
+.home-btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:500}
+.home-btn:hover{background:var(--surface2)}
+.lede{margin:0;color:var(--muted);max-width:60ch}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.mode{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.mode:hover{border-color:var(--accent);transform:translateY(-2px)}
+.mode h2{font-size:1.25rem;font-weight:800;color:var(--accent)}
+.mode p{margin:0;color:var(--muted);font-size:.92rem}
+.mode .best{margin-top:auto;font-size:.82rem;font-family:var(--mono);color:var(--fg)}
+.mode{transition:transform .15s,border-color .15s}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:.9rem;color:var(--muted)}
+.bar .grow{flex:1;min-width:120px}
+.meter{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.stat{font-family:var(--mono);color:var(--fg)}
+.lives{letter-spacing:3px;color:var(--cut)}
+/* study */
+.flip{perspective:1200px;cursor:pointer;border:0;background:none;padding:0;text-align:left;width:100%}
+.flip-in{display:grid;transition:transform .45s;transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;min-height:19rem;border-radius:14px;padding:22px;
+  display:flex;flex-direction:column;gap:12px;border:1px solid var(--line)}
+.face.q{background:var(--surface)}
+.face.a{background:var(--surface2);transform:rotateY(180deg);border-color:var(--accent)}
+.tag{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.face .text{font-size:1.2rem;line-height:1.5;margin:auto 0}
+.face.a .text{font-size:1.1rem}
+.hint{font-size:.8rem;color:var(--muted);margin-top:auto}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);padding:12px 18px;border-radius:10px;font-weight:600;flex:1;min-width:130px}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.miss{border-color:var(--cut);color:var(--cut)}
+.btn[disabled]{opacity:.45;cursor:default}
+/* quiz */
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.qcard h2{font-size:1.3rem;font-weight:600;font-family:var(--body);line-height:1.45}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:12px 14px;min-width:0;align-items:flex-start}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt .k{font-family:var(--mono);color:var(--muted);flex:none}
+.opt span:last-child{min-width:0;overflow-wrap:anywhere}
+.opt.good{background:var(--good-bg);border-color:var(--good)}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad)}
+.note{font-size:.95rem;padding:10px 14px;border-radius:10px;background:var(--surface2)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.flip:focus-visible{outline:3px solid var(--cut);outline-offset:3px}
+.pop{animation:pop .25s}
+@keyframes pop{0%{transform:scale(.97)}100%{transform:scale(1)}}
+/* match */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.tile{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:.88rem;min-width:0;overflow-wrap:anywhere}
+.tile:hover:not([disabled]){border-color:var(--accent)}
+.tile.sel{border-color:var(--cut);box-shadow:0 0 0 2px var(--cut)}
+.tile.done{background:var(--good-bg);border-color:var(--good);opacity:.55;cursor:default}
+.tile.shake{animation:shake .3s;border-color:var(--bad)}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.result{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.result h2{font-size:1.8rem;font-weight:800}
+.big{font-family:var(--mono);font-size:2.2rem;color:var(--accent)}
+.review{display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.review li{margin-bottom:6px}
+.review ul{margin:0;padding-left:20px}
+@media (max-width:520px){.mgrid{gap:8px}.tile{font-size:.8rem;padding:8px}.face{padding:16px}.face .text{font-size:1.05rem}}
+@media (prefers-reduced-motion:reduce){.flip-in,.mode,.meter i{transition:none}.pop,.tile.shake{animation:none}}
+</style>
+
+</head>
+<body>
+<main>
+  <div class="top">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 36V20M20 20L9 11M20 20L31 11M9 11L4 4M9 11L14 4" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M31 11L36 4" stroke="var(--cut)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 5" fill="none"/>
+        <circle cx="20" cy="36" r="3" fill="var(--accent)"/>
+      </svg>
+      <div><h1>Shunting-Yard Flashcard Game</h1><p>CSCI 235 &bull; Class 17 &bull; 30 cards</p></div>
+    </div>
+    <button class="home-btn" id="homeBtn" hidden>Home</button>
+  </div>
+  <div id="stage"></div>
+</main>
+
+<script>
+const CARDS=[
+["Three notations", "Where does the operator go in **infix**, **prefix**, and **postfix**? Write `3 + 4` in all three.", "**Infix:** between the operands: `3 + 4`.\n\n**Prefix:** before them: `+ 3 4`.\n\n**Postfix:** after them: `3 4 +`."],
+["Postfix advantage", "Write `(3 + 4) * 2` in postfix and in prefix. What do you notice about parentheses?", "Postfix: `3 4 + 2 *`. Prefix: `* + 3 4 2`.\n\nNeither needs **parentheses or precedence rules**: the order of the tokens already says what to do first."],
+["Evaluate postfix", "State the rule for evaluating a postfix expression with one stack.", "Read tokens left to right.\n\n**Number:** push it.\n\n**Operator:** **before popping**, require **at least two values** (otherwise the expression is invalid). Then pop the **right** operand `b`, then the **left** operand `a`, and push `a op b`.\n\nAt the end, exactly **one** value should be left: that is the answer."],
+["Two stacks", "Evaluating postfix and converting infix to postfix each use a stack. What does each stack hold?", "**Evaluation stack:** **numbers** (values), where an operator pops two and pushes one.\n\n**Conversion stack:** **operators** (and `(`) that are waiting to be written to the output."],
+["Trace postfix", "Evaluate `3 4 2 * +` with a stack. What is on the stack after each token? (Write it bottom to top, left to right.)", "`[3]`, `[3 4]`, `[3 4 2]`; then `*` pops 2 and 4 and pushes 8: `[3 8]`; then `+` pops 8 and 3 and pushes 11: `[11]`.\n\nThe value is **11**."],
+["Operand order", "When an operator pops two values, which one is the **left** operand? Evaluate `8 2 / 3 -`.", "The **first** value popped is the **right** operand; the second is the left.\n\n`8 2 /` gives 8 / 2 = 4; then `4 3 -` gives 4 - 3 = **1**.\n\nMatters for `-` and `/`, not for `+` and `*`."],
+["Wrong order", "A student treats the first popped value as the **left** operand. Using the lecture's C++ integer arithmetic, what does the code give for `8 2 / 3 -`?", "`/` computes 2 / 8 = 0 in integer arithmetic; then `-` computes 3 - 0 = **3**.\n\nThe correct answer is 1."],
+["Tokenize", "Why do we **tokenize** before parsing? What should `tokenize(\"12+3*(4-1)\")` return?", "Single characters are not enough: `12` must stay **one token**.\n\n`{\"12\", \"+\", \"3\", \"*\", \"(\", \"4\", \"-\", \"1\", \")\"}`"],
+["Integer arithmetic", "`evalPostfix` uses `std::stack<int>`. What does that mean for `/`? What about dividing by zero?", "It is **integer arithmetic**. Division truncates toward zero: `7 / 2` is 3 and `-7 / 2` is -3.\n\nDividing by zero is **not permitted**; a complete evaluator must check for it."],
+["Negative values", "The input assumptions say literals are nonnegative. Can a result be negative? Evaluate `0 7 - 2 /`.", "**Yes:** negative intermediate results are allowed. Unary minus in the **input** (like `-7`) is outside the lecture parser's scope.\n\n`0 7 -` gives -7; then -7 / 2 = **-3** (integer division truncates toward zero). Infix: `(0 - 7) / 2`."],
+["Assumptions", "What do the C++ examples in class assume about the input?", "Valid expressions with **nonnegative integer literals**, binary operators `+ - * /`, and **matching parentheses**.\n\nA complete evaluator must validate its input."],
+["Expression tree", "What do the **leaves** and **inner nodes** of an expression tree represent?", "**Leaves** are numbers.\n\nEach **inner node** is an operator applied to its two subtrees.\n\nThe tree for `3 + 4 * 2` has `+` at the root, with `3` on the left and `*` (children `4`, `2`) on the right."],
+["Tree traversals", "Which traversal of an expression tree gives **postfix**? **Prefix**? **Infix**?", "**Post-order** (left, right, node): postfix.\n\n**Pre-order** (node, left, right): prefix.\n\n**In-order**: infix; add parentheses **where needed** to preserve the tree's grouping."],
+["Tree exercise", "Draw the expression trees for `3 + 4 * 2` and `(3 + 4) * 2`. Which node is the root of each? Read each in post-order.", "`3 + 4 * 2`: root `+`; left `3`, right `*` with children `4`, `2`. Post-order: `3 4 2 * +`.\n\n`(3 + 4) * 2`: root `*`; left `+` with children `3`, `4`; right `2`. Post-order: `3 4 + 2 *`.\n\n{{TREES}}\n\nBoth expressions are infix. Parentheses change the grouping, so the tree and the postfix order change."],
+["Why a stack", "Compare `3 + 4 * 2` with `3 4 2 * +`. Did the numbers change order? Which operator comes out first?", "The numbers keep their order, so they go straight to the output.\n\n`+` was written first but comes out **last**; `*` comes out first. Operators need a place to **wait**: a stack, because the newest waiting operator is released first."],
+["Shunting yard", "Where does the name **shunting-yard** come from? What are the two containers?", "A railway shunting yard: cars wait on a side track and are released in the order the schedule needs.\n\nThe algorithm has an **output list** and an **operator stack**."],
+["Number rule", "What does shunting-yard do with a **number** token? With the **end** of input?", "A number is appended to the **output** at once.\n\nAt the end, **pop the remaining operators** to the output. A `(` still on the stack means **mismatched parentheses**."],
+["Operator rule", "State the rule for an **operator** token `o`.", "**While** the stack is nonempty, its top is an operator, and that operator's precedence is at least that of `o`: pop it to the output.\n\nThen **push** `o`."],
+["Parentheses", "What do the tokens `(` and `)` do?", "`(` : push it.\n\n`)` : pop operators to the output until `(` is on top, then **discard** the `(`. If the stack empties first: **error**.\n\nNeither parenthesis goes to the output. The `(` is a **wall**: only its own `)` removes it."],
+["Precedence", "What precedence values do the operators have, and what prevents an operator from popping a `(`?", "`*` and `/` are 2; `+` and `-` are 1.\n\nThe loop tests `isOp(ops.top())`, which is **false** for `(`, so an operator never pops it. Only the matching `)` removes it."],
+["Why >=", "Why does the pop test use >= (equal precedence) and not just >?", "The operators are **left-associative**: `8 - 3 - 2` means (8 - 3) - 2.\n\nWith `>`, the output would be `8 3 2 - -` = 7. Correct: `8 3 - 2 -` = 3."],
+["Full trace", "Convert `3 + 4 * 2` token by token. Give the output and the stack (bottom to top) after each token.", "`3`: output `3`, stack empty.\n\n`+`: output `3`, stack `+`.\n\n`4`: output `3 4`, stack `+`.\n\n`*`: output `3 4`, stack `+ *`.\n\n`2`: output `3 4 2`, stack `+ *`.\n\nEnd: pop `*`: output `3 4 2 *`, stack `+`.\n\nEnd: pop `+`: output `3 4 2 * +`, stack empty."],
+["Trace 1", "Convert `3 + 4 * 2`. When `*` arrives, why is nothing popped?", "`*` has **higher** precedence than the `+` on top, so the `+` keeps waiting.\n\nResult: `3 4 2 * +`. At the end, `*` is popped before `+`."],
+["Trace 2", "Convert `(3 + 4) * 2`. What does the `)` do?", "`)` pops `+` to the output and discards the `(`.\n\nThe `(` forced the `+` out **before** `*` arrived.\n\nResult: `3 4 + 2 *`."],
+["Trace 3", "Convert `5 + (1 + 2) * 4 - 3`. What does the final `-` do?", "The new `-` pops `*` (higher), then `+` (equal), then stops because the stack is empty. Finally the incoming `-` is **pushed**.\n\nResult: `5 1 2 + 4 * + 3 -` = **14**."],
+["Try one", "Convert `6 + 2 * (5 - 1)` to postfix and evaluate it.", "Postfix: `6 2 5 1 - * +`.\n\nThe `-` makes 4, the `*` makes 8, and the `+` makes 6 + 8 = **14**."],
+["Common bugs", "Name three mistakes in shunting-yard code.", "Popping only on `>`, so `8 - 3 - 2` gives 7.\n\n**Forgetting the final flush**: operators left on the stack must be output.\n\nLetting an operator pop a `(`, or tokenizing `12` as two characters."],
+["Bad parentheses", "What can go wrong with mismatched parentheses? Why is that dangerous in C++?", "A `)` with no `(` empties the stack, or a `(` is left at the end.\n\nCalling `ops.top()` on an **empty stack** is **undefined behavior**, so real code must detect both cases."],
+["Project 4", "What are the three stages of the Project 4 evaluator?", "**1. Tokenize** the infix text.\n\n**2. Convert** the tokens to postfix (shunting-yard).\n\n**3. Evaluate** the postfix expression with a stack."],
+["Stack size", "What is the largest number of values on the evaluation stack while evaluating `3 4 2 * +`?", "**3**: after reading `3`, `4`, `2` the stack is `[3 4 2]`. Then `*` leaves `[3 8]` and `+` leaves `[11]`."]
+].map((c,i)=>({id:i,t:c[0],q:c[1],a:c[2]}));
+const QUIZ=[["Where does the operator go in **postfix**?", "After its operands, as in `3 4 +`", "Between its operands, as in `3 + 4`", "Before its operands, as in `+ 3 4`", "Anywhere, as long as parentheses are used"], ["What is unnecessary for determining the grouping of a valid postfix expression?", "Parentheses or precedence rules", "The left-to-right order of the tokens", "Knowing that each operator takes two operands", "The positions of the operators"], ["A postfix evaluator reads an operator. What does it do?", "Checks for two values, pops the right operand, then the left, and pushes the result", "Pushes the operator and waits for more numbers", "Pops one value and applies the operator to it", "Pops the left operand first, then the right operand"], ["During infix-to-postfix conversion, what does the stack hold?", "Operators waiting to be output, plus opening parentheses that mark boundaries", "Numbers waiting to be output", "The finished postfix expression", "Only parentheses"], ["What is the value of `3 4 2 * +`?", "11", "14", "9", "24"], ["Evaluate `8 2 / 3 -`.", "1", "3", "-1", "4"], ["A student treats the first popped value as the **left** operand. In integer arithmetic, what does `8 2 / 3 -` compute?", "3", "1", "0", "-1"], ["Why do we tokenize instead of reading single characters?", "So multi-digit numbers like `12` stay one token", "To remove the operators", "To make the stack smaller", "To convert the numbers to postfix"], ["With `std::stack<int>`, what is `7 / 2` in `evalPostfix`?", "3 (truncated)", "3.5", "4", "A compile error"], ["Evaluate `0 7 - 2 /` with integer arithmetic.", "-3", "-4", "3", "-3.5"], ["Which input is outside the lecture code's assumptions?", "`-7 + 3` (unary minus)", "`12 + 3`", "`(4 - 1) * 2`", "`8 / 2 / 2`"], ["What is at a **leaf** of an expression tree?", "A number", "An operator", "A parenthesis", "Only the final result"], ["Which traversal of an expression tree gives **postfix**?", "Post-order (left, right, node)", "Pre-order (node, left, right)", "In-order (left, node, right)", "Level-order"], ["What is the root of the expression tree for `(3 + 4) * 2`?", "`*`", "`+`", "`2`", "`3`"], ["In `3 + 4 * 2`, which operator is written first but output last?", "`+`", "`*`", "Neither", "Both at the same time"], ["What are the two containers in shunting-yard?", "An output list and an operator stack", "Two stacks of numbers", "A queue of numbers and a stack of numbers", "An output stack and an operator queue"], ["What happens to a **number** token?", "It goes straight to the output", "It is pushed on the operator stack", "It waits for the next operator", "It is evaluated immediately"], ["When operator `o` arrives, which operators on top of the stack are popped?", "Those with precedence greater than or equal to `o` (stopping at a `(`)", "Only those with strictly higher precedence", "Those with lower precedence", "All operators, always"], ["What does `)` do?", "Pops operators to the output until `(`, then discards the `(`", "Pushes `)` on the stack", "Pops everything, including the `(`, to the output", "Pops exactly one operator"], ["What prevents an operator from popping a `(`?", "The loop checks `isOp(ops.top())`, which is false for `(`", "`(` has the highest precedence", "`(` is never on the stack", "Operators never pop anything"], ["Why does the pop test use `>=`?", "The operators are left-associative: `8 - 3 - 2` means `(8 - 3) - 2`", "Equal operators cancel each other", "It makes `*` and `+` equal", "It saves stack space"], ["Converting `3 + 4 * 2`: what is the stack right after `*` is read?", "`+ *` (bottom to top)", "`*`", "`+`", "Empty"], ["In `3 + 4 * 2`, why does `*` not pop the `+`?", "`*` has higher precedence than `+`", "`*` has lower precedence than `+`", "`+` is a parenthesis", "The stack is empty"], ["Convert `(3 + 4) * 2` to postfix.", "`3 4 + 2 *`", "`3 4 2 * +`", "`3 4 + * 2`", "`* + 3 4 2`"], ["Convert `5 + (1 + 2) * 4 - 3` to postfix.", "`5 1 2 + 4 * + 3 -`", "`5 1 2 4 * + + 3 -`", "`5 1 2 + 4 * 3 - +`", "`5 1 + 2 4 * + 3 -`"], ["What is the value of `6 + 2 * (5 - 1)`?", "14", "32", "15", "10"], ["Which is a shunting-yard bug?", "Forgetting to pop the remaining operators at the end", "Outputting numbers immediately", "Pushing a `(` on the stack", "Popping on `>=` for left-associative operators"], ["What is dangerous when a `)` has no matching `(`?", "Calling `ops.top()` on an empty stack is undefined behavior", "The output list overflows", "The compiler rejects the program", "Nothing: the extra `)` is ignored safely"], ["What is the correct order of the Project 4 stages?", "Tokenize, convert to postfix, evaluate", "Evaluate, tokenize, convert to postfix", "Convert to postfix, tokenize, evaluate", "Tokenize, evaluate, convert to postfix"], ["What is the largest number of values on the evaluation stack while evaluating `3 4 2 * +`?", "3", "2", "4", "1"]];
+
+const $=s=>document.querySelector(s);
+const MATCH=[["Notation of `3 4 +`", "Postfix"], ["Notation of `+ 3 4`", "Prefix"], ["Postfix form of `(3 + 4) * 2`", "`3 4 + 2 *`"], ["Postfix form of `3 + 4 * 2`", "`3 4 2 * +`"], ["Value of `3 4 2 * +`", "11"], ["Value of `8 2 / 3 -`", "1"], ["Value of `6 + 2 * (5 - 1)`", "14"], ["Value of `0 7 - 2 /` (integer arithmetic)", "-3"], ["The first value an operator pops is its...", "Right operand"], ["Expression-tree traversal that gives postfix", "Post-order"], ["Leaves of an expression tree", "Numbers"], ["Root of the tree for `(3 + 4) * 2`", "`*`"], ["Shunting-yard: a number token", "Goes straight to the output"], ["Shunting-yard: a `(` token", "Pushed on the operator stack"], ["Shunting-yard: a `)` token", "Pop operators to the output until `(`, then discard it"], ["Why the pop test uses `>=`", "Operators are left-associative"], ["Shunting-yard: end of input", "Pop the remaining operators to the output"], ["`ops.top()` on an empty stack", "Undefined behavior"]].map((c,i)=>({id:i,q:c[0],a:c[1]}));
+const stage=$('#stage'), homeBtn=$('#homeBtn');
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const TREES='<svg viewBox="0 0 260 105" width="100%" style="max-width:340px;display:block;margin:6px auto" role="img" aria-label="Two expression trees: plus at the root of three plus four times two, and times at the root of three plus four, times two" fill="none" stroke="currentColor" stroke-width="1.4"><g><path d="M50 26L25 40M50 26L75 40M75 61L62 74M75 61L88 74"/><path d="M180 26L155 40M180 26L205 40M155 61L142 74M155 61L168 74"/></g><g font-size="13" text-anchor="middle" fill="currentColor" stroke="none"><g stroke="currentColor" fill="var(--surface2)"><circle cx="50" cy="15" r="11"/><circle cx="25" cy="50" r="11"/><circle cx="75" cy="50" r="11"/><circle cx="62" cy="85" r="11"/><circle cx="88" cy="85" r="11"/><circle cx="180" cy="15" r="11"/><circle cx="155" cy="50" r="11"/><circle cx="205" cy="50" r="11"/><circle cx="142" cy="85" r="11"/><circle cx="168" cy="85" r="11"/></g><text x="50" y="20">+</text><text x="25" y="55">3</text><text x="75" y="55">*</text><text x="62" y="90">4</text><text x="88" y="90">2</text><text x="180" y="20">*</text><text x="155" y="55">+</text><text x="205" y="55">2</text><text x="142" y="90">3</text><text x="168" y="90">4</text></g></svg>';
+function plain(s){return s.replace(/\{\{TREES\}\}/g,'').replace(/[`]/g,'').replace(/\*\*/g,'').replace(/\n\n/g,' ');}
+function fmt(s,rich){
+  s=rich?s.replace(/\{\{TREES\}\}/g,'@@TREES@@'):s.replace(/\{\{TREES\}\}/g,'');
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br><br>').replace(/@@TREES@@/g,TREES);
+}
+function load(k){try{return JSON.parse(localStorage.getItem('sy17.'+k))}catch(e){return null}}
+function save(k,v){try{localStorage.setItem('sy17.'+k,JSON.stringify(v))}catch(e){}}
+let cleanup=null;
+function go(fn){ if(cleanup){cleanup();cleanup=null} fn(); window.scrollTo(0,0); }
+homeBtn.onclick=()=>go(home);
+
+function home(){
+  homeBtn.hidden=true;
+  const bq=load('quiz'), bm=load('match');
+  stage.innerHTML=`
+    <p class="lede">Practice the ideas from Class 17: infix, prefix and postfix, evaluating postfix with a stack, and the shunting-yard algorithm. Pick a game.</p>
+    <div class="modes" style="margin-top:16px">
+      <button class="mode" data-m="study"><h2>Study deck</h2><p>Flip cards one at a time. Cards you miss come back until you know them.</p><span class="best">30 cards</span></button>
+      <button class="mode" data-m="quiz"><h2>Stack Quiz</h2><p>10 multiple-choice questions. You have 3 lives. Each wrong answer costs one.</p><span class="best">Best: ${bq!=null?bq+' pts':'none yet'}</span></button>
+      <button class="mode" data-m="match"><h2>Match Rounds</h2><p>Pair each question with its answer. Three rounds of six. Misses add 5 seconds.</p><span class="best">Best: ${bm!=null?bm+' s':'none yet'}</span></button>
+    </div>`;
+  stage.querySelectorAll('.mode').forEach(b=>b.onclick=()=>go({study,quiz,match}[b.dataset.m]));
+}
+
+/* ---------- Study ---------- */
+function study(){
+  homeBtn.hidden=false;
+  let queue=shuffle(CARDS), total=CARDS.length, known=0, pass=1, flipped=false, missed=new Set();
+  function render(){
+    if(!queue.length){
+      flipped=false;
+      stage.innerHTML=`<div class="result"><h2 id="doneH" tabindex="-1">Deck complete</h2><div class="big">${total} / ${total}</div>
+        <p>${missed.size?`You needed a second look at ${missed.size} card${missed.size>1?'s':''}: `+[...missed].map(i=>CARDS[i].t).join(', ')+'.':'You knew every card on the first pass.'}</p>
+        <div class="row"><button class="btn pri" id="again">Study again</button><button class="btn" id="hm">Home</button></div></div>`;
+      $('#again').onclick=()=>go(study); $('#hm').onclick=()=>go(home); $('#doneH').focus({preventScroll:true}); return;
+    }
+    const c=queue[0]; flipped=false;
+    stage.innerHTML=`
+      <div class="bar"><span class="stat">${known} / ${total} known</span><div class="grow meter"><i style="width:${known/total*100}%"></i></div><span>${queue.length} left</span></div>
+      <div class="flip" id="card" tabindex="-1" role="group" aria-label="Flashcard: ${plain(c.t)}" style="margin-top:14px"><div class="flip-in">
+        <div class="face q"><div class="tag"><span>${fmt(c.t)}</span><span>Question</span></div><div class="text">${fmt(c.q)}</div><div class="hint">Think of your answer, then click the card or press Space.</div></div>
+        <div class="face a" aria-hidden="true"><div class="tag"><span>${fmt(c.t)}</span><span>Answer</span></div><div class="text">${fmt(c.a,true)}</div></div>
+      </div></div>
+      <div class="row" style="margin-top:14px"><button class="btn" id="flip" aria-expanded="false">Show answer (Space)</button><button class="btn miss" id="miss" disabled>Need review (&larr;)</button><button class="btn pri" id="got" disabled>Got it (&rarr;)</button></div>
+      <div class="sr-only" id="sr" aria-live="polite"></div>`;
+    $('#card').onclick=flip; $('#flip').onclick=flip; $('#miss').onclick=()=>next(false); $('#got').onclick=()=>next(true);
+    $('#card').focus({preventScroll:true});
+  }
+  function flip(){ if(!queue.length) return; flipped=!flipped; $('#card').classList.toggle('on',flipped); const fb=$('#flip'); fb.textContent=flipped?'Show question (Space)':'Show answer (Space)'; fb.setAttribute('aria-expanded',String(flipped)); $('#sr').textContent=flipped?'Answer: '+plain(queue[0].a):'Question: '+plain(queue[0].q); $('.face.q').setAttribute('aria-hidden',String(flipped)); $('.face.a').setAttribute('aria-hidden',String(!flipped)); $('#miss').disabled=!flipped; $('#got').disabled=!flipped; }
+  function next(ok){
+    if(!flipped||!queue.length) return;
+    const c=queue.shift();
+    if(ok) known++; else { missed.add(c.id); queue.splice(Math.min(3,queue.length),0,c); }
+    render();
+  }
+  const key=e=>{
+    if(e.key===' '||e.key==='Enter'){ if(document.activeElement&&document.activeElement.tagName==='BUTTON') return; if(queue.length){e.preventDefault();flip()} }
+    else if(e.key==='ArrowRight') next(true); else if(e.key==='ArrowLeft') next(false);
+  };
+  document.addEventListener('keydown',key); cleanup=()=>document.removeEventListener('keydown',key);
+  render();
+}
+
+/* ---------- Quiz ---------- */
+function quiz(){
+  homeBtn.hidden=false;
+  const qs=shuffle(CARDS).slice(0,10); let i=0, score=0, streak=0, lives=3, answered=false, wrongs=[];
+  function render(){
+    if(i>=qs.length||lives<=0) return finish();
+    const c=qs[i]; answered=false;
+    const qz=QUIZ[c.id];
+    const opts=shuffle(qz.slice(1).map((t,n)=>({t,ok:n===0})));
+    stage.innerHTML=`
+      <div class="bar"><span class="stat">Question ${i+1} / ${qs.length}</span><div class="grow meter"><i style="width:${i/qs.length*100}%"></i></div>
+        <span class="stat" id="qScore">${score} pts</span><span class="lives" id="qLives" aria-label="${lives} lives left">${'●'.repeat(lives)}${'○'.repeat(3-lives)}</span></div>
+      <div class="qcard pop" style="margin-top:14px"><div class="tag"><span>${fmt(c.t)}</span><span id="qStreak">${streak>1?streak+' correct in a row':''}</span></div>
+        <h2 id="qh" tabindex="-1">${fmt(qz[0])}</h2>
+        <div class="opts">${opts.map((o,n)=>`<button class="opt" data-ok="${o.ok?1:0}"><span class="k">${n+1}</span><span>${fmt(o.t)}</span></button>`).join('')}</div>
+        <div id="fb" role="status" aria-live="polite"></div></div>`;
+    stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(b,c));
+    $('#qh').focus({preventScroll:true});
+  }
+  function updateBar(){ const sk=$('#qStreak'); if(sk) sk.textContent=streak>1?streak+' correct in a row':''; $('#qScore').textContent=score+' pts'; const L=$('#qLives'); L.textContent='●'.repeat(lives)+'○'.repeat(3-lives); L.setAttribute('aria-label',lives+' lives left'); }
+  function pick(btn,c){
+    if(answered) return; answered=true;
+    const ok=btn.dataset.ok==='1';
+    let right='', mine=btn.lastElementChild.innerHTML; stage.querySelectorAll('.opt').forEach(b=>{b.disabled=true; if(b.dataset.ok==='1'){ b.classList.add('good'); right=b.lastElementChild.innerHTML; }});
+    let msg;
+    if(ok){ streak++; const gain=10+Math.min(streak-1,5)*2; score+=gain; msg=`Correct. +${gain} points.`; }
+    else { btn.classList.add('bad'); streak=0; lives--; wrongs.push({c,prompt:fmt(QUIZ[c.id][0]),mine,right}); msg=`Not quite. The correct answer is: ${right}. ${lives>0?lives+(lives===1?' life left.':' lives left.'):'No lives left.'}`; }
+    updateBar();
+    $('#fb').innerHTML=`<div class="note">${msg}</div><div class="row" style="margin-top:12px"><button class="btn pri" id="nx">${(i+1>=qs.length||lives<=0)?'See results':'Next question (Enter)'}</button></div>`;
+    $('#nx').onclick=advance; $('#nx').focus();
+  }
+  function advance(){ i++; render(); }
+  function finish(){
+    const best=load('quiz'), isBest=best==null||score>best; if(isBest) save('quiz',score);
+    stage.innerHTML=`<div class="result pop"><h2 id="doneQ" tabindex="-1">${lives<=0?'Out of lives':'Round complete'}</h2><div class="big">${score} pts</div>
+      <p>${isBest?'New best score.':'Best so far: '+best+' pts.'}</p>
+      ${wrongs.length?`<div class="review"><strong>Review these:</strong><ul>${wrongs.map(w=>`<li>${w.prompt}<br><span>Your answer: ${w.mine}</span><br><span>Correct answer: ${w.right}</span><br><span style="color:var(--muted)"><em>Full flashcard (${fmt(w.c.t)}):</em> ${fmt(w.c.q)}<br>${fmt(w.c.a,true)}</span></li>`).join('')}</ul></div>`:'<p>No misses.</p>'}
+      <div class="row"><button class="btn pri" id="again">Play again</button><button class="btn" id="hm">Home</button></div></div>`;
+    $('#again').onclick=()=>go(quiz); $('#hm').onclick=()=>go(home); $('#doneQ').focus({preventScroll:true});
+  }
+  const key=e=>{
+    if(['1','2','3','4'].includes(e.key)){ const b=stage.querySelectorAll('.opt')[+e.key-1]; if(b&&!answered) b.click(); }
+    else if(e.key==='Enter'&&answered){ const n=$('#nx'); if(n&&document.activeElement!==n) n.click(); }
+  };
+  document.addEventListener('keydown',key); cleanup=()=>document.removeEventListener('keydown',key);
+  render();
+}
+
+/* ---------- Match ---------- */
+function match(){
+  homeBtn.hidden=false;
+  const pool=shuffle(MATCH); let round=0, misses=0, t0=Date.now(), timer, nextT, sel=null, left=0;
+  function startRound(){
+    const set=pool.slice(round*6,round*6+6); left=6; sel=null;
+    const L=shuffle(set), R=shuffle(set);
+    stage.innerHTML=`
+      <div class="bar"><span class="stat">Round ${round+1} / 3</span><div class="grow meter"><i style="width:${round/3*100}%"></i></div>
+        <span class="stat" id="clock">0.0 s</span><span class="stat" id="missCount">${misses} miss${misses===1?'':'es'}</span></div>
+      <h2 id="rh" tabindex="-1" class="sr-only">Round ${round+1} of 3</h2><p class="lede" style="margin:12px 0">Click a prompt, then click its matching answer.</p><div class="sr-only" id="msr" role="status" aria-live="polite"></div>
+      <div class="mgrid"><div class="mcol" id="cl">${L.map(c=>`<button class="tile" data-id="${c.id}" data-side="q" aria-pressed="false">${fmt(c.q)}</button>`).join('')}</div>
+      <div class="mcol" id="cr">${R.map(c=>`<button class="tile" data-id="${c.id}" data-side="a" aria-pressed="false">${fmt(c.a)}</button>`).join('')}</div></div>`;
+    stage.querySelectorAll('.tile').forEach(b=>b.onclick=()=>tap(b));
+    $('#rh').focus({preventScroll:true}); say(`Round ${round+1} of 3. Six pairs.`);
+  }
+  function say(t){ const r=$('#msr'); if(r) r.textContent=t; }
+  function setSel(x,on){ x.classList.toggle('sel',on); x.setAttribute('aria-pressed',on?'true':'false'); }
+  function tap(b){
+    if(b.classList.contains('done')) return;
+    if(!sel){ sel=b; setSel(b,true); return; }
+    if(sel===b){ setSel(b,false); sel=null; return; }
+    if(sel.dataset.side===b.dataset.side){ setSel(sel,false); sel=b; setSel(b,true); return; }
+    if(sel.dataset.id===b.dataset.id){
+      [sel,b].forEach(x=>{setSel(x,false);x.classList.add('done');x.disabled=true;}); sel=null; left--;
+      if(left){ say(`Matched. ${left} pair${left===1?'':'s'} left.`); const nx=stage.querySelector('.tile:not(.done)'); if(nx) nx.focus({preventScroll:true}); } else say(round<2?'Matched. Round complete.':'Matched. All pairs done.');
+      if(!left){ stage.querySelectorAll('.tile').forEach(t=>t.disabled=true); round++; if(round>=3) done(); else nextT=setTimeout(startRound,500); }
+    } else {
+      misses++; const a=sel, c=b; setSel(a,false); sel=null; say('Not a match. Try again.');
+      [a,c].forEach(x=>{x.classList.add('shake'); setTimeout(()=>x.classList.remove('shake'),320)});
+      const m=$('#missCount'); if(m) m.textContent=misses+' miss'+(misses===1?'':'es');
+    }
+  }
+  function done(){
+    clearInterval(timer);
+    const secs=(Date.now()-t0)/1000, score=Math.round((secs+misses*5)*10)/10;
+    const best=load('match'), isBest=best==null||score<best; if(isBest) save('match',score);
+    stage.innerHTML=`<div class="result pop"><h2 id="doneM" tabindex="-1">All pairs matched</h2><div class="big">${score} s</div>
+      <p>${secs.toFixed(1)} s on the clock plus ${misses} miss${misses===1?'':'es'} × 5 s. ${isBest?'New best time.':'Best so far: '+best+' s.'}</p>
+      <div class="row"><button class="btn pri" id="again">Play again</button><button class="btn" id="hm">Home</button></div></div>`;
+    $('#again').onclick=()=>go(match); $('#hm').onclick=()=>go(home); $('#doneM').focus({preventScroll:true});
+  }
+  timer=setInterval(()=>{const c=$('#clock'); if(c) c.textContent=((Date.now()-t0)/1000).toFixed(1)+' s'},100);
+  cleanup=()=>{clearInterval(timer);clearTimeout(nextT)};
+  startRound();
+}
+
+home();
+</script>
+</body>
+</html>
