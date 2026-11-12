@@ -62,6 +62,15 @@
       font-size: .9em;
     }
 
+    /* ── Download all ── */
+    .dl-all { margin: 0 0 14px; font-size: .9em; }
+    .dl-all button {
+      background: #1a3a6b; color: #fff; border: 0; border-radius: 4px;
+      padding: 7px 14px; font-size: 1em; cursor: pointer;
+    }
+    .dl-all button:disabled { opacity: .6; cursor: wait; }
+    .dl-all #dl-status { margin-left: 10px; color: #555; }
+
     /* ── Legend ── */
     .legend {
       display: flex;
@@ -188,6 +197,11 @@
   <strong>Note:</strong> All project submissions are due on Gradescope by <strong>11:59&nbsp;PM</strong> on the date listed.
   Programming exercises are auto-graded; submit typed code files.
   Exercises have no late submissions because solutions are released immediately afterward.
+</div>
+
+<div class="dl-all">
+  <button id="dl-all-btn" type="button">&#11015;&nbsp;Download all slides &amp; supplements (ZIP)</button>
+  <span id="dl-status"></span>
 </div>
 
 <!-- ═══════════════════════ LEGEND ═══════════════════════ -->
@@ -481,15 +495,11 @@
   <tr>
     <td class="lec-num">19</td>
     <td>Tu, 11/10</td>
-    <td>Searching Algorithms and Complexity
-        <div class="sub"><a href="slides/day19_searching.pdf">&#128196;&nbsp;Slides (PDF)</a></div>
+    <td>Expression Evaluator: Live Demo (<code>tokenize</code> and the Start of <code>toPostfix</code>)
         <div class="sub"><a href="slides/lecture_slip_2026_11_10_student.pdf">&#128196;&nbsp;Lecture Slip (PDF)</a></div>
         <div class="sub"><a href="slides/lecture_slip_2026_11_10_key.pdf">&#128196;&nbsp;Lecture Slip Solution (PDF)</a></div>
-        <div class="sub"><a href="slides/day19_expression_demo.pdf">&#128196;&nbsp;Live demo slides: <code>tokenize</code>, <code>toPostfix</code>, <code>evalPostfix</code> (PDF)</a></div>
-        <div class="sub"><a href="supplements/expression_demo_use_queue.cpp">&#128187;&nbsp;Demo code, queue version (with error checks): <code>expression_demo_use_queue.cpp</code> (C++)</a></div>
-        <div class="sub"><a href="supplements/expression_demo_use_vector.cpp">&#128187;&nbsp;Demo code, vector version (with error checks): <code>expression_demo_use_vector.cpp</code> (C++)</a></div>
-        <div class="sub"><a href="supplements/day19_supplement_duplicates.pdf">&#128196;&nbsp;Optional supplement: duplicates and <code>lower_bound</code> (PDF)</a></div></td>
-    <td>Live demo of the expression evaluator (tokenize, toPostfix, evalPostfix); linear search O(n), binary search O(log n), sorted-array requirement</td>
+        <div class="sub"><a href="supplements/expression_demo_live.cpp">&#128187;&nbsp;Partial code from class: <code>expression_demo_live.cpp</code> (C++)</a></div></td>
+    <td>Live demo of the expression evaluator: <code>tokenize</code> and the first part of <code>toPostfix</code>. We finish the rest on Thursday.</td>
     <td></td>
     <td></td>
   </tr>
@@ -497,28 +507,38 @@
   <tr>
     <td class="lec-num">20</td>
     <td>Th, 11/12</td>
-    <td>Sorting I &mdash; Quadratic Sorts</td>
-    <td>Bubble, selection, insertion sort; O(n&sup2;) analysis; stability and in-place properties; when quadratic sorts are practical</td>
-    <td><span class="badge b-due">Ex&nbsp;8 Due</span> <span class="badge b-ex">Ex&nbsp;9 Posted</span>
-        <div class="sub">Sorting Trace</div></td>
+    <td>Finishing the Expression Evaluator; Searching Algorithms and Complexity
+        <div class="sub"><a href="slides/day19_searching.pdf">&#128196;&nbsp;Searching slides (PDF)</a></div>
+        <div class="sub"><a href="slides/day20_live_coding_handout.pdf">&#128196;&nbsp;Live-coding handout: finish <code>toPostfix</code> and <code>evalPostfix</code>, then two-stack <code>evalInfix</code> (PDF)</a></div>
+        <div class="sub"><a href="supplements/expression_demo_live_complete.cpp">&#128187;&nbsp;Complete code: <code>expression_demo_live_complete.cpp</code> (C++)</a></div>
+        <div class="sub"><a href="slides/day19_expression_demo.pdf">&#128196;&nbsp;Demo slides: <code>tokenize</code>, <code>toPostfix</code>, <code>evalPostfix</code> (PDF)</a></div>
+        <div class="sub"><a href="supplements/expression_demo_use_queue.cpp">&#128187;&nbsp;Demo code, queue version (with error checks): <code>expression_demo_use_queue.cpp</code> (C++)</a></div>
+        <div class="sub"><a href="supplements/expression_demo_use_vector.cpp">&#128187;&nbsp;Demo code, vector version (with error checks): <code>expression_demo_use_vector.cpp</code> (C++)</a></div>
+        <div class="sub"><a href="supplements/bst_1_to_100.pdf">&#128196;&nbsp;Optional: the binary search tree for the numbers 1 to 100 (PDF)</a></div>
+        <div class="sub"><a href="supplements/day19_supplement_duplicates.pdf">&#128196;&nbsp;Optional supplement: duplicates and <code>lower_bound</code> (PDF)</a></div></td>
+    <td>Finish <code>toPostfix</code> and write <code>evalPostfix</code> together; a two-stack method that evaluates infix directly (for Project 4); linear search O(n) with its average cost, binary search step by step (<code>lo</code>, <code>hi</code>, <code>mid</code>, the overflow-safe midpoint, why it is O(log n)), the search tree view, sorted-array requirement; review of the Nov 10 lecture slip</td>
+    <td></td>
     <td></td>
   </tr>
 
   <tr>
     <td class="lec-num">21</td>
     <td>Tu, 11/17</td>
-    <td>Sorting II &mdash; Merge Sort</td>
-    <td>Divide-and-conquer; recursive halving; merge step; O(n log n) time, O(n) auxiliary space; recurrence T(n) = 2T(n/2) + O(n)</td>
-    <td></td>
+    <td>Sorting I &mdash; Quadratic Sorts
+        <div class="sub"><a href="slides/day21_sorting_quadratic.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
+    <td>Bubble, selection, insertion sort; O(n&sup2;) analysis; stability and in-place properties; when quadratic sorts are practical</td>
+    <td><span class="badge b-due">Ex&nbsp;8 Due</span> <span class="badge b-ex">Ex&nbsp;9 Posted</span>
+        <div class="sub">Sorting Trace</div></td>
     <td></td>
   </tr>
 
   <tr class="project-due">
     <td class="lec-num">22</td>
     <td>Th, 11/19</td>
-    <td>Sorting III &mdash; Quicksort</td>
-    <td>Pivot selection, partitioning, recursive structure; average O(n log n), worst-case O(n&sup2;); comparison with Merge Sort; Heap Sort and Shell Sort if time permits</td>
-    <td><span class="badge b-due">Ex&nbsp;9 Due</span></td>
+    <td>Sorting II &mdash; Merge Sort and Quicksort
+        <div class="sub"><a href="slides/day22_merge_quick.pdf">&#128196;&nbsp;Slides (PDF)</a></div></td>
+    <td>Divide-and-conquer; the merge step; O(n log n) time; quicksort partitioning and pivot choice; average O(n log n), worst-case O(n&sup2;); comparison of the two</td>
+    <td></td>
     <td><span class="badge b-due">&#35;3 Due</span>&nbsp;<a href="projects/p4/p4_expression_evaluator.html" data-available="2026-11-19" style="text-decoration:none;"><span class="badge b-proj">&#35;4 Posted</span></a></td>
   </tr>
 
@@ -532,7 +552,7 @@
     <td>Tu, 11/24</td>
     <td>Binary Trees &amp; Binary Search Trees</td>
     <td>Tree structure; in-order / pre-order / post-order traversal; BST property, insert and search; deletion and height analysis as time permits</td>
-    <td><span class="badge b-ex">Ex&nbsp;10 Posted</span>
+    <td><span class="badge b-due">Ex&nbsp;9 Due</span> <span class="badge b-ex">Ex&nbsp;10 Posted</span>
         <div class="sub">BST Traversal</div></td>
     <td></td>
   </tr>
@@ -601,10 +621,55 @@
 <footer>
   CSCI 235 &bull; Data Structures &bull; Hunter College, CUNY &bull; Fall 2026
   &nbsp;&mdash;&nbsp;
-  Last updated: November 10, 2026
+  Last updated: November 11, 2026
 </footer>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+  // Download all slides and supplements listed on this page as one ZIP
+  (function () {
+    var btn = document.getElementById('dl-all-btn');
+    var status = document.getElementById('dl-status');
+    if (!btn) return;
+    btn.addEventListener('click', async function () {
+      if (typeof JSZip === 'undefined') {
+        status.textContent = 'ZIP tool could not load. Please download files one by one.';
+        return;
+      }
+      var seen = {}, urls = [];
+      document.querySelectorAll('a[href]').forEach(function (a) {
+        var h = a.getAttribute('href');
+        if (/^(slides|supplements)\//.test(h) && !seen[h]) { seen[h] = 1; urls.push(h); }
+      });
+      btn.disabled = true;
+      var zip = new JSZip(), ok = 0, missing = [];
+      for (var i = 0; i < urls.length; i++) {
+        status.textContent = 'Fetching ' + (i + 1) + ' of ' + urls.length + '...';
+        try {
+          var r = await fetch(urls[i]);
+          if (!r.ok) throw new Error(r.status);
+          zip.file(urls[i], await r.blob());
+          ok++;
+        } catch (e) { missing.push(urls[i]); }
+      }
+      if (ok === 0) {
+        status.textContent = 'No files could be fetched (open this page from the course website).';
+        btn.disabled = false; return;
+      }
+      status.textContent = 'Building ZIP...';
+      var blob = await zip.generateAsync({ type: 'blob' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'csci235_materials.zip';
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(function () { URL.revokeObjectURL(link.href); }, 10000);
+      status.textContent = 'Downloaded ' + ok + ' files' +
+        (missing.length ? ' (' + missing.length + ' not available yet).' : '.');
+      btn.disabled = false;
+    });
+  })();
+</script>
 <script>
   // Hide project links that aren't available yet
   document.querySelectorAll('a[data-available]').forEach(function(a) {
