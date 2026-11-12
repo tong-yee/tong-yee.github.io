@@ -1,18 +1,21 @@
 // File name: expression_demo_use_queue.cpp
-
+//
+// Live demo for Day 19: tokenize -> toPostfix -> evalPostfix.
+//
 // Assumes syntactically valid infix expressions containing nonnegative
 // integer literals, binary operators +, -, *, /, and balanced parentheses.
 // Unary minus and decimal literals are not supported.
 // Intermediate evaluation results may be fractional.
-// Some invalid inputs are detected, but this is not a complete syntax validator.
-#include <iostream>
-#include <string>
+// Some invalid inputs are detected, but this is not a complete syntax
+// validator.
 #include <cctype>
+#include <iostream>
 #include <queue>
 #include <stack>
-#include <stdexcept> // std::invalid_argument
+#include <stdexcept>  // std::invalid_argument
+#include <string>
 
-// convert a string to a queue of strings, each element is a token, can be an int, an operator +, -, *, /, (, or ).
+// Convert a string to a queue of tokens: an integer, +, -, *, /, ( or ).
 std::queue<std::string> tokenize(const std::string& s);
 // Queue parameters are passed by value because these functions
 // consume their local copies using front() and pop().
@@ -27,11 +30,11 @@ void print(std::queue<std::string> que);
 int main() {
   std::string expr("12 + 3 * (1 - 2) / 4");
   std::queue<std::string> tokens = tokenize(expr);
-  std::cout << "tokens in expression: " << expr << '\n'; 
+  std::cout << "tokens in expression: " << expr << '\n';
   print(tokens);
 
   std::queue<std::string> postfix = toPostfix(tokens);
-  std::cout << "tokens in postfix expression:\n"; 
+  std::cout << "tokens in postfix expression:\n";
   print(postfix);
 
   std::cout << evalPostfix(postfix) << '\n';
@@ -56,12 +59,12 @@ std::queue<std::string> tokenize(const std::string& s) {
       tokens.push(numStr);
     }
     else if (s[i] == '(' || s[i] == ')' ||
-      s[i] == '+' || s[i] == '-' || 
-      s[i] == '*' || s[i] == '/') {
+             s[i] == '+' || s[i] == '-' ||
+             s[i] == '*' || s[i] == '/') {
       tokens.push(std::string(1, s[i]));
       i++;
     }
-    else { 
+    else {
       // Without this branch, an unsupported character would cause
       // an infinite loop because i would not advance.
       throw std::invalid_argument("Invalid character in infix expression");
@@ -79,10 +82,10 @@ void print(std::queue<std::string> que) {
   std::cout << '\n';
 }
 
-// shunting yard algorithm 
+// shunting yard algorithm
 std::queue<std::string> toPostfix(std::queue<std::string> infix) {
   std::queue<std::string> postfix;
-  std::stack<std::string> operators; // operators waiting to be added to postfix
+  std::stack<std::string> operators;  // waiting to be added to postfix
   while (!infix.empty()) {
     std::string token = infix.front();
     infix.pop();
@@ -119,13 +122,13 @@ std::queue<std::string> toPostfix(std::queue<std::string> infix) {
       if (operators.empty()) {
         throw std::invalid_argument("Unmatched closing parenthesis");
       }
-      operators.pop(); // pop the matched '('
+      operators.pop();  // pop the matched '('
     }
     else {
       throw std::invalid_argument("Invalid token in infix expression");
     }
   }
- 
+
   while (!operators.empty()) {
     // An unmatched ( must not be added to the postfix expression.
     if (operators.top() == "(") {
@@ -194,5 +197,5 @@ double evalPostfix(std::queue<std::string> postfix) {
     throw std::invalid_argument("invalid expression");
   }
 
-  return operands.top(); 
+  return operands.top();
 }
