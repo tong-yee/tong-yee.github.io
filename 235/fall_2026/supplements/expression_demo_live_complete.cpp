@@ -1,6 +1,6 @@
 // File name: expression_demo_live_complete.cpp
 // Name: Tong Yi
-// Class demo: tokenize -> toPostfix -> evalPostfix (complete version)
+// Class demo: tokenize -> toPostfix -> evalPostfix (complete version, without evalInfix)
 #include <cctype>
 #include <iostream>
 #include <queue>
@@ -13,7 +13,6 @@ void print(std::queue<std::string> que);
 std::queue<std::string> toPostfix(std::queue<std::string> infix);
 int prec(const std::string& op);
 double evalPostfix(std::queue<std::string> postfix);
-double evalInfix(std::queue<std::string> infix);
 
 int main() {
   std::queue<std::string> infix = tokenize("12 + 3 * (1 - 2) / 4");
@@ -24,8 +23,8 @@ int main() {
 
   std::cout << evalPostfix(postfix) << '\n';
 
-  // Two stacks: evaluate the infix tokens directly, no postfix needed.
-  std::cout << evalInfix(infix) << '\n';
+  // Project 4 idea: evaluate the infix tokens directly with two stacks
+  // (see the key steps below). Write evalInfix yourself.
   return 0;
 }
 
@@ -36,9 +35,9 @@ std::queue<std::string> tokenize(const std::string& expr) {
   while (i < len) {
     char ch = expr[i];
 
-    if (std::isdigit(ch)) {
+    if (std::isdigit(static_cast<unsigned char>(ch))) {
       std::string numStr;
-      while (i < len && std::isdigit(expr[i])) {
+      while (i < len && std::isdigit(static_cast<unsigned char>(expr[i]))) {
         numStr += expr[i];
         i++;
       }
@@ -49,7 +48,7 @@ std::queue<std::string> tokenize(const std::string& expr) {
       que.push(std::string(1, ch));
       i++;
     }
-    else if (std::isspace(ch)) {
+    else if (std::isspace(static_cast<unsigned char>(ch))) {
       i++;
     }
     else {
@@ -90,7 +89,7 @@ std::queue<std::string> toPostfix(std::queue<std::string> infix) {
     std::string token = infix.front();
     infix.pop();
 
-    if (std::isdigit(token[0])) {
+    if (std::isdigit(static_cast<unsigned char>(token[0]))) {
       postfix.push(token);
     }
     else if (token == "+" || token == "-" || token == "*" || token == "/") {
@@ -136,7 +135,7 @@ double evalPostfix(std::queue<std::string> postfix) {
     std::string token = postfix.front();
     postfix.pop();
 
-    if (std::isdigit(token[0])) {
+    if (std::isdigit(static_cast<unsigned char>(token[0]))) {
       values.push(std::stod(token));
     }
     else {
@@ -175,85 +174,19 @@ double evalPostfix(std::queue<std::string> postfix) {
   return values.top();
 }
 
-// Pop one operator and two values, then push the result.
-// Precondition: ops is not empty (every call below checks this first).
-void applyTop(std::stack<double>& values, std::stack<std::string>& ops) {
-  std::string op = ops.top();
-  ops.pop();
-  if (values.size() < 2) {
-    throw std::invalid_argument("not enough operands");
-  }
-  double right = values.top();  // the right operand comes off first
-  values.pop();
-  double left = values.top();
-  values.pop();
-
-  if (op == "+") {
-    values.push(left + right);
-  }
-  else if (op == "-") {
-    values.push(left - right);
-  }
-  else if (op == "*") {
-    values.push(left * right);
-  }
-  else if (op == "/") {
-    if (right == 0.0) {
-      throw std::invalid_argument("division by zero");
-    }
-    values.push(left / right);
-  }
-  else {
-    throw std::invalid_argument("invalid operator");
-  }
-}
-
-// Evaluate infix directly with two stacks: one for values, one for
-// operators. An operator waits on the operator stack until an operator of
-// lower precedence (or ")") arrives. Same rules as toPostfix, but instead of
-// sending an operator to the output we apply it right away.
-double evalInfix(std::queue<std::string> infix) {
-  std::stack<double> values;
-  std::stack<std::string> ops;
-  while (!infix.empty()) {
-    std::string token = infix.front();
-    infix.pop();
-
-    if (std::isdigit(token[0])) {
-      values.push(std::stod(token));
-    }
-    else if (token == "+" || token == "-" || token == "*" || token == "/") {
-      while (!ops.empty() && prec(ops.top()) >= prec(token)) {
-        applyTop(values, ops);
-      }
-      ops.push(token);
-    }
-    else if (token == "(") {
-      ops.push(token);
-    }
-    else if (token == ")") {
-      while (!ops.empty() && ops.top() != "(") {
-        applyTop(values, ops);
-      }
-      if (ops.empty()) {
-        throw std::invalid_argument("unmatched )");
-      }
-      ops.pop();  // discard the matching (
-    }
-    else {
-      throw std::invalid_argument("invalid token");
-    }
-  }
-
-  while (!ops.empty()) {
-    if (ops.top() == "(") {
-      throw std::invalid_argument("unmatched (");
-    }
-    applyTop(values, ops);
-  }
-
-  if (values.size() != 1) {
-    throw std::invalid_argument("invalid expression");
-  }
-  return values.top();
-}
+// Key steps of evalInfix (two stacks, no postfix queue). Code left for you.
+//   values: stack of numbers        ops: stack of operators
+//   For each token:
+//     1. number      -> convert it and push it on values.
+//     2. operator    -> while ops is not empty and prec(ops.top()) >= prec(token):
+//                         apply the top operator (pop two values, push the result).
+//                       then push the token on ops.
+//     3. "("         -> push it on ops; apply nothing.
+//     4. ")"         -> apply operators until "(" is on top of ops;
+//                       discard the "("; if ops runs out first, throw.
+//     5. anything else -> throw an invalid-token error.
+//   After the last token:
+//     6. apply every remaining operator; if one of them is "(", throw.
+//   Applying an operator: pop the RIGHT operand first, then the left;
+//   throw on division by zero; push the result.
+//   When done, values holds exactly one number: the answer.
