@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 9: Sorting Trace</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: .55rem;
+    right: .6rem;
+    z-index: 2;
+    font: 600 .78rem/1 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--navy);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(30,39,97,.08);
+  }
+  .copy-btn:hover { background: #f0f2f8; border-color: var(--navy-light); }
+  .copy-btn:focus-visible { outline: 2px solid var(--navy-light); outline-offset: 2px; }
+  .copy-btn.done { color: #2e7d32; border-color: #2e7d32; }
+  .copy-btn.failed { color: #b3261e; border-color: #b3261e; }
+  @media print { .copy-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 9 &mdash; Sorting Trace</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Posted: Tuesday, November 17, 2026 &middot; Due: Tuesday, November 24, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#warmup">Warm-Up &mdash; Trace by Hand (not graded)</a></li>
+    <li><a href="#taskA">Task A &mdash; <code>selectionSort()</code></a></li>
+    <li><a href="#taskB">Task B &mdash; <code>bubbleSort()</code></a></li>
+    <li><a href="#taskC">Task C &mdash; <code>insertionSort()</code></a></li>
+    <li><a href="#taskD">Task D &mdash; <code>stableSortCards()</code></a></li>
+    <li><a href="#edges">Edge Cases to Test</a></li>
+    <li><a href="#grading">Grading</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>
+  This exercise turns the quadratic sorts from class into code. Each sort also <em>reports its own work</em>,
+  so you can check your hand traces against what the program does. By the end of it you should be able to:
+</p>
+<ul>
+  <li>write <strong>selection sort</strong> by keeping the <em>index</em> of the smallest element seen so far (<code>minIdx</code>);</li>
+  <li>write <strong>bubble sort</strong> with an early exit, using a <code>swapped</code> flag;</li>
+  <li>write <strong>insertion sort</strong> by saving the element in <code>toInsert</code> and shifting larger elements right;</li>
+  <li>count <strong>comparisons</strong> and <strong>moves</strong> exactly, and see how they depend on the input (sorted, reversed, with duplicates);</li>
+  <li>explain what <strong>stable</strong> means and why a strict comparison (<code>&gt;</code>, not <code>&gt;=</code>) makes insertion sort stable.</li>
+</ul>
+<div class="note">
+  <span class="label">An analogy: sorting a hand of cards</span>
+  Selection sort scans the whole hand for the smallest card and puts it first. Bubble sort keeps swapping two
+  neighbouring cards that are in the wrong order. Insertion sort picks up one card at a time and slides it left into
+  its place among the cards you already hold. In this exercise you also keep a tally of how many cards you looked
+  at (comparisons) and how many you moved.
+</div>
+
+<h2 id="files">Files</h2>
+<table>
+  <thead><tr><th>File</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>Sorting.hpp</code></td><td>Provided. Declares <code>SortStats</code>, <code>Card</code> and the four functions, and documents exactly what to count. Do not modify, do not submit.</td></tr>
+    <tr><td><code>Sorting.cpp</code></td><td><strong>Submit this.</strong> Tasks A, B, C and D.</td></tr>
+    <tr><td><code>Ex9Demo.cpp</code></td><td>Provided. A program that exercises your code so you can see what it does. Do not submit.</td></tr>
+    <tr><td><code>demo_output.txt</code></td><td>What <code>Ex9Demo</code> prints when everything is correct.</td></tr>
+  </tbody>
+</table>
+<p>
+  All four files are available together as <code>ex9_starter.zip</code> on the course website and on
+  Brightspace, and the header and the demo files are also listed in full at the
+  <a href="#listings">end of this handout</a>.
+</p>
+<p>
+  Your work is the <code>TODO</code> sections of <code>Sorting.cpp</code>. You may add helper functions of your own, but do not change the signatures of the four required functions. The stubs compile as given, so you
+  can build and run the demo before you have written anything. <strong>Gradescope compiles your
+  <code>Sorting.cpp</code> against the original header</strong>, so any change you make to
+  <code>Sorting.hpp</code> is ignored &mdash; and if your code depended on that change, it will not compile.
+</p>
+<div class="note">
+  <span class="label">What &ldquo;comparisons&rdquo; and &ldquo;moves&rdquo; mean</span>
+  A <strong>comparison</strong> is a test between two <em>elements</em> of the array, such as <code>a[j] &lt; a[minIdx]</code>.
+  A test on an index, such as <code>j &gt;= 0</code>, is <em>not</em> a comparison. For selection sort and bubble sort a
+  <strong>move</strong> is a swap. For insertion sort a move is a <strong>shift</strong>: a copy <code>a[j+1] = a[j]</code>.
+  Writing <code>toInsert</code> into its final gap is not counted. Each task spells out the rule; follow it exactly,
+  because the autograder checks the counts as well as the sorted array.
+</div>
+
+<h2 id="warmup">Warm-Up &mdash; Trace by Hand (not graded)</h2>
+<p>
+  Do this on paper before you write any code. Nothing here is submitted or graded. Use the array
+  <code>{8, 3, 6, 2, 7}</code> (<code>n = 5</code>) for all three sorts.
+</p>
+
+<p><strong>1. Selection sort.</strong> Complete the table. After each pass show the array, and record whether a swap happened.</p>
+<table>
+  <thead><tr><th><code>i</code></th><th><code>minIdx</code> at the end of the inner loop</th><th>array after the pass</th><th>swap?</th></tr></thead>
+  <tbody>
+    <tr><td>start</td><td>&nbsp;</td><td><code>8 3 6 2 7</code></td><td>&nbsp;</td></tr>
+    <tr><td>0</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>1</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>2</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>3</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+<p>How many comparisons did the inner loops make in total? Why would the answer be the same for <em>any</em> array of 5 elements?</p>
+
+<p><strong>2. Bubble sort.</strong> Write the array after each pass, and say how many swaps the pass made. Does the
+<code>swapped</code> flag stop the sort before pass <code>i = 1</code>? Count the total comparisons and swaps.</p>
+
+<p><strong>3. Insertion sort.</strong> Complete the table, then count the comparisons (remember that the test that
+<em>fails</em> also counts, but a test with <code>j = -1</code> never happens).</p>
+<table>
+  <thead><tr><th><code>i</code></th><th><code>toInsert</code></th><th>array after inserting it</th><th>shifts</th></tr></thead>
+  <tbody>
+    <tr><td>start</td><td>&nbsp;</td><td><code>8 3 6 2 7</code></td><td>&nbsp;</td></tr>
+    <tr><td>1</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>2</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>3</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>4</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+
+<p><strong>4. Compare.</strong> Which of the three made the <em>fewest</em> moves on this array? Which made the most?
+Why is that a reason to prefer selection sort when moving an element is expensive?</p>
+
+<p><strong>5. Stability.</strong> Suppose two cards have the same rank, <code>5H</code> then <code>5C</code>. In insertion
+sort, <code>toInsert</code> is <code>5C</code> and <code>5H</code> is on its left. Should the loop shift <code>5H</code>?
+What happens to the order of the two cards if you use <code>&gt;=</code> instead of <code>&gt;</code>?</p>
+
+<h2 id="taskA">Task A &mdash; <code>selectionSort()</code></h2>
+<p>
+  Sort the vector into increasing order. Pass <code>i</code> (for <code>i = 0, 1, &hellip;, n-2</code>) finds the
+  <strong>index</strong> of the smallest element of <code>a[i..n-1]</code> in a variable named <code>minIdx</code>, and then
+  swaps that element into position <code>i</code>. Do the swap <strong>only when <code>minIdx != i</code></strong>.
+</p>
+<p>
+  Return a <code>SortStats</code>: <code>comparisons</code> is the number of tests <code>a[j] &lt; a[minIdx]</code>, and
+  <code>moves</code> is the number of swaps you actually performed. An array with zero or one elements returns
+  <code>{0, 0}</code>.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Store an <em>index</em>, not a value: you need to know <em>where</em> the smallest element is in order to swap it.
+  Use <code>int</code> loop variables and compute <code>n</code> once as <code>static_cast&lt;int&gt;(a.size())</code>:
+  with an unsigned <code>size_t</code>, the expression <code>n - 2</code> is a huge number when <code>n</code> is 0 or 1.
+</div>
+
+<h2 id="taskB">Task B &mdash; <code>bubbleSort()</code></h2>
+<p>
+  Sort the vector into increasing order. Pass <code>i</code> (for <code>i = n-1, n-2, &hellip;, 1</code>) compares neighbours
+  <code>a[j]</code> and <code>a[j+1]</code> for <code>j = 0, 1, &hellip;, i-1</code> and swaps them when
+  <code>a[j] &gt; a[j+1]</code>. Keep a <code>bool swapped</code> for the pass. If a complete pass makes <strong>no swap</strong>,
+  the array is sorted, so stop at once.
+</p>
+<p>
+  <code>comparisons</code> counts every test <code>a[j] &gt; a[j+1]</code>; <code>moves</code> counts the swaps. The pass that
+  discovers there is nothing to swap still makes its comparisons. An array with zero or one elements returns <code>{0, 0}</code>.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  On an already sorted array of 6 elements, how many comparisons should your code make? If your answer is not 5,
+  the early exit is missing.
+</div>
+
+<h2 id="taskC">Task C &mdash; <code>insertionSort()</code></h2>
+<p>
+  Sort the vector into increasing order. For <code>i = 1, 2, &hellip;, n-1</code>, save <code>a[i]</code> in
+  <code>toInsert</code>, shift every element of <code>a[0..i-1]</code> that is <strong>strictly greater</strong> than
+  <code>toInsert</code> one place to the right, and write <code>toInsert</code> into the gap.
+</p>
+<p>
+  <code>comparisons</code> counts every test <code>a[j] &gt; toInsert</code>: both the ones that are true (and cause a shift) and the one
+  that is false (and stops the loop). When the loop stops because <code>j</code> reached <code>-1</code>, there is no such test, because
+  <code>j &gt;= 0</code> compares indices, not elements. <code>moves</code> counts the shifts only; writing <code>toInsert</code> is not a shift.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Test <code>j &gt;= 0</code> <em>before</em> you read <code>a[j]</code>. Reading <code>a[-1]</code> is undefined behavior: it may
+  appear to work on your machine and still crash on Gradescope.
+</div>
+
+<h2 id="taskD">Task D &mdash; <code>stableSortCards()</code></h2>
+<p>
+  A <code>Card</code> has a <code>rank</code> and a <code>suit</code>. Sort a vector of cards into increasing order of
+  <strong>rank only</strong>. A sort is <strong>stable</strong> if cards of equal rank keep the order they had before the sort:
+  if <code>5H</code> was in front of <code>5C</code>, it must still be in front afterwards. Write your own sort (the insertion sort
+  from Task C, adapted to <code>Card</code>, works). Do not call <code>std::sort</code>, <code>std::stable_sort</code> or <code>std::partial_sort</code>, and do not use a sorted
+  container (<code>std::multiset</code>, <code>std::multimap</code>, <code>std::priority_queue</code>); a submission that does earns no
+  credit for this task. You may name your own helper functions anything you like.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Compare <code>cards[j].rank</code> with <code>toInsert.rank</code>, and shift only when the card on the left is <em>strictly</em> greater.
+  Move whole <code>Card</code> objects, not just the ranks, or the suits will be left behind.
+</div>
+
+<h2 id="edges">Edge Cases to Test</h2>
+<p>Write a few small calls of your own in a scratch <code>main</code> before submitting. Check at least:</p>
+<ul>
+  <li>an empty vector and a vector of one element: no crash, and <code>{0, 0}</code> returned by all three int sorts;</li>
+  <li>two elements, in order and out of order;</li>
+  <li>an array that is already sorted, and one in reverse order (compare the counts with your warm-up reasoning);</li>
+  <li>an array with duplicates, such as <code>{3, 1, 3, 2, 1, 2}</code>, and one where all elements are equal;</li>
+  <li>negative numbers;</li>
+  <li>for Task D, several cards of the <em>same</em> rank with different suits.</li>
+</ul>
+
+<h2 id="grading">Grading</h2>
+<table>
+  <thead><tr><th>Item</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td>Task A &mdash; <code>selectionSort()</code></td><td>25</td></tr>
+    <tr><td>Task B &mdash; <code>bubbleSort()</code></td><td>25</td></tr>
+    <tr><td>Task C &mdash; <code>insertionSort()</code></td><td>30</td></tr>
+    <tr><td>Task D &mdash; <code>stableSortCards()</code></td><td>20</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>100</strong></td></tr>
+  </tbody>
+</table>
+<div class="note">
+  <span class="label">How credit is earned</span>
+  Each task is graded by its own set of checks, and partial credit is given for the checks you pass. A task
+  earns credit only once its core behavior works: a stub that does not sort does not earn points on its own,
+  even for inputs (such as an empty vector) where doing nothing gives the right counts. For Tasks A, B and C the autograder checks the sorted
+  array <em>and</em> the two counts on every input. The autograder uses different inputs from <code>Ex9Demo.cpp</code>,
+  so matching the demo output is necessary but not sufficient.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>
+  When all four tasks are correct, <code>Ex9Demo</code> prints exactly the contents of
+  <code>demo_output.txt</code>:
+</p>
+<pre class="copyable" data-filename="demo_output.txt"><code class="language-plaintext">=== Task A: selectionSort ===
+  start   : 5 2 4 6 1 3  -&gt;  1 2 3 4 5 6   comparisons=15 moves=3
+  sorted  : 1 2 3 4 5 6  -&gt;  1 2 3 4 5 6   comparisons=15 moves=0
+  reversed: 6 5 4 3 2 1  -&gt;  1 2 3 4 5 6   comparisons=15 moves=3
+
+=== Task B: bubbleSort ===
+  start   : 5 2 4 6 1 3  -&gt;  1 2 3 4 5 6   comparisons=15 moves=9
+  sorted  : 1 2 3 4 5 6  -&gt;  1 2 3 4 5 6   comparisons=5 moves=0
+  reversed: 6 5 4 3 2 1  -&gt;  1 2 3 4 5 6   comparisons=15 moves=15
+
+=== Task C: insertionSort ===
+  start   : 5 2 4 6 1 3  -&gt;  1 2 3 4 5 6   comparisons=12 moves=9
+  sorted  : 1 2 3 4 5 6  -&gt;  1 2 3 4 5 6   comparisons=5 moves=0
+  reversed: 6 5 4 3 2 1  -&gt;  1 2 3 4 5 6   comparisons=15 moves=15
+
+=== Task D: stableSortCards ===
+  before: 5H 3S 5C 2D 3H
+  after : 2D 3S 3H 5H 5C</code></pre>
+
+<h2 id="compile">Compile and Run</h2>
+<pre><code class="language-bash">g++ -std=c++17 -g Sorting.cpp Ex9Demo.cpp -o ex9demo
+./ex9demo</code></pre>
+
+<h2 id="listings">Provided File Listings</h2>
+<h3>Sorting.hpp</h3>
+<pre class="copyable" data-filename="Sorting.hpp"><code class="language-cpp">// Sorting.hpp
+// CSCI 235 -- Exercise 9: Sorting Trace
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef SORTING_HPP
+#define SORTING_HPP
+
+#include &lt;vector&gt;
+
+// What a sort reports about its own work.
+//   comparisons : how many times the sort compared two ELEMENTS of the array
+//                 (a comparison of two indices, such as j &gt;= 0, does not count).
+//   moves       : selectionSort and bubbleSort: the number of SWAPS performed.
+//                 insertionSort: the number of SHIFTS (an element copied one
+//                 place to the right). Each task below says exactly what to count.
+struct SortStats {
+    int comparisons;
+    int moves;
+};
+
+// Task A -- selection sort. Sort a into increasing order.
+// Pass i (i = 0, 1, ..., n-2) finds the index of the smallest element of
+// a[i..n-1] in the variable minIdx and swaps it into position i, but only
+// when minIdx != i (never swap an element with itself).
+//   comparisons: one for every test  a[j] &lt; a[minIdx]   (always n(n-1)/2)
+//   moves:       the number of swaps actually performed
+// An array with 0 or 1 elements returns {0, 0}.
+SortStats selectionSort(std::vector&lt;int&gt;&amp; a);
+
+// Task B -- bubble sort with an early exit.
+// Pass i (i = n-1, n-2, ..., 1) compares neighbours a[j] and a[j+1] for
+// j = 0, 1, ..., i-1 and swaps them when a[j] &gt; a[j+1]. If a whole pass
+// makes no swap, the array is sorted: stop at once.
+//   comparisons: one for every test  a[j] &gt; a[j+1]
+//   moves:       the number of swaps performed
+// An array with 0 or 1 elements returns {0, 0}.
+SortStats bubbleSort(std::vector&lt;int&gt;&amp; a);
+
+// Task C -- insertion sort. For i = 1, 2, ..., n-1: save a[i] in toInsert,
+// shift every element of a[0..i-1] that is STRICTLY greater than toInsert
+// one place to the right, and put toInsert into the gap.
+//   comparisons: one for every test  a[j] &gt; toInsert
+//                (the test  j &gt;= 0  is not a comparison of elements)
+//   moves:       the number of shifts (writes of the form a[j+1] = a[j]);
+//                placing toInsert into the gap is NOT counted
+// An array with 0 or 1 elements returns {0, 0}.
+SortStats insertionSort(std::vector&lt;int&gt;&amp; a);
+
+// Task D -- a STABLE sort of cards by rank.
+struct Card {
+    int  rank;     // the sort key, for example 2 .. 14
+    char suit;     // &#x27;C&#x27;, &#x27;D&#x27;, &#x27;H&#x27; or &#x27;S&#x27;; NOT part of the comparison
+};
+// Sort cards into increasing order of rank. Cards of equal rank must keep the
+// order they had before the sort (that is what STABLE means).
+// Write your own sort (insertion sort with a strict comparison works well).
+// Do not call std::sort, std::stable_sort or std::partial_sort, and do not use a
+// sorted container (std::multiset, std::multimap, std::priority_queue).
+void stableSortCards(std::vector&lt;Card&gt;&amp; cards);
+
+#endif</code></pre>
+<h3>Ex9Demo.cpp</h3>
+<pre class="copyable" data-filename="Ex9Demo.cpp"><code class="language-cpp">// Ex9Demo.cpp
+// CSCI 235 -- Exercise 9: Sorting Trace
+//
+// Provided file -- do not submit this. Build it with:
+//
+//     g++ -std=c++17 -g Sorting.cpp Ex9Demo.cpp -o ex9demo
+//     ./ex9demo
+//
+// The expected output is in demo_output.txt. Your output should match it
+// exactly once all four tasks are done.
+
+#include &quot;Sorting.hpp&quot;
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+static std::string show(const std::vector&lt;int&gt;&amp; a) {
+    std::string s;
+    for (std::size_t i = 0; i &lt; a.size(); ++i) {
+        if (i &gt; 0) { s += &quot; &quot;; }
+        s += std::to_string(a[i]);
+    }
+    return s;
+}
+
+static std::string showCards(const std::vector&lt;Card&gt;&amp; c) {
+    std::string s;
+    for (std::size_t i = 0; i &lt; c.size(); ++i) {
+        if (i &gt; 0) { s += &quot; &quot;; }
+        s += std::to_string(c[i].rank);
+        s += c[i].suit;
+    }
+    return s;
+}
+
+static void runInt(const char* name, SortStats (*sorter)(std::vector&lt;int&gt;&amp;),
+                   std::vector&lt;int&gt; a) {
+    std::cout &lt;&lt; &quot;  &quot; &lt;&lt; name &lt;&lt; &quot;: &quot; &lt;&lt; show(a) &lt;&lt; &quot;  -&gt;  &quot;;
+    SortStats st = sorter(a);
+    std::cout &lt;&lt; show(a) &lt;&lt; &quot;   comparisons=&quot; &lt;&lt; st.comparisons
+              &lt;&lt; &quot; moves=&quot; &lt;&lt; st.moves &lt;&lt; &quot;\n&quot;;
+}
+
+int main() {
+    const std::vector&lt;int&gt; start = {5, 2, 4, 6, 1, 3};
+    const std::vector&lt;int&gt; sorted = {1, 2, 3, 4, 5, 6};
+    const std::vector&lt;int&gt; reversed = {6, 5, 4, 3, 2, 1};
+
+    std::cout &lt;&lt; &quot;=== Task A: selectionSort ===\n&quot;;
+    runInt(&quot;start   &quot;, selectionSort, start);
+    runInt(&quot;sorted  &quot;, selectionSort, sorted);
+    runInt(&quot;reversed&quot;, selectionSort, reversed);
+
+    std::cout &lt;&lt; &quot;\n=== Task B: bubbleSort ===\n&quot;;
+    runInt(&quot;start   &quot;, bubbleSort, start);
+    runInt(&quot;sorted  &quot;, bubbleSort, sorted);
+    runInt(&quot;reversed&quot;, bubbleSort, reversed);
+
+    std::cout &lt;&lt; &quot;\n=== Task C: insertionSort ===\n&quot;;
+    runInt(&quot;start   &quot;, insertionSort, start);
+    runInt(&quot;sorted  &quot;, insertionSort, sorted);
+    runInt(&quot;reversed&quot;, insertionSort, reversed);
+
+    std::cout &lt;&lt; &quot;\n=== Task D: stableSortCards ===\n&quot;;
+    std::vector&lt;Card&gt; cards = {{5, &#x27;H&#x27;}, {3, &#x27;S&#x27;}, {5, &#x27;C&#x27;}, {2, &#x27;D&#x27;}, {3, &#x27;H&#x27;}};
+    std::cout &lt;&lt; &quot;  before: &quot; &lt;&lt; showCards(cards) &lt;&lt; &quot;\n&quot;;
+    stableSortCards(cards);
+    std::cout &lt;&lt; &quot;  after : &quot; &lt;&lt; showCards(cards) &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</code></pre>
+<h3>Sorting.cpp</h3>
+<pre class="copyable" data-filename="Sorting.cpp"><code class="language-cpp">// Sorting.cpp
+// CSCI 235 -- Exercise 9: Sorting Trace
+// Complete the four functions below by finishing the TODO sections.
+// Submit this file (and only this file) to Gradescope.
+// You may add your own helper functions here, but do not change the
+// signatures of the four required functions.
+
+#include &quot;Sorting.hpp&quot;
+
+#include &lt;cstddef&gt;
+#include &lt;utility&gt;   // std::swap
+
+// Task A
+SortStats selectionSort(std::vector&lt;int&gt;&amp; a) {
+    SortStats stats = {0, 0};
+    // TODO: for each position i, keep the INDEX of the smallest element
+    // seen so far in a variable named minIdx (start with minIdx = i).
+    //   * count one comparison for every test a[j] &lt; a[minIdx];
+    //   * after the inner loop, swap only if minIdx != i, and count that swap.
+    (void)a;
+    return stats;
+}
+
+// Task B
+SortStats bubbleSort(std::vector&lt;int&gt;&amp; a) {
+    SortStats stats = {0, 0};
+    // TODO: for i = n-1 down to 1, one pass over j = 0 .. i-1.
+    //   * count one comparison for every test a[j] &gt; a[j+1];
+    //   * swap the neighbours when they are out of order, and count the swap;
+    //   * remember in a bool named swapped whether this pass swapped anything,
+    //     and stop after a pass with no swap.
+    (void)a;
+    return stats;
+}
+
+// Task C
+SortStats insertionSort(std::vector&lt;int&gt;&amp; a) {
+    SortStats stats = {0, 0};
+    // TODO: for i = 1 .. n-1, save a[i] in toInsert and let j start at i-1.
+    //   * while j &gt;= 0, count one comparison for the test a[j] &gt; toInsert;
+    //   * if it is true, shift: a[j+1] = a[j], count one move, decrease j;
+    //   * if it is false, stop;
+    //   * finally write toInsert into a[j+1].
+    (void)a;
+    return stats;
+}
+
+// Task D
+void stableSortCards(std::vector&lt;Card&gt;&amp; cards) {
+    // TODO: sort by rank only. Equal ranks must stay in their original order.
+    (void)cards;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>
+  Submit <strong>exactly one file</strong>, named <code>Sorting.cpp</code>, to the Exercise 9 assignment on
+  Gradescope. Do not rename it, do not put it in a folder, and do not submit <code>Sorting.hpp</code> or
+  <code>Ex9Demo.cpp</code>. All four functions must be defined, even if one is unfinished, or the program
+  will not link. You may resubmit as many times as you like before the deadline; the last submission is
+  graded.
+</p>
+
+</main>
+
+<footer>
+  CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026
+</footer>
+
+<script>hljs.highlightAll();</script>
+<script>
+// Add a "Copy" button to each provided header / demo listing.
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('pre.copyable').forEach(function (pre) {
+    var wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy ' + (pre.dataset.filename || 'code') + ' to clipboard');
+    btn.addEventListener('click', function () {
+      copyText(pre.textContent).then(function (ok) {
+        btn.textContent = ok ? 'Copied!' : 'Copy failed';
+        btn.classList.toggle('done', ok);
+        btn.classList.toggle('failed', !ok);
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('done', 'failed');
+        }, 1800);
+      });
+    });
+    wrap.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>
