@@ -507,17 +507,14 @@
   <tr>
     <td class="lec-num">20</td>
     <td>Th, 11/12</td>
-    <td>Finishing the Expression Evaluator; Searching Algorithms and Complexity
-        <div class="sub"><a href="slides/day19_searching.pdf">&#128196;&nbsp;Searching slides (PDF)</a></div>
+    <td>Finishing the Expression Evaluator
         <div class="sub"><a href="slides/day20_live_coding_handout.pdf">&#128196;&nbsp;Live-coding handout: finish <code>toPostfix</code> and <code>evalPostfix</code>, then two-stack <code>evalInfix</code> (PDF)</a></div>
         <div class="sub"><a href="slides/day20_live_coding_handout_key.pdf">&#128196;&nbsp;Handout key: completed TODO rules, traces, and predictions (PDF)</a></div>
         <div class="sub"><a href="supplements/expression_demo_live_complete.cpp">&#128187;&nbsp;Code from class: <code>expression_demo_live_complete.cpp</code> (C++; <code>evalInfix</code> left for you, with key steps in comments)</a></div>
         <div class="sub"><a href="slides/day19_expression_demo.pdf">&#128196;&nbsp;Demo slides: <code>tokenize</code>, <code>toPostfix</code>, <code>evalPostfix</code> (PDF)</a></div>
         <div class="sub"><a href="supplements/expression_demo_use_queue.cpp">&#128187;&nbsp;Demo code, queue version (with error checks): <code>expression_demo_use_queue.cpp</code> (C++)</a></div>
-        <div class="sub"><a href="supplements/expression_demo_use_vector.cpp">&#128187;&nbsp;Demo code, vector version (with error checks): <code>expression_demo_use_vector.cpp</code> (C++)</a></div>
-        <div class="sub"><a href="supplements/bst_1_to_100.pdf">&#128196;&nbsp;Optional: the binary search tree for the numbers 1 to 100 (PDF)</a></div>
-        <div class="sub"><a href="supplements/day19_supplement_duplicates.pdf">&#128196;&nbsp;Optional supplement: duplicates and <code>lower_bound</code> (PDF)</a></div></td>
-    <td>Finish <code>toPostfix</code> and write <code>evalPostfix</code> together; a two-stack method that evaluates infix directly (for Project 4); linear search O(n) with its average cost, binary search step by step (<code>lo</code>, <code>hi</code>, <code>mid</code>, the overflow-safe midpoint, why it is O(log n)), the search tree view, sorted-array requirement; review of the Nov 10 lecture slip</td>
+        <div class="sub"><a href="supplements/expression_demo_use_vector.cpp">&#128187;&nbsp;Demo code, vector version (with error checks): <code>expression_demo_use_vector.cpp</code> (C++)</a></div></td>
+    <td>Finish <code>toPostfix</code> and write <code>evalPostfix</code> together; a two-stack method that evaluates infix directly (for Project 4); review of the Nov 10 lecture slip</td>
     <td></td>
     <td></td>
   </tr>
@@ -525,9 +522,11 @@
   <tr>
     <td class="lec-num">21</td>
     <td>Tu, 11/17</td>
-    <td>Sorting I &mdash; Quadratic Sorts
-        <div class="sub"><a href="slides/day21_sorting_quadratic.pdf">&#128196;&nbsp;Quadratic sorting slides (PDF)</a></div></td>
-    <td>Bubble, selection, insertion sort; O(n&sup2;) analysis; stability and in-place properties; when quadratic sorts are practical</td>
+    <td>Searching &mdash; Linear Search and Binary Search
+        <div class="sub"><a href="slides/day19_searching.pdf">&#128196;&nbsp;Searching slides (PDF)</a></div>
+        <div class="sub"><a href="supplements/bst_1_to_100.pdf">&#128196;&nbsp;Optional: the binary search tree for the numbers 1 to 100 (PDF)</a></div>
+        <div class="sub"><a href="supplements/day19_supplement_duplicates.pdf">&#128196;&nbsp;Optional supplement: duplicates and <code>lower_bound</code> (PDF)</a></div></td>
+    <td>Linear search O(n) with its average cost; binary search step by step (<code>lo</code>, <code>hi</code>, <code>mid</code>, the overflow-safe midpoint, why it is O(log n)); the search tree view; the sorted-array requirement</td>
     <td><span class="badge b-due">Ex&nbsp;8 Due</span> <a href="exercises/ex9_sorting_trace.html" data-available="2026-11-17" style="text-decoration:none;"><span class="badge b-ex">Ex&nbsp;9 Posted</span></a>
         <div class="sub">Sorting Trace</div></td>
     <td></td>
@@ -536,26 +535,27 @@
   <tr class="project-due">
     <td class="lec-num">22</td>
     <td>Th, 11/19</td>
-    <td>Sorting II &mdash; Merge Sort and Quicksort
-        <div class="sub"><a href="slides/day22_merge_quick.pdf">&#128196;&nbsp;Merge sort and quicksort slides (PDF)</a></div></td>
-    <td>Divide-and-conquer; the merge step; O(n log n) time; quicksort partitioning and pivot choice; average O(n log n), worst-case O(n&sup2;); comparison of the two</td>
+    <td>Sorting I &mdash; Quadratic Sorts
+        <div class="sub"><a href="slides/day21_sorting_quadratic.pdf">&#128196;&nbsp;Quadratic sorting slides (PDF)</a></div></td>
+    <td>Bubble, selection, insertion sort; O(n&sup2;) analysis; stability and in-place properties; when quadratic sorts are practical</td>
     <td></td>
     <td><span class="badge b-due">&#35;3 Due</span>&nbsp;<a href="projects/p4/p4_expression_evaluator.html" data-available="2026-11-19" style="text-decoration:none;"><span class="badge b-proj">&#35;4 Posted</span></a></td>
-  </tr>
-
-  <!-- ═══ ADVANCED TOPICS BANNER ═══ -->
-  <tr class="unit-banner">
-    <td colspan="6">&#128300;&nbsp; ADVANCED TOPICS &mdash; Tries, Hashing &amp; Graphs  &nbsp;&bull;&nbsp; <span style="font-weight:400; font-style:italic; opacity:.8;">No new project — finish P4. These topics preview CSCI 335 depth coverage.</span></td>
   </tr>
 
   <tr>
     <td class="lec-num">23</td>
     <td>Tu, 11/24</td>
-    <td>Binary Trees &amp; Binary Search Trees</td>
-    <td>Tree structure; in-order / pre-order / post-order traversal; BST property, insert and search; deletion and height analysis as time permits</td>
+    <td>Sorting II &mdash; Merge Sort and Quicksort
+        <div class="sub"><a href="slides/day22_merge_quick.pdf">&#128196;&nbsp;Merge sort and quicksort slides (PDF)</a></div></td>
+    <td>Divide-and-conquer; the merge step; O(n log n) time; quicksort partitioning and pivot choice; average O(n log n), worst-case O(n&sup2;); comparison of the two</td>
     <td><span class="badge b-due">Ex&nbsp;9 Due</span> <span class="badge b-ex">Ex&nbsp;10 Posted</span>
         <div class="sub">BST Traversal</div></td>
     <td></td>
+  </tr>
+
+  <!-- ═══ ADVANCED TOPICS BANNER ═══ -->
+  <tr class="unit-banner">
+    <td colspan="6">&#128300;&nbsp; ADVANCED TOPICS &mdash; Tries, Hashing &amp; Graphs  &nbsp;&bull;&nbsp; <span style="font-weight:400; font-style:italic; opacity:.8;">No new project — finish P4. These topics preview CSCI 335 depth coverage.</span></td>
   </tr>
 
   <tr class="holiday">
@@ -568,8 +568,8 @@
   <tr>
     <td class="lec-num">24</td>
     <td>Tu, 12/1</td>
-    <td>Tries &mdash; Insert, Search &amp; Prefix Matching</td>
-    <td>Trie nodes, insert, prefix enumeration, time complexity vs. BST/hash map</td>
+    <td>Binary Trees &amp; Binary Search Trees; Tries (as time permits)</td>
+    <td>Tree structure; in-order / pre-order / post-order traversal; BST property, insert, search and deletion; height analysis; then trie nodes, insert and prefix matching if time permits</td>
     <td><span class="badge b-ex">Ex&nbsp;11 Posted</span>
         <div class="sub">Trie Operations</div></td>
     <td></td>
