@@ -523,9 +523,11 @@
     <td class="lec-num">21</td>
     <td>Tu, 11/17</td>
     <td>Searching &mdash; Linear Search and Binary Search
-        <div class="sub"><a href="slides/day19_searching.pdf">&#128196;&nbsp;Searching slides (PDF)</a></div>
+        <div class="sub"><a href="slides/day21_searching.pdf">&#128196;&nbsp;Searching slides (PDF)</a></div>
         <div class="sub"><a href="supplements/bst_1_to_100.pdf">&#128196;&nbsp;Optional: the binary search tree for the numbers 1 to 100 (PDF)</a></div>
-        <div class="sub"><a href="supplements/day19_supplement_duplicates.pdf">&#128196;&nbsp;Optional supplement: duplicates and <code>lower_bound</code> (PDF)</a></div></td>
+        <div class="sub"><a href="supplements/day19_supplement_duplicates.pdf">&#128196;&nbsp;Optional supplement: duplicates and <code>lower_bound</code> (PDF)</a></div>
+        <div class="sub"><a href="slides/lecture_slip_2026_11_17_student.pdf">&#128196;&nbsp;Lecture Slip (PDF)</a></div>
+        <div class="sub"><a href="slides/lecture_slip_2026_11_17_key.pdf">&#128196;&nbsp;Lecture Slip Solution (PDF)</a></div></td>
     <td>Linear search O(n) with its average cost; binary search step by step (<code>lo</code>, <code>hi</code>, <code>mid</code>, the overflow-safe midpoint, why it is O(log n)); the search tree view; the sorted-array requirement</td>
     <td><span class="badge b-due">Ex&nbsp;8 Due</span> <a href="exercises/ex9_sorting_trace.html" style="text-decoration:none;"><span class="badge b-ex">Ex&nbsp;9 Posted</span></a>
         <div class="sub">Sorting Trace</div></td>
@@ -536,7 +538,9 @@
     <td class="lec-num">22</td>
     <td>Th, 11/19</td>
     <td>Sorting I &mdash; Quadratic Sorts
-        <div class="sub"><a href="slides/day21_sorting_quadratic.pdf">&#128196;&nbsp;Quadratic sorting slides (PDF)</a></div></td>
+        <div class="sub"><a href="slides/day22_sorting_quadratic.pdf">&#128196;&nbsp;Quadratic sorting slides (PDF)</a></div>
+        <div class="sub" data-show-from="2026-11-19T09:45:00-05:00"><a href="slides/lecture_slip_2026_11_19_student.pdf">&#128196;&nbsp;Lecture Slip (PDF)</a></div>
+        <div class="sub" data-show-from="2026-11-19T09:45:00-05:00"><a href="slides/lecture_slip_2026_11_19_key.pdf">&#128196;&nbsp;Lecture Slip Solution (PDF)</a></div></td>
     <td>Bubble, selection, insertion sort; O(n&sup2;) analysis; stability and in-place properties; when quadratic sorts are practical</td>
     <td></td>
     <td><span class="badge b-due">&#35;3 Due</span>&nbsp;<a href="projects/p4/p4_expression_evaluator.html" data-available="2026-11-19" style="text-decoration:none;"><span class="badge b-proj">&#35;4 Posted</span></a></td>
@@ -678,6 +682,14 @@
       var parent = a.parentNode;
       while (a.firstChild) parent.insertBefore(a.firstChild, a);
       parent.removeChild(a);
+    }
+  });
+</script>
+<script>
+  // Hide items until their data-show-from time (Eastern Time) has arrived
+  document.querySelectorAll('[data-show-from]').forEach(function(el) {
+    if (new Date() < new Date(el.dataset.showFrom)) {
+      el.parentNode.removeChild(el);
     }
   });
 </script>
