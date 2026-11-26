@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 10: BST Traversal</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<style>
+  :root {
+    --navy: #1E2761;
+    --navy-light: #2C3785;
+    --ice: #CADCFC;
+    --tan: #F7D9A0;
+    --tan-border: #C98A2B;
+    --ink: #1b1f2a;
+    --muted: #5a6273;
+    --line: #dde1ea;
+    --bg-code: #f7f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    line-height: 1.55;
+  }
+  header.band {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    padding: 2.4rem 2rem 2rem;
+  }
+  header.band .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .78rem;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  header.band h1 {
+    margin: .35rem 0 .2rem;
+    font-size: 1.9rem;
+  }
+  header.band .meta {
+    color: #cfd6ee;
+    font-size: .95rem;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.2rem 2rem 4rem;
+  }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .35rem;
+    margin-top: 2.6rem;
+    font-size: 1.35rem;
+  }
+  h3 {
+    color: var(--navy-light);
+    margin-top: 1.8rem;
+    font-size: 1.1rem;
+  }
+  p { color: #2a2f3a; }
+  code:not(pre code) {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+    font-size: .92em;
+    color: #a31515;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
+  .note {
+    border-left: 4px solid var(--navy);
+    background: #f4f6fc;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .note .label {
+    font-weight: 700;
+    color: var(--navy);
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .hint {
+    border-left: 4px solid var(--tan-border);
+    background: #fdf6ea;
+    padding: .9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+  }
+  .hint .label {
+    font-weight: 700;
+    color: #8a5a12;
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: .92rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0f2f8;
+    color: var(--navy);
+  }
+  td code, th code {
+    white-space: nowrap;
+  }
+  ul, ol { color: #2a2f3a; }
+  .filecard {
+    display: inline-block;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .55rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: .88rem;
+    margin: .15rem .25rem .15rem 0;
+  }
+  .filecard.given { border-color: #9fb6e8; }
+  .filecard.submit { border-color: var(--tan-border); background: #fdf6ea; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 2rem 0 3rem;
+  }
+  .toc {
+    background: #f4f6fc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .toc a { color: var(--navy-light); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: .3rem 0 0; padding-left: 1.3rem; }
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: .55rem;
+    right: .6rem;
+    z-index: 2;
+    font: 600 .78rem/1 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--navy);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(30,39,97,.08);
+  }
+  .copy-btn:hover { background: #f0f2f8; border-color: var(--navy-light); }
+  .copy-btn:focus-visible { outline: 2px solid var(--navy-light); outline-offset: 2px; }
+  .copy-btn.done { color: #2e7d32; border-color: #2e7d32; }
+  .copy-btn.failed { color: #b3261e; border-color: #b3261e; }
+  @media print { .copy-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="kicker">CSCI 235 &middot; Software Design &amp; Analysis II &middot; Fall 2026</div>
+  <h1>Exercise 10 &mdash; BST Traversal</h1>
+  <div class="meta">Hunter College, CUNY &middot; Tong Yi &middot; Posted: Tuesday, November 24, 2026 &middot; Due: Tuesday, December 8, 2026 (see Gradescope for the exact time)</div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#objectives">Learning Objectives</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#warmup">Warm-Up &mdash; Trace by Hand (not graded)</a></li>
+    <li><a href="#taskA">Task A &mdash; Recursive traversals</a></li>
+    <li><a href="#taskB">Task B &mdash; Traversals with a stack</a></li>
+    <li><a href="#taskC">Task C &mdash; <code>levelOrder()</code></a></li>
+    <li><a href="#taskD">Task D &mdash; <code>height()</code> and <code>countLeaves()</code></a></li>
+    <li><a href="#edges">Edge Cases to Test</a></li>
+    <li><a href="#grading">Grading</a></li>
+    <li><a href="#expected">Expected Behavior</a></li>
+    <li><a href="#compile">Compile and Run</a></li>
+    <li><a href="#listings">Provided File Listings</a></li>
+    <li><a href="#submit">Submission</a></li>
+  </ol>
+</nav>
+
+<h2 id="objectives">Learning Objectives</h2>
+<p>This exercise gives you practice with the basic operations on a binary search tree. By the end you should be able to:</p>
+<ul>
+  <li>write the three <strong>depth-first traversals</strong> (in-order, pre-order, post-order) recursively, and explain that they differ only in <em>when</em> the node is visited;</li>
+  <li>explain why <strong>in-order traversal of a binary search tree visits the values in increasing order</strong>;</li>
+  <li>replace recursion by an explicit <code>std::stack</code>, and see that the call stack and your own stack do the same job;</li>
+  <li>write a <strong>level-order (breadth-first)</strong> traversal with <code>std::queue</code>, the same idea you used in the maze solver;</li>
+  <li>compute the <strong>height</strong> of a tree and count its <strong>leaves</strong> with a short recursive function.</li>
+</ul>
+<div class="note">
+  <span class="label">An analogy: walking through an office building</span>
+  Picture a tree as an office building. Each office (node) has a door to a left room and a door to a right room.
+  <strong>Pre-order</strong> is the tour guide who announces an office <em>before</em> walking into its rooms.
+  <strong>In-order</strong> visits the left rooms first, announces the office, and then does the right rooms.
+  <strong>Post-order</strong> is the inspector who may only sign off on an office <em>after</em> both rooms behind it are done.
+  <strong>Level-order</strong> instead visits the whole first floor, then the whole second floor, and so on.
+</div>
+
+<h2 id="files">Files</h2>
+<table>
+  <thead><tr><th>File</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>Tree.hpp</code></td><td>Provided. Declares <code>Node</code>, three helper functions (<code>insert</code>, <code>buildTree</code>, <code>destroy</code>) and all the functions you must write, with the exact rules. Do not modify, do not submit.</td></tr>
+    <tr><td><code>Tree.cpp</code></td><td>Provided. Implements <code>insert</code>, <code>buildTree</code> and <code>destroy</code>. Do not modify, do not submit.</td></tr>
+    <tr><td><code>Traversal.cpp</code></td><td><strong>Submit this.</strong> Tasks A, B, C and D.</td></tr>
+    <tr><td><code>Ex10Demo.cpp</code></td><td>Provided. A program that exercises your code so you can see what it does. Do not submit.</td></tr>
+    <tr><td><code>demo_output.txt</code></td><td>What <code>Ex10Demo</code> prints when everything is correct.</td></tr>
+  </tbody>
+</table>
+<p>
+  All five files are available together as <code>ex10_starter.zip</code> on the course website and on Brightspace,
+  and the provided files are also listed in full at the <a href="#listings">end of this handout</a>.
+</p>
+<p>
+  Your work is the <code>TODO</code> sections of <code>Traversal.cpp</code>. You may add helper functions of your own,
+  but do not change the signatures of the required functions. The stubs compile as given, so you can build and run
+  the demo before you have written anything. <strong>Gradescope compiles your <code>Traversal.cpp</code> against the
+  original <code>Tree.hpp</code> and <code>Tree.cpp</code></strong>, so any change you make to them is ignored &mdash; and if your
+  code depended on that change, it will not compile.
+</p>
+<div class="note">
+  <span class="label">The tree you work with</span>
+  A <code>Node</code> holds an <code>int data</code> and two pointers, <code>left</code> and <code>right</code>, which are
+  <code>nullptr</code> when there is no child. The tree is a binary <em>search</em> tree: every value in the left subtree of a
+  node is smaller than the node, and every value in the right subtree is larger. The provided <code>buildTree</code> makes such a
+  tree from a list of values (a repeated value is ignored), and <code>destroy</code> frees it. All your functions only
+  <em>read</em> the tree (the parameters are <code>const Node*</code>); none of them allocates or frees a node. The autograder checks that the tree is unchanged after every call.
+</div>
+
+<h2 id="warmup">Warm-Up &mdash; Trace by Hand (not graded)</h2>
+<p>
+  Do this on paper before you write any code. Nothing here is submitted or graded. Insert the values
+  <code>20, 10, 30, 5, 15, 25, 40, 12</code> into an empty binary search tree, in that order, and draw the tree.
+</p>
+<p><strong>1. Depth-first orders.</strong> Write the in-order, pre-order and post-order sequences. What do you notice about the in-order sequence, and why does it have to happen for <em>every</em> binary search tree?</p>
+<p><strong>2. Level order.</strong> Write the values level by level. Which of your four sequences would a queue produce, and which would a stack produce?</p>
+<p><strong>3. Trace the stack.</strong> Run the iterative in-order idea by hand on your tree. Complete the table: at each step, write what is on the stack (bottom to top) and the value that is visited.</p>
+<table>
+  <thead><tr><th>step</th><th>stack after the step (bottom &rarr; top)</th><th>visited</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>2</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>3</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>&hellip;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+<p><strong>4. Measure.</strong> What is the height of your tree? How many leaves does it have? What would the height be if the same eight values were inserted in <em>increasing</em> order? What does that tell you about the cost of searching a tree?</p>
+
+<h2 id="taskA">Task A &mdash; Recursive traversals</h2>
+<p>
+  Write <code>inorder()</code>, <code>preorder()</code> and <code>postorder()</code>. Each one <strong>appends</strong> the
+  <code>data</code> values to the vector <code>out</code> in the order its name says:
+</p>
+<table>
+  <thead><tr><th>Function</th><th>Order</th></tr></thead>
+  <tbody>
+    <tr><td><code>inorder</code></td><td>left subtree, then the node, then right subtree</td></tr>
+    <tr><td><code>preorder</code></td><td>the node, then left subtree, then right subtree</td></tr>
+    <tr><td><code>postorder</code></td><td>left subtree, then right subtree, then the node</td></tr>
+  </tbody>
+</table>
+<p>
+  Do not clear <code>out</code> and do not sort it: the caller may already have put values there, and your function must leave them in place.
+  An empty tree (<code>root == nullptr</code>) appends nothing.
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  All three functions have the same shape. Decide what the base case is, and then decide where the line that records
+  <code>root-&gt;data</code> goes relative to the two recursive calls.
+</div>
+
+<h2 id="taskB">Task B &mdash; Traversals with a stack</h2>
+<p>
+  Write <code>inorderIterative()</code> and <code>preorderIterative()</code>. They produce exactly the same sequences as
+  Task A, but <strong>without recursion</strong>: use a <code>std::stack</code> of node pointers (and, if you like, a
+  traversal pointer named <code>curr</code>). Each function returns the values it visits.
+</p>
+<p>
+  The recursive versions use the <em>call stack</em>, which holds one frame per node on the path from the root. A very deep tree can
+  overflow it. Your explicit stack lives on the heap and can grow much further. <strong>Requirements:</strong> write both functions as loops. <em>Inside each function</em> use a <code>std::stack</code> directly (do not move the work into a helper function), and do not call the function itself. The autograder checks this by reading your code: a Task B function that calls itself or does not mention <code>std::stack</code> in its own body earns <strong>no credit</strong> for Task B. It also builds a tree 1,000,000 nodes deep (in a separate run, so a crash there costs only that 5-point check): this tests that your functions cope with a very deep tree (a recursive function overflows the call stack on it).
+</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  In-order: what must you remember while you walk down the left spine? Pre-order: a stack gives back the <em>last</em>
+  item you pushed first. Which child must therefore be pushed last?
+</div>
+
+<h2 id="taskC">Task C &mdash; <code>levelOrder()</code></h2>
+<p>
+  Return the values <strong>level by level</strong>: <code>result[0]</code> holds the root, <code>result[1]</code> holds the
+  root&rsquo;s children from left to right, <code>result[2]</code> holds the next level, and so on. Use a
+  <code>std::queue</code> of node pointers (required: the point of the task is the queue). An empty tree returns an empty outer vector (not a vector holding one empty vector).
+</p>
+<p>For the tree built from <code>8, 3, 10, 1, 6, 14, 4, 7, 13</code> the result is</p>
+<pre><code class="language-plaintext">[8]   [3 10]   [1 6 14]   [4 7 13]</code></pre>
+<div class="hint">
+  <span class="label">Hint</span>
+  You used a queue to explore a maze one step at a time. Here the question is how to know where one level ends and the
+  next begins. How many nodes are in the queue at the moment a new level starts?
+</div>
+
+<h2 id="taskD">Task D &mdash; <code>height()</code> and <code>countLeaves()</code></h2>
+<p>
+  <code>height()</code> returns the number of <strong>edges</strong> on the longest path from the root down to a leaf. A single
+  node has height <code>0</code>, and the empty tree has height <code>-1</code>. <code>countLeaves()</code> returns the number of
+  nodes that have <strong>no children</strong>; the empty tree has <code>0</code> leaves.
+</p>
+<p>Both are short recursive functions. Check them against the tree you drew in the warm-up.</p>
+<div class="hint">
+  <span class="label">Hint</span>
+  Ask each subtree for its answer, and combine the two answers with the node itself. Take care with the empty tree and
+  with a node that has only <em>one</em> child: an empty subtree is not a leaf.
+</div>
+
+<h2 id="edges">Edge Cases to Test</h2>
+<p>Write a few small calls of your own in a scratch <code>main</code> before submitting. Check at least:</p>
+<ul>
+  <li>the empty tree (<code>nullptr</code>) in every function;</li>
+  <li>a tree with a single node;</li>
+  <li>a tree where every node has only a left child, and one where every node has only a right child;</li>
+  <li>a node with exactly one child (not two, not zero);</li>
+  <li>for Task A, an <code>out</code> that already holds some values;</li>
+  <li>for Task B, the sequences agree with Task A on every tree you try.</li>
+</ul>
+
+<h2 id="grading">Grading</h2>
+<table>
+  <thead><tr><th>Item</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td>Task A &mdash; <code>inorder()</code>, <code>preorder()</code>, <code>postorder()</code></td><td>25</td></tr>
+    <tr><td>Task B &mdash; <code>inorderIterative()</code>, <code>preorderIterative()</code></td><td>25</td></tr>
+    <tr><td>Task B &mdash; no recursion (the 1,000,000-deep tree)</td><td>5</td></tr>
+    <tr><td>Task C &mdash; <code>levelOrder()</code></td><td>25</td></tr>
+    <tr><td>Task D &mdash; <code>height()</code>, <code>countLeaves()</code></td><td>20</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>100</strong></td></tr>
+  </tbody>
+</table>
+<div class="note">
+  <span class="label">How credit is earned</span>
+  Each task is graded by its own set of checks on several trees (including the empty tree, a single node, chains, and
+  trees with negative values), and partial credit is given for the checks you pass. The autograder uses different trees from
+  <code>Ex10Demo.cpp</code>, so matching the demo output is necessary but not sufficient.
+</div>
+
+<h2 id="expected">Expected Behavior</h2>
+<p>When all four tasks are correct, <code>Ex10Demo</code> prints exactly the contents of <code>demo_output.txt</code>:</p>
+<pre class="copyable" data-filename="demo_output.txt"><code class="language-plaintext">Tree 1  (inserted: 8 3 10 1 6 14 4 7 13)
+  inorder            : 1 3 4 6 7 8 10 13 14
+  preorder           : 8 3 1 6 4 7 10 14 13
+  postorder          : 1 4 7 6 3 13 14 10 8
+  inorderIterative   : 1 3 4 6 7 8 10 13 14
+  preorderIterative  : 8 3 1 6 4 7 10 14 13
+  levelOrder         : [8] [3 10] [1 6 14] [4 7 13]
+  height 3, leaves 4
+
+Tree 2 (a chain)  (inserted: 1 2 3 4)
+  inorder            : 1 2 3 4
+  preorder           : 1 2 3 4
+  postorder          : 4 3 2 1
+  inorderIterative   : 1 2 3 4
+  preorderIterative  : 1 2 3 4
+  levelOrder         : [1] [2] [3] [4]
+  height 3, leaves 1
+
+Tree 3 (one node)  (inserted: 5)
+  inorder            : 5
+  preorder           : 5
+  postorder          : 5
+  inorderIterative   : 5
+  preorderIterative  : 5
+  levelOrder         : [5]
+  height 0, leaves 1
+
+Tree 4 (empty)  (inserted: )
+  inorder            : 
+  preorder           : 
+  postorder          : 
+  inorderIterative   : 
+  preorderIterative  : 
+  levelOrder         :
+  height -1, leaves 0</code></pre>
+
+<h2 id="compile">Compile and Run</h2>
+<pre><code class="language-bash">g++ -std=c++17 -g Tree.cpp Traversal.cpp Ex10Demo.cpp -o ex10demo
+./ex10demo
+valgrind --leak-check=full ./ex10demo</code></pre>
+<p>
+  Your functions never create or delete a node, so Valgrind should report no leaks and no errors. If it reports an
+  invalid read, you are probably following a <code>nullptr</code> (an empty subtree) or calling <code>top()</code> on an empty stack.
+</p>
+
+<h2 id="listings">Provided File Listings</h2>
+<h3>Tree.hpp</h3>
+<pre class="copyable" data-filename="Tree.hpp"><code class="language-cpp">// Tree.hpp
+// CSCI 235 -- Exercise 10: BST Traversal
+// Provided file -- do not modify. Gradescope compiles your submission
+// against the original version of this file.
+
+#ifndef TREE_HPP
+#define TREE_HPP
+
+#include &lt;vector&gt;
+
+// A node of a binary tree. In this exercise the tree is always a binary
+// SEARCH tree: every value in the left subtree is smaller than data, and
+// every value in the right subtree is larger.
+struct Node {
+    int   data;
+    Node* left;
+    Node* right;
+    explicit Node(int d) : data(d), left(nullptr), right(nullptr) {}
+};
+
+// ---- Provided (implemented in Tree.cpp; you do not write these) -------------
+
+// Insert value into the BST and return the (possibly new) root.
+// A value that is already in the tree is ignored.
+Node* insert(Node* root, int value);
+
+// Build a BST by inserting the values in the given order.
+Node* buildTree(const std::vector&lt;int&gt;&amp; values);
+
+// Free every node of the tree. Safe to call with nullptr.
+void destroy(Node* root);
+
+// ---- Required (you write these in Traversal.cpp) ----------------------------
+// None of the functions below may change the tree. Every one of them must
+// work on an EMPTY tree (root == nullptr).
+
+// Task A -- recursive traversals. APPEND the data values to out, in the
+// order named. Do not clear out and do not sort it.
+void inorder(const Node* root, std::vector&lt;int&gt;&amp; out);     // left, node, right
+void preorder(const Node* root, std::vector&lt;int&gt;&amp; out);    // node, left, right
+void postorder(const Node* root, std::vector&lt;int&gt;&amp; out);   // left, right, node
+
+// Task B -- the same visiting orders WITHOUT recursion: use std::stack.
+// Return the values in the order visited. Inside each function use a
+// std::stack directly and do not call the function itself; otherwise Task B
+// earns no credit.
+std::vector&lt;int&gt; inorderIterative(const Node* root);
+std::vector&lt;int&gt; preorderIterative(const Node* root);
+
+// Task C -- level-order (breadth-first) traversal with std::queue.
+// Return one inner vector per level: result[0] holds the root, result[1] the
+// root's children from left to right, and so on. An empty tree returns an
+// empty outer vector.
+std::vector&lt;std::vector&lt;int&gt;&gt; levelOrder(const Node* root);
+
+// Task D -- measuring a tree.
+// height: the number of EDGES on the longest path from the root down to a
+//         leaf. A single node has height 0 and an empty tree has height -1.
+// countLeaves: the number of nodes that have no children (0 for an empty tree).
+int height(const Node* root);
+int countLeaves(const Node* root);
+
+#endif</code></pre>
+<h3>Tree.cpp</h3>
+<pre class="copyable" data-filename="Tree.cpp"><code class="language-cpp">// Tree.cpp
+// CSCI 235 -- Exercise 10: BST Traversal
+// Provided file -- do not modify, do not submit. Compile it together with
+// your Traversal.cpp (see the handout).
+
+#include "Tree.hpp"
+
+Node* insert(Node* root, int value) {
+    if (root == nullptr) { return new Node(value); }
+    Node* curr = root;
+    while (true) {
+        if (value &lt; curr-&gt;data) {
+            if (curr-&gt;left == nullptr) { curr-&gt;left = new Node(value); break; }
+            curr = curr-&gt;left;
+        } else if (value &gt; curr-&gt;data) {
+            if (curr-&gt;right == nullptr) { curr-&gt;right = new Node(value); break; }
+            curr = curr-&gt;right;
+        } else {
+            break;                       // duplicate: ignored
+        }
+    }
+    return root;
+}
+
+Node* buildTree(const std::vector&lt;int&gt;&amp; values) {
+    Node* root = nullptr;
+    for (std::size_t i = 0; i &lt; values.size(); ++i) {
+        root = insert(root, values[i]);
+    }
+    return root;
+}
+
+// Uses a vector of pending nodes instead of recursion, so that even a very
+// deep tree can be freed.
+void destroy(Node* root) {
+    std::vector&lt;Node*&gt; pending;
+    if (root != nullptr) { pending.push_back(root); }
+    while (!pending.empty()) {
+        Node* toDelete = pending.back();
+        pending.pop_back();
+        if (toDelete-&gt;left  != nullptr) { pending.push_back(toDelete-&gt;left); }
+        if (toDelete-&gt;right != nullptr) { pending.push_back(toDelete-&gt;right); }
+        delete toDelete;
+    }
+}</code></pre>
+<h3>Ex10Demo.cpp</h3>
+<pre class="copyable" data-filename="Ex10Demo.cpp"><code class="language-cpp">// Ex10Demo.cpp
+// CSCI 235 -- Exercise 10: BST Traversal
+//
+// Provided file -- do not submit this. Build it with:
+//
+//     g++ -std=c++17 -g Tree.cpp Traversal.cpp Ex10Demo.cpp -o ex10demo
+//     ./ex10demo
+//
+// The expected output is in demo_output.txt. Your output should match it
+// exactly once all four tasks are done.
+
+#include "Tree.hpp"
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+static std::string show(const std::vector&lt;int&gt;&amp; v) {
+    std::string s;
+    for (std::size_t i = 0; i &lt; v.size(); ++i) {
+        if (i &gt; 0) { s += " "; }
+        s += std::to_string(v[i]);
+    }
+    return s;
+}
+
+static void runTree(const char* name, const std::vector&lt;int&gt;&amp; insertOrder) {
+    Node* root = buildTree(insertOrder);
+    std::cout &lt;&lt; name &lt;&lt; "  (inserted: " &lt;&lt; show(insertOrder) &lt;&lt; ")\n";
+
+    std::vector&lt;int&gt; a;
+    inorder(root, a);
+    std::cout &lt;&lt; "  inorder            : " &lt;&lt; show(a) &lt;&lt; "\n";
+    a.clear();
+    preorder(root, a);
+    std::cout &lt;&lt; "  preorder           : " &lt;&lt; show(a) &lt;&lt; "\n";
+    a.clear();
+    postorder(root, a);
+    std::cout &lt;&lt; "  postorder          : " &lt;&lt; show(a) &lt;&lt; "\n";
+
+    std::cout &lt;&lt; "  inorderIterative   : " &lt;&lt; show(inorderIterative(root)) &lt;&lt; "\n";
+    std::cout &lt;&lt; "  preorderIterative  : " &lt;&lt; show(preorderIterative(root)) &lt;&lt; "\n";
+
+    std::vector&lt;std::vector&lt;int&gt;&gt; levels = levelOrder(root);
+    std::cout &lt;&lt; "  levelOrder         :";
+    for (std::size_t i = 0; i &lt; levels.size(); ++i) {
+        std::cout &lt;&lt; " [" &lt;&lt; show(levels[i]) &lt;&lt; "]";
+    }
+    std::cout &lt;&lt; "\n";
+
+    std::cout &lt;&lt; "  height " &lt;&lt; height(root) &lt;&lt; ", leaves " &lt;&lt; countLeaves(root) &lt;&lt; "\n\n";
+    destroy(root);
+}
+
+int main() {
+    runTree("Tree 1", {8, 3, 10, 1, 6, 14, 4, 7, 13});
+    runTree("Tree 2 (a chain)", {1, 2, 3, 4});
+    runTree("Tree 3 (one node)", {5});
+    runTree("Tree 4 (empty)", {});
+    return 0;
+}</code></pre>
+<h3>Traversal.cpp</h3>
+<pre class="copyable" data-filename="Traversal.cpp"><code class="language-cpp">// Traversal.cpp
+// CSCI 235 -- Exercise 10: BST Traversal
+// Complete the functions below by finishing the TODO sections.
+// Submit this file (and only this file) to Gradescope.
+// You may add your own helper functions here, but do not change the
+// signatures of the required functions.
+
+#include "Tree.hpp"
+
+#include &lt;algorithm&gt;   // std::max
+#include &lt;queue&gt;
+#include &lt;stack&gt;
+#include &lt;vector&gt;
+
+// ---------------------------------------------------------------- Task A
+void inorder(const Node* root, std::vector&lt;int&gt;&amp; out) {
+    // TODO: recursive. What is the base case? Where does the line that
+    // appends root-&gt;data go, relative to the two recursive calls?
+    (void)root;
+    (void)out;
+}
+
+void preorder(const Node* root, std::vector&lt;int&gt;&amp; out) {
+    // TODO: same structure as inorder; only the position of the visit changes.
+    (void)root;
+    (void)out;
+}
+
+void postorder(const Node* root, std::vector&lt;int&gt;&amp; out) {
+    // TODO: same structure again.
+    (void)root;
+    (void)out;
+}
+
+// ---------------------------------------------------------------- Task B
+std::vector&lt;int&gt; inorderIterative(const Node* root) {
+    std::vector&lt;int&gt; result;
+    // TODO: no recursion. Use a std::stack&lt;const Node*&gt; and a traversal
+    // pointer named curr. The stack holds the nodes whose own visit, and
+    // whose right subtree, are still waiting.
+    (void)root;
+    return result;
+}
+
+std::vector&lt;int&gt; preorderIterative(const Node* root) {
+    std::vector&lt;int&gt; result;
+    // TODO: no recursion. A stack of nodes still to be processed.
+    // Think about the ORDER in which the two children must be pushed.
+    (void)root;
+    return result;
+}
+
+// ---------------------------------------------------------------- Task C
+std::vector&lt;std::vector&lt;int&gt;&gt; levelOrder(const Node* root) {
+    std::vector&lt;std::vector&lt;int&gt;&gt; levels;
+    // TODO: use a std::queue&lt;const Node*&gt;. How many nodes are in the queue
+    // at the moment a new level begins?
+    (void)root;
+    return levels;
+}
+
+// ---------------------------------------------------------------- Task D
+int height(const Node* root) {
+    // TODO: recursive. Empty tree: -1. Single node: 0.
+    (void)root;
+    return 0;
+}
+
+int countLeaves(const Node* root) {
+    // TODO: recursive. A leaf has no children. Do not count empty subtrees.
+    (void)root;
+    return 0;
+}</code></pre>
+
+<h2 id="submit">Submission</h2>
+<p>
+  Submit exactly one file, named <code>Traversal.cpp</code>, to the Exercise 10 assignment on Gradescope. Do not rename it,
+  do not put it in a folder, and do not submit <code>Tree.hpp</code>, <code>Tree.cpp</code> or <code>Ex10Demo.cpp</code>.
+  All the required functions must be defined, even if one is unfinished, or the program will not link. You may resubmit as
+  many times as you like before the deadline; the last submission is graded.
+</p>
+
+<footer>CSCI 235 &middot; Software Design &amp; Analysis II &middot; Hunter College, CUNY &middot; Fall 2026</footer>
+
+</main>
+
+<script>
+// Add a "Copy" button to each provided header / demo listing.
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('pre.copyable').forEach(function (pre) {
+    var wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy ' + (pre.dataset.filename || 'code') + ' to clipboard');
+    btn.addEventListener('click', function () {
+      copyText(pre.textContent).then(function (ok) {
+        btn.textContent = ok ? 'Copied!' : 'Copy failed';
+        btn.classList.toggle('done', ok);
+        btn.classList.toggle('failed', !ok);
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('done', 'failed');
+        }, 1800);
+      });
+    });
+    wrap.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>
